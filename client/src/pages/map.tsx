@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DealWithMerchant } from "@shared/schema";
 import InteractiveMap from "@/components/map/InteractiveMap";
@@ -68,6 +68,13 @@ export default function MapPage() {
       dealCard.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }
   };
+
+  const handleCloseModal = useCallback(() => {
+    console.log('handleCloseModal called');
+    setSelectedDeal(null);
+  }, []);
+
+  console.log('MapPage render - handleCloseModal function:', handleCloseModal);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -164,12 +171,7 @@ export default function MapPage() {
       {selectedDeal && (
         <DealModal
           deal={selectedDeal}
-          onClose={() => {
-            console.log('Modal onClose called in parent');
-            console.log('Current selectedDeal:', selectedDeal?.id);
-            setSelectedDeal(null);
-            console.log('setSelectedDeal(null) called');
-          }}
+          onClose={handleCloseModal}
           onClaim={() => {
             logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
             handleNotification("Deal claimed successfully!");
