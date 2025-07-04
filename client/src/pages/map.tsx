@@ -59,13 +59,11 @@ export default function MapPage() {
   }, [logAction, refetchDeals]);
 
   const handleDealClick = (deal: DealWithMerchant) => {
-    console.log('Handle deal click called for deal:', deal.id);
     setSelectedDeal(deal);
     logAction("Deal Viewed", `Deal ID: ${deal.id}, Title: ${deal.title}`);
     
     // Scroll to the corresponding deal card
     const dealCard = document.querySelector(`[data-deal-id="${deal.id}"]`);
-    console.log('Found deal card element:', dealCard);
     if (dealCard) {
       dealCard.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }

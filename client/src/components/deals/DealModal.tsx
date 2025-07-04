@@ -80,11 +80,20 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   const minutes = timeLeft % 60;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end justify-center">
-      <div className={`slide-up ${isVisible ? 'active' : ''} w-full max-w-lg bg-white rounded-t-3xl shadow-2xl`}>
+    <div 
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end justify-center"
+      onClick={handleClose}
+    >
+      <div 
+        className={`slide-up ${isVisible ? 'active' : ''} w-full max-w-lg bg-white rounded-t-3xl shadow-2xl`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
           {/* Handle Bar */}
-          <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+          <div 
+            className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6 cursor-pointer hover:bg-gray-400 transition-colors"
+            onClick={handleClose}
+          ></div>
           
           {/* Deal Header */}
           <div className="flex items-start justify-between mb-6">

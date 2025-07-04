@@ -52,15 +52,8 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
       position={[deal.merchant.latitude, deal.merchant.longitude]}
       icon={customIcon}
       eventHandlers={{
-        click: (e) => {
-          console.log('Marker clicked for deal:', deal.id);
-          console.log('Click event:', e);
-          onClick();
-        },
-        mousedown: () => {
-          console.log('Marker mousedown for deal:', deal.id);
-          onClick();
-        },
+        click: onClick,
+        mousedown: onClick,
       }}
     >
       <Popup>
