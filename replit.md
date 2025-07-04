@@ -99,6 +99,15 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 04, 2025 21:05: AUTHENTICATION BREAKTHROUGH - Token-based auth system fully operational
+  * RESOLVED: Fixed critical protocol mismatch (HTTP vs HTTPS) causing authentication failures
+  * Token extraction and storage working perfectly across browser sessions
+  * Authorization headers properly attached to API requests
+  * User authentication state correctly maintained throughout app
+  * All protected endpoints now accessible to authenticated users
+  * Login modal and redirect flow working seamlessly
+  * Authentication system ready for production deployment
+
 - July 04, 2025 19:20: MAJOR EXPANSION - Authentication system and comprehensive features
   * Implemented Replit-based authentication system for secure user access
   * Migrated from in-memory storage to full PostgreSQL database with Drizzle ORM
