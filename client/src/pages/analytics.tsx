@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Users, Activity, AlertTriangle, TrendingUp, Clock, Star, Target } from "lucide-react";
+import BottomNavigation from "@/components/layout/BottomNavigation";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function AnalyticsPage() {
   const { isAuthenticated } = useAuth();
+  const authModal = useAuthModal();
   
   const { data: auditStats } = useQuery({
     queryKey: ["/api/audit/stats"],
@@ -68,7 +72,7 @@ export default function AnalyticsPage() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-6">
@@ -270,6 +274,19 @@ export default function AnalyticsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="analytics" 
+        onAuditClick={() => {}} 
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.closeModal}
+        redirectAfterAuth={authModal.redirectAfterAuth}
+      />
     </div>
   );
 }

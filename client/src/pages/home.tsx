@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Star, User, LogOut } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
+import BottomNavigation from "@/components/layout/BottomNavigation";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function Home() {
   const { user } = useAuth();
+  const authModal = useAuthModal();
   
   const { data: savedDeals = [] } = useQuery({
     queryKey: ["/api/saved-deals"],
@@ -26,7 +30,7 @@ export default function Home() {
   const formatDiscount = (percentage: number) => `${percentage}% OFF`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -220,6 +224,19 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="home" 
+        onAuditClick={() => {}} 
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.closeModal}
+        redirectAfterAuth={authModal.redirectAfterAuth}
+      />
     </div>
   );
 }
