@@ -78,11 +78,7 @@ export default function MerchantDashboard() {
 
   const createMerchantMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/merchants", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", "/api/merchants", data);
     },
     onSuccess: () => {
       toast({
@@ -115,11 +111,7 @@ export default function MerchantDashboard() {
 
   const createDealMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest(`/api/merchants/${selectedMerchant}/deals`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", `/api/merchants/${selectedMerchant}/deals`, data);
     },
     onSuccess: () => {
       toast({

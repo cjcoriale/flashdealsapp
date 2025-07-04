@@ -36,7 +36,7 @@ export default function DealsPage() {
 
   const saveDealMutation = useMutation({
     mutationFn: async (dealId: number) => {
-      await apiRequest(`/api/deals/${dealId}/save`, { method: "POST" });
+      await apiRequest("POST", `/api/deals/${dealId}/save`);
     },
     onSuccess: () => {
       toast({
@@ -67,7 +67,7 @@ export default function DealsPage() {
 
   const claimDealMutation = useMutation({
     mutationFn: async (dealId: number) => {
-      await apiRequest(`/api/deals/${dealId}/claim`, { method: "POST" });
+      await apiRequest("POST", `/api/deals/${dealId}/claim`);
     },
     onSuccess: () => {
       toast({

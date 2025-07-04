@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, UserCircle, Heart, Bell, Settings, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 interface SideMenuProps {
   isOpen: boolean;
@@ -15,10 +16,10 @@ export default function SideMenu({ isOpen, onClose, onAuditClick }: SideMenuProp
   };
 
   const menuItems = [
-    { icon: UserCircle, label: "Profile", onClick: () => {} },
-    { icon: Heart, label: "Saved Deals", onClick: () => {} },
-    { icon: Bell, label: "Notifications", onClick: () => {} },
-    { icon: Settings, label: "Settings", onClick: () => {} },
+    { icon: UserCircle, label: "Profile", href: "/home", onClick: () => onClose() },
+    { icon: Heart, label: "Saved Deals", href: "/saved-deals", onClick: () => onClose() },
+    { icon: Bell, label: "Notifications", onClick: () => onClose() },
+    { icon: Settings, label: "Settings", onClick: () => onClose() },
     { icon: ClipboardList, label: "Audit Logs", onClick: handleAuditClick },
   ];
 
@@ -38,17 +39,39 @@ export default function SideMenu({ isOpen, onClose, onAuditClick }: SideMenuProp
         </div>
         
         <nav className="space-y-4">
-          {menuItems.map(({ icon: Icon, label, onClick }) => (
-            <Button
-              key={label}
-              variant="ghost"
-              className="w-full justify-start py-3 px-4 rounded-xl hover:bg-gray-100 transition-colors"
-              onClick={onClick}
-            >
-              <Icon className="w-6 h-6 text-gray-600 mr-4" />
-              <span className="font-medium text-gray-800">{label}</span>
-            </Button>
-          ))}
+          {menuItems.map(({ icon: Icon, label, href, onClick }) => {
+            const buttonContent = (
+              <>
+                <Icon className="w-6 h-6 text-gray-600 mr-4" />
+                <span className="font-medium text-gray-800">{label}</span>
+              </>
+            );
+
+            if (href) {
+              return (
+                <Link key={label} href={href}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start py-3 px-4 rounded-xl hover:bg-gray-100 transition-colors"
+                    onClick={onClick}
+                  >
+                    {buttonContent}
+                  </Button>
+                </Link>
+              );
+            }
+
+            return (
+              <Button
+                key={label}
+                variant="ghost"
+                className="w-full justify-start py-3 px-4 rounded-xl hover:bg-gray-100 transition-colors"
+                onClick={onClick}
+              >
+                {buttonContent}
+              </Button>
+            );
+          })}
         </nav>
       </div>
     </div>
