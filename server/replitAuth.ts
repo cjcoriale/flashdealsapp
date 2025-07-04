@@ -35,11 +35,12 @@ export function getSession() {
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Changed to true to allow session creation
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: false, // Set to false for development
       maxAge: sessionTtl,
+      sameSite: 'lax', // Allow cross-site requests for OAuth
     },
   });
 }
@@ -127,7 +128,7 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log('Auth callback received for hostname:', req.hostname);
-    console.log('Available auth strategies:', Object.keys(passport._strategies));
+    console.log('Available auth strategies:', Object.keys((passport as any)._strategies));
     
     passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any, info: any) => {
       console.log('Passport authenticate callback - err:', err, 'user:', user, 'info:', info);
