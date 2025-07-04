@@ -57,19 +57,40 @@ export default function AnalyticsPage() {
     );
   }
 
-  // Calculate personal analytics
-  const totalSavings = claimedDeals.reduce((total: number, deal: any) => 
-    total + ((deal.deal?.originalPrice - deal.deal?.discountedPrice) || 0), 0
-  );
+  // Sample data for unauthenticated users
+  const sampleData = {
+    totalSavings: 245.67,
+    savedDeals: 12,
+    claimedDeals: 8,
+    categoriesUsed: 5,
+    recentActivity: [
+      { action: "Deal Claimed", timestamp: new Date(Date.now() - 1000 * 60 * 30), status: "success" },
+      { action: "Deal Saved", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), status: "success" },
+      { action: "Location Search", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4), status: "success" }
+    ]
+  };
 
-  const categoriesUsed = new Set(claimedDeals.map((deal: any) => deal.deal?.category)).size;
+  // Calculate personal analytics or use sample data
+  const totalSavings = isAuthenticated 
+    ? (claimedDeals || []).reduce((total: number, deal: any) => 
+        total + ((deal.deal?.originalPrice - deal.deal?.discountedPrice) || 0), 0
+      )
+    : sampleData.totalSavings;
+
+  const categoriesUsed = isAuthenticated 
+    ? new Set((claimedDeals || []).map((deal: any) => deal.deal?.category)).size
+    : sampleData.categoriesUsed;
   
-  const recentActivity = auditLogs.slice(0, 10);
+  const recentActivity = isAuthenticated 
+    ? (auditLogs || []).slice(0, 10)
+    : sampleData.recentActivity;
   
-  const dealsByCategory = allDeals.reduce((acc: any, deal: any) => {
-    acc[deal.category] = (acc[deal.category] || 0) + 1;
-    return acc;
-  }, {});
+  const dealsByCategory = isAuthenticated 
+    ? (allDeals || []).reduce((acc: any, deal: any) => {
+        acc[deal.category] = (acc[deal.category] || 0) + 1;
+        return acc;
+      }, {})
+    : { 'Food & Dining': 4, 'Shopping': 3, 'Entertainment': 2 };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
@@ -91,10 +112,23 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-blue-800 dark:text-blue-200 text-sm">
+              You're viewing sample analytics. <button 
+                onClick={() => authModal.openModal('/analytics')}
+                className="underline font-medium hover:text-blue-900 dark:hover:text-blue-100"
+              >
+                Sign in
+              </button> to view your personal statistics and insights.
+            </p>
+          </div>
+        )}
+        
         {/* Personal Stats */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Your Statistics
+            {isAuthenticated ? "Your Statistics" : "Sample Statistics"}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -107,7 +141,7 @@ export default function AnalyticsPage() {
                   ${totalSavings.toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  From {claimedDeals.length} claimed deals
+                  From {isAuthenticated ? (claimedDeals || []).length : sampleData.claimedDeals} claimed deals
                 </p>
               </CardContent>
             </Card>
@@ -118,7 +152,9 @@ export default function AnalyticsPage() {
                 <Star className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{savedDeals.length}</div>
+                <div className="text-2xl font-bold">
+                  {isAuthenticated ? (savedDeals || []).length : sampleData.savedDeals}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Deals bookmarked for later
                 </p>
