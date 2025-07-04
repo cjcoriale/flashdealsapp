@@ -35,15 +35,17 @@ export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
+    createTableIfMissing: true, // Let it create the table if needed
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
-    resave: false,
-    saveUninitialized: true, // Changed to true to allow session creation
+    resave: true, // Changed to true to ensure session saves
+    saveUninitialized: true, // Keep true to allow session creation
+    rolling: true, // Reset expiration on each request
     cookie: {
       httpOnly: true,
       secure: false, // Set to false for development
