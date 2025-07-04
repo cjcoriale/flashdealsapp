@@ -13,7 +13,7 @@ export default function FloatingButtons({
   notificationCount = 0 
 }: FloatingButtonsProps) {
   return (
-    <div className="absolute bottom-40 right-4 z-20 flex flex-col space-y-3">
+    <div className="absolute bottom-36 right-4 z-20 flex flex-col space-y-3">
       <Button
         size="icon"
         onClick={onLocationClick}
