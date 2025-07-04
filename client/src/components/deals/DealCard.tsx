@@ -9,23 +9,39 @@ interface DealCardProps {
 export default function DealCard({ deal, onClick }: DealCardProps) {
   const getCategoryIcon = (category: string) => {
     const iconMap: { [key: string]: string } = {
+      'food': '🍕',
       'Food': '🍕',
+      'italian': '🍝',
       'Italian': '🍝',
+      'coffee': '☕',
       'Coffee': '☕',
+      'clothing': '👕',
       'Clothing': '👕',
+      'wellness': '🧘',
       'Wellness': '🧘',
+      'entertainment': '🎬',
+      'Entertainment': '🎬',
+      'shopping': '🛍️',
+      'Shopping': '🛍️',
     };
     return iconMap[category] || '🏪';
   };
 
   const getCategoryColor = (category: string) => {
     const colorMap: { [key: string]: string } = {
+      'food': 'bg-red-500',
       'Food': 'bg-red-500',
+      'italian': 'bg-green-500',
       'Italian': 'bg-green-500', 
+      'coffee': 'bg-amber-600',
       'Coffee': 'bg-amber-600',
+      'clothing': 'bg-blue-500',
       'Clothing': 'bg-blue-500',
+      'wellness': 'bg-purple-500',
       'Wellness': 'bg-purple-500',
+      'entertainment': 'bg-pink-500',
       'Entertainment': 'bg-pink-500',
+      'shopping': 'bg-indigo-500',
       'Shopping': 'bg-indigo-500',
     };
     return colorMap[category] || 'bg-gray-500';

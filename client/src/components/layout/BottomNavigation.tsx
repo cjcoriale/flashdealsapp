@@ -25,18 +25,20 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-200 px-4 py-2 shadow-lg">
-      <div className="flex items-center justify-around">
+    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-t border-gray-200/50 px-2 py-1 shadow-sm">
+      <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map(({ id, label, icon: Icon, href }) => (
           <Link key={id} href={href}>
             <Button
               variant="ghost"
-              className={`flex flex-col items-center py-2 px-3 ${
-                location === href ? 'text-primary' : 'text-gray-600 hover:text-primary'
-              } transition-colors`}
+              className={`flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 ${
+                location === href 
+                  ? 'text-primary bg-primary/10 transform scale-105' 
+                  : 'text-gray-500 hover:text-primary hover:bg-primary/5'
+              }`}
               onClick={() => handleNavClick(id)}
             >
-              <Icon className="w-6 h-6 mb-1" />
+              <Icon className="w-5 h-5 mb-1" />
               <span className="text-xs font-medium">{label}</span>
             </Button>
           </Link>
