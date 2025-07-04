@@ -136,11 +136,22 @@ export async function setupAuth(app: Express) {
     console.log('Login request for hostname:', req.hostname);
     console.log('Session ID:', req.sessionID);
     console.log('Session data:', req.session);
+    console.log('Available strategies:', Object.keys((passport as any)._strategies));
+    console.log('Using strategy:', `replitauth:${req.hostname}`);
     
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const authenticator = passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    });
+    
+    console.log('Calling passport.authenticate...');
+    authenticator(req, res, (err: any) => {
+      if (err) {
+        console.error('Authentication error in login:', err);
+        return res.status(500).json({ error: 'Authentication failed' });
+      }
+      console.log('Authentication completed - this should not be reached for OAuth redirect');
+    });
   });
 
   app.get("/api/callback", (req, res, next) => {
