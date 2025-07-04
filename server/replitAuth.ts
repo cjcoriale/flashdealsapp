@@ -45,12 +45,15 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: true, // Keep true to allow session creation
-    rolling: true, // Reset expiration on each request
+    rolling: false, // Don't reset expiration to avoid session recreation
+    name: 'flashdeals.session', // Custom session name
     cookie: {
       httpOnly: true,
       secure: false, // Set to false for development
       maxAge: sessionTtl,
-      sameSite: 'lax', // Allow cross-site requests for OAuth
+      sameSite: 'none', // Allow all cross-site requests for OAuth
+      domain: undefined, // Let Express set the domain automatically
+      path: '/', // Ensure cookie is available for all paths
     },
   });
 }
