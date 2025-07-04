@@ -89,7 +89,11 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   return (
     <div 
       className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center"
-      onClick={onClose}
+      onClick={() => {
+        console.log('Background clicked - about to call onClose');
+        onClose();
+        console.log('onClose called from background');
+      }}
     >
       <div 
         className="slide-up active w-full max-w-lg bg-white rounded-t-3xl shadow-2xl"
@@ -124,7 +128,11 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={() => {
+                console.log('X button clicked - about to call onClose');
+                onClose();
+                console.log('onClose called from X button');
+              }}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-6 h-6 text-gray-600" />
