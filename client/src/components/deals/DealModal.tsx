@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { DealWithMerchant } from "@shared/schema";
 import { X, Clock, Star, Phone, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,19 +16,6 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Add escape key listener
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        console.log('Escape key pressed');
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
   const claimMutation = useMutation({
     mutationFn: async () => {
       return apiRequest('POST', `/api/deals/${deal.id}/claim`);
@@ -40,7 +27,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
       });
       onClaim();
       queryClient.invalidateQueries({ queryKey: ['/api/deals'] });
-      handleClose();
+      onClose();
     },
     onError: (error: any) => {
       toast({
@@ -51,28 +38,16 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
     },
   });
 
-  const handleClose = () => {
-    console.log('handleClose called');
-    onClose();
-  };
-
-  // Direct DOM manipulation as fallback
+  // Escape key handler
   useEffect(() => {
-    const modalElement = document.getElementById('deal-modal');
-    if (modalElement) {
-      modalElement.addEventListener('click', (e) => {
-        if (e.target === modalElement) {
-          console.log('Direct DOM click on background');
-          onClose();
-        }
-      });
-    }
-    
-    return () => {
-      if (modalElement) {
-        modalElement.removeEventListener('click', () => {});
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
       }
     };
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
   const handleClaim = () => {
@@ -99,26 +74,22 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
     const colorMap: { [key: string]: string } = {
       'Food': 'bg-accent',
       'Italian': 'bg-accent',
-      'Coffee': 'bg-secondary',
-      'Clothing': 'bg-red-500',
-      'Wellness': 'bg-purple-500',
+      'Coffee': 'bg-accent',
+      'Clothing': 'bg-secondary',
+      'Wellness': 'bg-primary',
     };
-    return colorMap[category] || 'bg-gray-500';
+    return colorMap[category] || 'bg-gray-600';
   };
 
+  // Calculate time remaining
   const timeLeft = Math.max(0, Math.floor((new Date(deal.endTime).getTime() - Date.now()) / (1000 * 60)));
   const hours = Math.floor(timeLeft / 60);
   const minutes = timeLeft % 60;
 
   return (
     <div 
-      id="deal-modal"
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center"
-      style={{ zIndex: 9999, pointerEvents: 'auto' }}
-      onClick={(e) => {
-        console.log('Background clicked');
-        handleClose();
-      }}
+      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center"
+      onClick={onClose}
     >
       <div 
         className="slide-up active w-full max-w-lg bg-white rounded-t-3xl shadow-2xl"
@@ -128,16 +99,13 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
           {/* Handle Bar */}
           <div 
             className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6 cursor-pointer hover:bg-gray-400 transition-colors"
-            onClick={(e) => {
-              console.log('Handle bar clicked');
-              handleClose();
-            }}
-          ></div>
+            onClick={onClose}
+          />
           
           {/* Deal Header */}
           <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center">
-              <div className={`w-16 h-16 ${getCategoryColor(deal.category)} rounded-xl mr-4 flex items-center justify-center`}>
+            <div className="flex space-x-4">
+              <div className={`${getCategoryColor(deal.category)} rounded-xl p-3 flex items-center justify-center`}>
                 <span className="text-white text-2xl">{getCategoryIcon(deal.category)}</span>
               </div>
               <div>
@@ -156,12 +124,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
               </div>
             </div>
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('X button clicked');
-                handleClose();
-              }}
+              onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-6 h-6 text-gray-600" />
@@ -176,42 +139,54 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
                 {deal.discountPercentage}% OFF
               </div>
             </div>
-            <p className="text-gray-600 mb-3">{deal.description}</p>
+            <p className="text-gray-600 mb-4">{deal.description}</p>
+            
             <div className="flex items-center justify-between">
-              <div>
-                <span className="text-2xl font-bold text-gray-800">${deal.discountedPrice}</span>
-                <span className="text-lg text-gray-500 line-through ml-2">${deal.originalPrice}</span>
+              <div className="flex items-center space-x-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-800">${deal.discountedPrice}</div>
+                  <div className="text-sm text-gray-500 line-through">${deal.originalPrice}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">You save</div>
+                  <div className="text-lg font-semibold text-green-600">${(deal.originalPrice - deal.discountedPrice).toFixed(2)}</div>
+                </div>
               </div>
-              <div className="flex items-center text-red-600">
-                <Clock className="w-4 h-4 mr-1" />
-                <span className="font-semibold">
-                  {hours}h {minutes}m left
-                </span>
+              
+              <div className="text-right">
+                <div className="flex items-center text-orange-600 mb-1">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span className="text-sm font-medium">
+                    {hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`} left
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {deal.currentRedemptions || 0}/{deal.maxRedemptions || 0} claimed
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Merchant Info */}
-          <div className="mb-6">
-            <h4 className="font-semibold text-gray-800 mb-3">About the Merchant</h4>
-            <p className="text-gray-600 text-sm mb-3">{deal.merchant.description}</p>
-            
-            <div className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span>{deal.merchant.address}</span>
+          {/* Contact Info */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center text-gray-600 mb-1">
+                <Phone className="w-4 h-4 mr-2" />
+                <span className="text-sm">Call</span>
               </div>
-              {deal.merchant.phone && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Phone className="w-4 h-4 mr-2" />
-                  <span>{deal.merchant.phone}</span>
-                </div>
-              )}
+              <p className="font-semibold">{deal.merchant.phone || 'N/A'}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center text-gray-600 mb-1">
+                <MapPin className="w-4 h-4 mr-2" />
+                <span className="text-sm">Address</span>
+              </div>
+              <p className="font-semibold text-sm">{deal.merchant.address}</p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-4 mb-4">
+          <div className="flex space-x-4">
             <Button 
               onClick={handleClaim}
               disabled={claimMutation.isPending}
@@ -228,17 +203,6 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
               Get Directions
             </Button>
           </div>
-
-          {/* Close Button */}
-          <button 
-            onClick={() => {
-              console.log('Native button clicked');
-              onClose();
-            }}
-            className="w-full py-3 text-lg font-semibold bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
-          >
-            Close Modal
-          </button>
         </div>
       </div>
     </div>
