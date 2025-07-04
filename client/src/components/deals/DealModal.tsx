@@ -7,65 +7,30 @@ interface DealModalProps {
 }
 
 export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
+  console.log('DealModal rendering...', deal);
+  
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center"
-      onClick={() => {
-        console.log('Background clicked - calling onClose');
-        onClose();
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+      onClick={(e) => {
+        console.log('Background clicked');
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
       }}
     >
-      <div 
-        className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6">
-          {/* Handle Bar */}
-          <div 
-            className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6 cursor-pointer hover:bg-gray-400 transition-colors"
-            onClick={() => {
-              console.log('Handle bar clicked - calling onClose');
-              onClose();
-            }}
-          />
-          
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">{deal.merchant.name}</h2>
-              <p className="text-gray-600">{deal.title}</p>
-            </div>
-            <button
-              onClick={() => {
-                console.log('X button clicked - calling onClose');
-                onClose();
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Simple content */}
-          <div className="mb-6">
-            <p className="text-gray-700">{deal.description}</p>
-            <div className="mt-4">
-              <span className="text-2xl font-bold text-gray-800">${deal.discountedPrice}</span>
-              <span className="text-lg text-gray-500 line-through ml-2">${deal.originalPrice}</span>
-            </div>
-          </div>
-
-          {/* Simple close button */}
-          <button 
-            onClick={() => {
-              console.log('Close button clicked - calling onClose');
-              onClose();
-            }}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Close
-          </button>
-        </div>
+      <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+        <h2 className="text-xl font-bold mb-4">Test Modal</h2>
+        <p className="mb-4">Modal is working!</p>
+        <button 
+          onClick={() => {
+            console.log('Close button clicked');
+            onClose();
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Close
+        </button>
       </div>
     </div>
   );
