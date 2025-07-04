@@ -29,13 +29,33 @@ export default function InteractiveMap({
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [zoom, setZoom] = useState(13);
 
+  // Calculate center of deals
+  const calculateDealsCenter = (dealsList: DealWithMerchant[]) => {
+    if (dealsList.length === 0) return null;
+    
+    const totalLat = dealsList.reduce((sum, deal) => sum + deal.merchant.latitude, 0);
+    const totalLng = dealsList.reduce((sum, deal) => sum + deal.merchant.longitude, 0);
+    
+    return {
+      lat: totalLat / dealsList.length,
+      lng: totalLng / dealsList.length
+    };
+  };
+
   useEffect(() => {
     if (userLocation) {
       setMapCenter([userLocation.lat, userLocation.lng]);
       setZoom(15);
       onLocationUpdate(userLocation.lat, userLocation.lng);
+    } else if (deals.length > 0) {
+      // Center map on deals if no user location
+      const center = calculateDealsCenter(deals);
+      if (center) {
+        setMapCenter([center.lat, center.lng]);
+        setZoom(deals.length === 1 ? 15 : 13);
+      }
     }
-  }, [userLocation, onLocationUpdate]);
+  }, [userLocation, deals, onLocationUpdate]);
 
   // Create user location icon
   const userIcon = new Icon({
