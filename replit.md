@@ -99,6 +99,18 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 04, 2025 19:20: MAJOR EXPANSION - Authentication system and comprehensive features
+  * Implemented Replit-based authentication system for secure user access
+  * Migrated from in-memory storage to full PostgreSQL database with Drizzle ORM
+  * Added user authentication with landing page for logged-out users
+  * Created comprehensive database schema: users, merchants, deals, saved deals, deal claims, audit logs
+  * Built 6 new pages: Home dashboard, Deals list, Saved deals, Analytics, Merchant dashboard, Landing
+  * Implemented merchant portal for businesses to create and manage deals
+  * Added deal saving/bookmarking and claiming functionality for users
+  * Enhanced audit logging system with comprehensive activity tracking
+  * Sample data populated: 5 merchants and 7 deals across NYC locations
+  * Authentication routes: /api/login, /api/logout, /api/callback for seamless user experience
+
 - July 04, 2025 19:07: MAJOR MILESTONE - Fixed critical modal bug, app fully functional
   * Resolved React state closure issue preventing modal from closing
   * Implemented useCallback for stable function references

@@ -1,22 +1,59 @@
-import { users, merchants, deals, auditLogs, type User, type InsertUser, type Merchant, type InsertMerchant, type Deal, type InsertDeal, type AuditLog, type InsertAuditLog, type DealWithMerchant } from "@shared/schema";
+import {
+  users,
+  merchants,
+  deals,
+  savedDeals,
+  dealClaims,
+  auditLogs,
+  type User,
+  type UpsertUser,
+  type Merchant,
+  type InsertMerchant,
+  type Deal,
+  type InsertDeal,
+  type DealWithMerchant,
+  type SavedDeal,
+  type InsertSavedDeal,
+  type SavedDealWithDetails,
+  type DealClaim,
+  type InsertDealClaim,
+  type DealClaimWithDetails,
+  type AuditLog,
+  type InsertAuditLog,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Merchant operations
   getMerchant(id: number): Promise<Merchant | undefined>;
   getAllMerchants(): Promise<Merchant[]>;
+  getMerchantsByUser(userId: string): Promise<Merchant[]>;
   createMerchant(merchant: InsertMerchant): Promise<Merchant>;
+  updateMerchant(id: number, merchant: Partial<InsertMerchant>): Promise<Merchant>;
   
   // Deal operations
   getDeal(id: number): Promise<Deal | undefined>;
   getAllActiveDeals(): Promise<DealWithMerchant[]>;
   getDealsByLocation(lat: number, lng: number, radius: number): Promise<DealWithMerchant[]>;
+  getDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
   createDeal(deal: InsertDeal): Promise<Deal>;
+  updateDeal(id: number, deal: Partial<InsertDeal>): Promise<Deal>;
   updateDealRedemptions(id: number): Promise<void>;
+  
+  // Saved deals operations
+  getSavedDeals(userId: string): Promise<SavedDealWithDetails[]>;
+  saveDeal(savedDeal: InsertSavedDeal): Promise<SavedDeal>;
+  unsaveDeal(userId: string, dealId: number): Promise<void>;
+  isDealSaved(userId: string, dealId: number): Promise<boolean>;
+  
+  // Deal claims operations
+  getClaimedDeals(userId: string): Promise<DealClaimWithDetails[]>;
+  claimDeal(dealClaim: InsertDealClaim): Promise<DealClaim>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -28,247 +65,253 @@ export interface IStorage {
   }>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private merchants: Map<number, Merchant>;
-  private deals: Map<number, Deal>;
-  private auditLogs: Map<number, AuditLog>;
-  private currentUserId: number = 1;
-  private currentMerchantId: number = 1;
-  private currentDealId: number = 1;
-  private currentAuditId: number = 1;
-
-  constructor() {
-    this.users = new Map();
-    this.merchants = new Map();
-    this.deals = new Map();
-    this.auditLogs = new Map();
-    this.initializeMockData();
-  }
-
-  private initializeMockData() {
-    // Initialize mock merchants
-    const mockMerchants: InsertMerchant[] = [
-      {
-        name: "Tony's Pizzeria",
-        description: "Tony's Pizzeria has been serving authentic Italian cuisine for over 20 years. Known for their wood-fired pizzas and fresh ingredients.",
-        category: "Italian",
-        latitude: 40.7128,
-        longitude: -74.0060,
-        address: "123 Main St, New York, NY 10001",
-        phone: "+1 (555) 123-4567",
-        rating: 4.5,
-        reviewCount: 234,
-        isActive: true,
-      },
-      {
-        name: "Brew & Beans",
-        description: "Artisan coffee shop with locally roasted beans and fresh pastries.",
-        category: "Coffee",
-        latitude: 40.7589,
-        longitude: -73.9851,
-        address: "456 Coffee Ave, New York, NY 10002",
-        phone: "+1 (555) 987-6543",
-        rating: 4.2,
-        reviewCount: 156,
-        isActive: true,
-      },
-      {
-        name: "Fashion Hub",
-        description: "Trendy clothing store with the latest fashion trends.",
-        category: "Clothing",
-        latitude: 40.7505,
-        longitude: -73.9934,
-        address: "789 Fashion St, New York, NY 10003",
-        phone: "+1 (555) 456-7890",
-        rating: 4.0,
-        reviewCount: 89,
-        isActive: true,
-      },
-      {
-        name: "Zen Spa",
-        description: "Relaxing spa services with professional treatments.",
-        category: "Wellness",
-        latitude: 40.7282,
-        longitude: -73.9942,
-        address: "321 Wellness Way, New York, NY 10004",
-        phone: "+1 (555) 321-6547",
-        rating: 4.8,
-        reviewCount: 167,
-        isActive: true,
-      },
-    ];
-
-    mockMerchants.forEach(merchant => {
-      this.createMerchant(merchant);
-    });
-
-    // Initialize mock deals
-    const now = new Date();
-    const mockDeals: InsertDeal[] = [
-      {
-        merchantId: 1,
-        title: "Family Pizza Deal",
-        description: "Large pizza with 3 toppings + garlic bread + 2L soda",
-        originalPrice: 25.99,
-        discountedPrice: 12.99,
-        discountPercentage: 50,
-        category: "Food",
-        startTime: now,
-        endTime: new Date(now.getTime() + 2 * 60 * 60 * 1000), // 2 hours from now
-        isActive: true,
-        maxRedemptions: 50,
-        currentRedemptions: 15,
-      },
-      {
-        merchantId: 2,
-        title: "Coffee Deal",
-        description: "Buy one coffee, get one free",
-        originalPrice: 4.99,
-        discountedPrice: 4.99,
-        discountPercentage: 0,
-        category: "Food",
-        startTime: now,
-        endTime: new Date(now.getTime() + 1 * 60 * 60 * 1000), // 1 hour from now
-        isActive: true,
-        maxRedemptions: 30,
-        currentRedemptions: 8,
-      },
-      {
-        merchantId: 3,
-        title: "Fashion Sale",
-        description: "30% off all clothing items",
-        originalPrice: 50.00,
-        discountedPrice: 35.00,
-        discountPercentage: 30,
-        category: "Clothing",
-        startTime: now,
-        endTime: new Date(now.getTime() + 3 * 60 * 60 * 1000), // 3 hours from now
-        isActive: true,
-        maxRedemptions: 20,
-        currentRedemptions: 5,
-      },
-      {
-        merchantId: 4,
-        title: "Spa Treatment",
-        description: "40% off relaxation massage",
-        originalPrice: 80.00,
-        discountedPrice: 48.00,
-        discountPercentage: 40,
-        category: "Wellness",
-        startTime: now,
-        endTime: new Date(now.getTime() + 4 * 60 * 60 * 1000), // 4 hours from now
-        isActive: true,
-        maxRedemptions: 15,
-        currentRedemptions: 3,
-      },
-    ];
-
-    mockDeals.forEach(deal => {
-      this.createDeal(deal);
-    });
-  }
-
+export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return user;
   }
 
   // Merchant operations
   async getMerchant(id: number): Promise<Merchant | undefined> {
-    return this.merchants.get(id);
+    const [merchant] = await db.select().from(merchants).where(eq(merchants.id, id));
+    return merchant;
   }
 
   async getAllMerchants(): Promise<Merchant[]> {
-    return Array.from(this.merchants.values()).filter(merchant => merchant.isActive);
+    return await db.select().from(merchants).where(eq(merchants.isActive, true));
   }
 
-  async createMerchant(insertMerchant: InsertMerchant): Promise<Merchant> {
-    const id = this.currentMerchantId++;
-    const merchant: Merchant = { ...insertMerchant, id };
-    this.merchants.set(id, merchant);
+  async getMerchantsByUser(userId: string): Promise<Merchant[]> {
+    return await db.select().from(merchants).where(eq(merchants.userId, userId));
+  }
+
+  async createMerchant(merchantData: InsertMerchant): Promise<Merchant> {
+    const [merchant] = await db
+      .insert(merchants)
+      .values(merchantData)
+      .returning();
+    return merchant;
+  }
+
+  async updateMerchant(id: number, merchantData: Partial<InsertMerchant>): Promise<Merchant> {
+    const [merchant] = await db
+      .update(merchants)
+      .set(merchantData)
+      .where(eq(merchants.id, id))
+      .returning();
     return merchant;
   }
 
   // Deal operations
   async getDeal(id: number): Promise<Deal | undefined> {
-    return this.deals.get(id);
+    const [deal] = await db.select().from(deals).where(eq(deals.id, id));
+    return deal;
   }
 
   async getAllActiveDeals(): Promise<DealWithMerchant[]> {
-    const activeDeals = Array.from(this.deals.values()).filter(deal => 
-      deal.isActive && new Date(deal.endTime) > new Date()
-    );
-    
-    return activeDeals.map(deal => ({
-      ...deal,
-      merchant: this.merchants.get(deal.merchantId)!
-    }));
+    const now = new Date();
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(deals.isActive, true),
+          eq(merchants.isActive, true),
+          gte(deals.endTime, now)
+        )
+      )
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
   }
 
   async getDealsByLocation(lat: number, lng: number, radius: number): Promise<DealWithMerchant[]> {
-    const allDeals = await this.getAllActiveDeals();
+    const now = new Date();
+    // Using a simple bounding box for radius filtering
+    const latRange = radius / 69; // Approximate miles to degrees
+    const lngRange = radius / (69 * Math.cos(lat * Math.PI / 180));
     
-    return allDeals.filter(deal => {
-      const distance = this.calculateDistance(lat, lng, deal.merchant.latitude, deal.merchant.longitude);
-      return distance <= radius;
-    });
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(deals.isActive, true),
+          eq(merchants.isActive, true),
+          gte(deals.endTime, now),
+          gte(merchants.latitude, lat - latRange),
+          lte(merchants.latitude, lat + latRange),
+          gte(merchants.longitude, lng - lngRange),
+          lte(merchants.longitude, lng + lngRange)
+        )
+      )
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
   }
 
-  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+  async getDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]> {
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(eq(deals.merchantId, merchantId))
+      .orderBy(desc(deals.createdAt))
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
   }
 
-  async createDeal(insertDeal: InsertDeal): Promise<Deal> {
-    const id = this.currentDealId++;
-    const deal: Deal = { ...insertDeal, id };
-    this.deals.set(id, deal);
+  async createDeal(dealData: InsertDeal): Promise<Deal> {
+    const [deal] = await db
+      .insert(deals)
+      .values(dealData)
+      .returning();
+    return deal;
+  }
+
+  async updateDeal(id: number, dealData: Partial<InsertDeal>): Promise<Deal> {
+    const [deal] = await db
+      .update(deals)
+      .set(dealData)
+      .where(eq(deals.id, id))
+      .returning();
     return deal;
   }
 
   async updateDealRedemptions(id: number): Promise<void> {
-    const deal = this.deals.get(id);
-    if (deal) {
-      deal.currentRedemptions = (deal.currentRedemptions || 0) + 1;
-      this.deals.set(id, deal);
-    }
+    await db
+      .update(deals)
+      .set({ 
+        currentRedemptions: sql`${deals.currentRedemptions} + 1` 
+      })
+      .where(eq(deals.id, id));
+  }
+
+  // Saved deals operations
+  async getSavedDeals(userId: string): Promise<SavedDealWithDetails[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(savedDeals)
+      .innerJoin(deals, eq(savedDeals.dealId, deals.id))
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(savedDeals.userId, userId),
+          eq(deals.isActive, true),
+          gte(deals.endTime, now)
+        )
+      )
+      .orderBy(desc(savedDeals.savedAt))
+      .then(rows => rows.map(row => ({
+        ...row.saved_deals,
+        deal: {
+          ...row.deals,
+          merchant: row.merchants
+        }
+      })));
+  }
+
+  async saveDeal(savedDealData: InsertSavedDeal): Promise<SavedDeal> {
+    const [savedDeal] = await db
+      .insert(savedDeals)
+      .values(savedDealData)
+      .onConflictDoNothing()
+      .returning();
+    return savedDeal;
+  }
+
+  async unsaveDeal(userId: string, dealId: number): Promise<void> {
+    await db
+      .delete(savedDeals)
+      .where(
+        and(
+          eq(savedDeals.userId, userId),
+          eq(savedDeals.dealId, dealId)
+        )
+      );
+  }
+
+  async isDealSaved(userId: string, dealId: number): Promise<boolean> {
+    const [saved] = await db
+      .select()
+      .from(savedDeals)
+      .where(
+        and(
+          eq(savedDeals.userId, userId),
+          eq(savedDeals.dealId, dealId)
+        )
+      );
+    return !!saved;
+  }
+
+  // Deal claims operations
+  async getClaimedDeals(userId: string): Promise<DealClaimWithDetails[]> {
+    return await db
+      .select()
+      .from(dealClaims)
+      .innerJoin(deals, eq(dealClaims.dealId, deals.id))
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(eq(dealClaims.userId, userId))
+      .orderBy(desc(dealClaims.claimedAt))
+      .then(rows => rows.map(row => ({
+        ...row.deal_claims,
+        deal: {
+          ...row.deals,
+          merchant: row.merchants
+        }
+      })));
+  }
+
+  async claimDeal(dealClaimData: InsertDealClaim): Promise<DealClaim> {
+    const [dealClaim] = await db
+      .insert(dealClaims)
+      .values(dealClaimData)
+      .returning();
+    
+    // Update deal redemption count
+    await this.updateDealRedemptions(dealClaimData.dealId);
+    
+    return dealClaim;
   }
 
   // Audit log operations
-  async createAuditLog(insertAuditLog: InsertAuditLog): Promise<AuditLog> {
-    const id = this.currentAuditId++;
-    const auditLog: AuditLog = { 
-      ...insertAuditLog, 
-      id,
-      timestamp: new Date()
-    };
-    this.auditLogs.set(id, auditLog);
+  async createAuditLog(logData: InsertAuditLog): Promise<AuditLog> {
+    const [auditLog] = await db
+      .insert(auditLogs)
+      .values(logData)
+      .returning();
     return auditLog;
   }
 
   async getAuditLogs(limit: number = 50): Promise<AuditLog[]> {
-    const logs = Array.from(this.auditLogs.values())
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, limit);
-    return logs;
+    return await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(limit);
   }
 
   async getAuditStats(): Promise<{
@@ -278,17 +321,27 @@ export class MemStorage implements IStorage {
   }> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const todayLogs = Array.from(this.auditLogs.values()).filter(log => 
-      new Date(log.timestamp) >= today
-    );
-    
+
+    const [{ totalUsers }] = await db
+      .select({ totalUsers: sql<number>`count(*)` })
+      .from(users);
+
+    const [{ actionsToday }] = await db
+      .select({ actionsToday: sql<number>`count(*)` })
+      .from(auditLogs)
+      .where(gte(auditLogs.timestamp, today));
+
+    const [{ errors }] = await db
+      .select({ errors: sql<number>`count(*)` })
+      .from(auditLogs)
+      .where(eq(auditLogs.status, "error"));
+
     return {
-      totalUsers: this.users.size,
-      actionsToday: todayLogs.length,
-      errors: todayLogs.filter(log => log.status === 'error').length
+      totalUsers: totalUsers || 0,
+      actionsToday: actionsToday || 0,
+      errors: errors || 0,
     };
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
