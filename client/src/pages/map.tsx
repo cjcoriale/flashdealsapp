@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DealWithMerchant } from "@shared/schema";
 import InteractiveMap from "@/components/map/InteractiveMap";
-import TopNavigation from "@/components/layout/TopNavigation";
+
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import FloatingButtons from "@/components/layout/FloatingButtons";
 import SideMenu from "@/components/layout/SideMenu";
@@ -23,7 +23,6 @@ export default function MapPage() {
   const [showSideMenu, setShowSideMenu] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState<{ message: string; visible: boolean }>({
     message: "",
     visible: false
@@ -133,12 +132,7 @@ export default function MapPage() {
         />
       </div>
 
-      {/* Top Navigation */}
-      <TopNavigation
-        onSearch={handleSearch}
-        onMenuClick={handleMenuToggle}
-        searchQuery={searchQuery}
-      />
+
 
       {/* Deal Cards */}
       <div className="absolute bottom-32 left-0 right-0 z-30 px-4">
