@@ -55,8 +55,11 @@ export async function setupSimpleAuth(app: Express) {
         httpOnly: true,
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: 'lax'
+        sameSite: 'lax',
+        path: '/'
       });
+      
+      console.log('Cookie set with token:', sessionToken);
 
       console.log('Session created, redirecting to home');
       res.redirect('/?auth=success');
@@ -89,9 +92,12 @@ export async function setupSimpleAuth(app: Express) {
 
   // User info endpoint
   app.get('/api/auth/user', async (req, res) => {
+    console.log('Auth check - cookies received:', req.cookies);
     const token = req.cookies.auth_token;
+    console.log('Auth token from cookie:', token);
     
     if (!token) {
+      console.log('No auth token found in cookies');
       return res.status(401).json({ message: "Unauthorized" });
     }
 
