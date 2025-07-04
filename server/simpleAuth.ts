@@ -50,16 +50,18 @@ export async function setupSimpleAuth(app: Express) {
         expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
       });
 
-      // Set session cookie
-      res.cookie('auth_token', sessionToken, {
-        httpOnly: true,
+      // Set session cookie with more explicit settings
+      const cookieOptions = {
+        httpOnly: false, // Allow client-side access for debugging
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: 'lax',
-        path: '/'
-      });
+        sameSite: 'lax' as const,
+        path: '/',
+        domain: undefined // Let browser set automatically
+      };
       
-      console.log('Cookie set with token:', sessionToken);
+      res.cookie('auth_token', sessionToken, cookieOptions);
+      console.log('Cookie set with token:', sessionToken, 'and options:', cookieOptions);
 
       console.log('Session created, redirecting to home');
       res.redirect('/?auth=success');
