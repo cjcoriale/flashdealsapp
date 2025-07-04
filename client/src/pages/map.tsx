@@ -70,11 +70,8 @@ export default function MapPage() {
   };
 
   const handleCloseModal = useCallback(() => {
-    console.log('handleCloseModal called');
     setSelectedDeal(null);
   }, []);
-
-  console.log('MapPage render - handleCloseModal function:', handleCloseModal);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
