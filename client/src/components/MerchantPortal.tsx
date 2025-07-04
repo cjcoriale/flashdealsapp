@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { Store, Plus, Calendar, MapPin, TrendingUp, ArrowLeft } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, TrendingUp, ArrowLeft, Crown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
@@ -32,14 +33,40 @@ const dealFormSchema = insertDealSchema.extend({
 
 export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<'overview' | 'createDeal' | 'createMerchant'>('overview');
   const [selectedMerchant, setSelectedMerchant] = useState<number | null>(null);
   const [showMerchantLogin, setShowMerchantLogin] = useState(false);
+  
+  // Check if user is a merchant
+  const isMerchant = user?.role === 'merchant';
+
+  // Mutation to promote user to merchant
+  const promoteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("/api/auth/promote-to-merchant", "POST", {});
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "You're now a merchant! You can create and manage deals.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to become a merchant. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["/api/my-merchants"],
-    enabled: isOpen,
+    enabled: isOpen && isMerchant,
   });
 
   const { data: merchantDeals = [] } = useQuery({
@@ -117,34 +144,85 @@ export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps)
     });
   };
 
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {/* Quick Action Header */}
-      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Plus className="w-6 h-6 text-blue-600" />
-              <div>
-                <CardTitle className="text-blue-900 dark:text-blue-100">
-                  Create New Deal
-                </CardTitle>
-                <CardDescription className="text-blue-700 dark:text-blue-300">
-                  Add a flash deal for your customers to discover
-                </CardDescription>
+  const renderOverview = () => {
+    // If user is not a merchant, show promotion section
+    if (!isMerchant) {
+      return (
+        <div className="space-y-6">
+          <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-800">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Crown className="w-12 h-12 text-purple-600" />
               </div>
+              <CardTitle className="text-purple-900 dark:text-purple-100">
+                Become a Merchant
+              </CardTitle>
+              <CardDescription className="text-purple-700 dark:text-purple-300">
+                Join FlashDeals as a business owner and start creating amazing deals for local customers to discover on our interactive map.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+                    <Store className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                    <div className="font-medium">Create Business Profile</div>
+                    <div className="text-gray-600 dark:text-gray-300">Set up your business info</div>
+                  </div>
+                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+                    <MapPin className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                    <div className="font-medium">Add Deals to Map</div>
+                    <div className="text-gray-600 dark:text-gray-300">Reach local customers</div>
+                  </div>
+                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                    <div className="font-medium">Track Performance</div>
+                    <div className="text-gray-600 dark:text-gray-300">Monitor deal success</div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => promoteMutation.mutate()}
+                  disabled={promoteMutation.isPending}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {promoteMutation.isPending ? "Setting up..." : "Get Started as Merchant"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    // If user is a merchant, show normal merchant overview
+    return (
+      <div className="space-y-6">
+        {/* Quick Action Header */}
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Plus className="w-6 h-6 text-blue-600" />
+                <div>
+                  <CardTitle className="text-blue-900 dark:text-blue-100">
+                    Create New Deal
+                  </CardTitle>
+                  <CardDescription className="text-blue-700 dark:text-blue-300">
+                    Add a flash deal for your customers to discover
+                  </CardDescription>
+                </div>
+              </div>
+              <Button 
+                onClick={() => setCurrentView('createDeal')}
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={merchants.length === 0}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Deal
+              </Button>
             </div>
-            <Button 
-              onClick={() => setCurrentView('createDeal')}
-              className="bg-blue-600 hover:bg-blue-700"
-              disabled={merchants.length === 0}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Deal
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+        </Card>
 
       {/* Your Businesses */}
       <div>
@@ -226,7 +304,8 @@ export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps)
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderCreateDeal = () => (
     <div className="space-y-6">

@@ -123,6 +123,38 @@ export async function setupSimpleAuth(app: Express) {
 
     res.json(session.user);
   });
+
+  // Promote user to merchant
+  app.post('/api/auth/promote-to-merchant', async (req, res) => {
+    let token = req.cookies.auth_token;
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.replace('Bearer ', '');
+    }
+    
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const session = authenticatedUsers.get(token);
+    if (!session || session.expires < Date.now()) {
+      authenticatedUsers.delete(token);
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const userId = session.user.id;
+      const updatedUser = await storage.promoteUserToMerchant(userId);
+      
+      // Update session with new user data
+      session.user = updatedUser;
+      authenticatedUsers.set(token, session);
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error promoting user to merchant:", error);
+      res.status(500).json({ message: "Failed to promote user to merchant" });
+    }
+  });
 }
 
 // Authentication middleware
