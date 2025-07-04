@@ -99,6 +99,14 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 04, 2025 22:07: MERCHANT SYSTEM COMPLETE - Role-based access control fully operational
+  * Direct user promotion to merchant status working via API endpoint
+  * Merchant Portal now shows different interfaces based on user role
+  * Regular users see "Become a Merchant" promotion interface
+  * Merchants see full business and deal management dashboard
+  * Role checking integrated throughout application
+  * User successfully promoted to merchant status for testing
+
 - July 04, 2025 21:05: AUTHENTICATION BREAKTHROUGH - Token-based auth system fully operational
   * RESOLVED: Fixed critical protocol mismatch (HTTP vs HTTPS) causing authentication failures
   * Token extraction and storage working perfectly across browser sessions
