@@ -64,8 +64,10 @@ export async function setupSimpleAuth(app: Express) {
       console.log('Cookie set with token:', sessionToken, 'and options:', cookieOptions);
 
       console.log('Session created, redirecting to home');
-      // Send token in URL for client-side storage
-      res.redirect(`/?auth=success&token=${encodeURIComponent(sessionToken)}`);
+      // Send token in URL for client-side storage - use absolute URL to ensure proper redirect
+      const redirectUrl = `${req.protocol}://${req.get('host')}/?auth=success&token=${encodeURIComponent(sessionToken)}`;
+      console.log('Redirecting to:', redirectUrl);
+      res.redirect(redirectUrl);
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Login failed' });
