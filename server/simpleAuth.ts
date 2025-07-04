@@ -55,7 +55,7 @@ export async function setupSimpleAuth(app: Express) {
         httpOnly: false, // Allow client-side access for debugging
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: 'lax' as const,
+        sameSite: 'none' as const, // Allow cross-origin cookies
         path: '/',
         domain: undefined // Let browser set automatically
       };
@@ -64,7 +64,8 @@ export async function setupSimpleAuth(app: Express) {
       console.log('Cookie set with token:', sessionToken, 'and options:', cookieOptions);
 
       console.log('Session created, redirecting to home');
-      res.redirect('/?auth=success');
+      // Send token in URL for client-side storage
+      res.redirect(`/?auth=success&token=${encodeURIComponent(sessionToken)}`);
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Login failed' });
@@ -95,11 +96,18 @@ export async function setupSimpleAuth(app: Express) {
   // User info endpoint
   app.get('/api/auth/user', async (req, res) => {
     console.log('Auth check - cookies received:', req.cookies);
-    const token = req.cookies.auth_token;
-    console.log('Auth token from cookie:', token);
+    console.log('Auth check - authorization header:', req.headers.authorization);
+    
+    // Try to get token from cookie or Authorization header
+    let token = req.cookies.auth_token;
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.replace('Bearer ', '');
+    }
+    
+    console.log('Auth token from cookie or header:', token);
     
     if (!token) {
-      console.log('No auth token found in cookies');
+      console.log('No auth token found in cookies or headers');
       return res.status(401).json({ message: "Unauthorized" });
     }
 

@@ -13,6 +13,7 @@ import AnalyticsPage from "@/pages/analytics";
 import MerchantDashboard from "@/pages/merchant-dashboard";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 function Router() {
   return (
@@ -28,10 +29,35 @@ function Router() {
   );
 }
 
+function TokenHandler() {
+  useEffect(() => {
+    // Check if there's a token in the URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (token) {
+      // Store the token in localStorage
+      localStorage.setItem('auth_token', token);
+      console.log('Auth token stored from URL:', token);
+      
+      // Clean up the URL by removing the token parameter
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('token');
+      window.history.replaceState({}, '', newUrl.toString());
+      
+      // Force a page refresh to trigger auth state update
+      window.location.reload();
+    }
+  }, []);
+  
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <TokenHandler />
         <Toaster />
         <Router />
       </TooltipProvider>
