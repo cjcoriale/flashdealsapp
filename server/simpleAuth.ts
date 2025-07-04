@@ -121,7 +121,18 @@ export async function setupSimpleAuth(app: Express) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    res.json(session.user);
+    // Always fetch fresh user data from database to ensure role updates are reflected
+    try {
+      const freshUser = await storage.getUser(session.user.id);
+      if (!freshUser) {
+        authenticatedUsers.delete(token);
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      res.json(freshUser);
+    } catch (error) {
+      console.error('Error fetching fresh user data:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 
   // Promote user to merchant
