@@ -127,7 +127,11 @@ export async function setupSimpleAuth(app: Express) {
 
 // Authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const token = req.cookies.auth_token;
+  // Try to get token from cookie or Authorization header (same as /api/auth/user)
+  let token = req.cookies.auth_token;
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.replace('Bearer ', '');
+  }
   
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
