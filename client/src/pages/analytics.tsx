@@ -36,26 +36,15 @@ export default function AnalyticsPage() {
     queryKey: ["/api/deals"],
   });
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <Card className="max-w-md mx-auto">
-          <CardHeader className="text-center">
-            <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <CardTitle>Sign In Required</CardTitle>
-            <CardDescription>
-              Please sign in to view analytics and usage statistics
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Button onClick={() => window.location.href = '/api/login'}>
-              Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Sample data for when not authenticated
+  const sampleAnalytics = {
+    totalUsers: 1247,
+    actionsToday: 89,
+    errors: 3,
+    totalSavings: 2340.75,
+    avgDealsSaved: 8.5,
+    topCategory: "Food"
+  };
 
   // Sample data for unauthenticated users
   const sampleData = {

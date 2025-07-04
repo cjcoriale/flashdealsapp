@@ -10,22 +10,40 @@ interface DealMarkerProps {
 export default function DealMarker({ deal, onClick }: DealMarkerProps) {
   const getCategoryIcon = (category: string) => {
     const iconMap: { [key: string]: string } = {
+      'food': '🍕',
       'Food': '🍕',
+      'italian': '🍝',
       'Italian': '🍝',
+      'coffee': '☕',
       'Coffee': '☕',
+      'clothing': '👕',
       'Clothing': '👕',
+      'wellness': '🧘',
       'Wellness': '🧘',
+      'entertainment': '🎬',
+      'Entertainment': '🎬',
+      'shopping': '🛍️',
+      'Shopping': '🛍️',
     };
     return iconMap[category] || '🏪';
   };
 
   const getCategoryColor = (category: string) => {
     const colorMap: { [key: string]: string } = {
-      'Food': '#F59E0B',
-      'Italian': '#F59E0B',
-      'Coffee': '#10B981',
-      'Clothing': '#EF4444',
+      'food': '#EF4444',
+      'Food': '#EF4444',
+      'italian': '#10B981',
+      'Italian': '#10B981',
+      'coffee': '#D97706',
+      'Coffee': '#D97706',
+      'clothing': '#3B82F6',
+      'Clothing': '#3B82F6',
+      'wellness': '#8B5CF6',
       'Wellness': '#8B5CF6',
+      'entertainment': '#EC4899',
+      'Entertainment': '#EC4899',
+      'shopping': '#6366F1',
+      'Shopping': '#6366F1',
     };
     return colorMap[category] || '#6B7280';
   };

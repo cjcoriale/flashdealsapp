@@ -11,20 +11,29 @@ import BottomNavigation from "@/components/layout/BottomNavigation";
 import AuthModal from "@/components/auth/AuthModal";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const authModal = useAuthModal();
   
   const { data: savedDeals = [] } = useQuery({
     queryKey: ["/api/saved-deals"],
+    enabled: isAuthenticated,
   });
 
   const { data: claimedDeals = [] } = useQuery({
     queryKey: ["/api/claimed-deals"],
+    enabled: isAuthenticated,
   });
 
   const { data: recentDeals = [] } = useQuery({
     queryKey: ["/api/deals"],
   });
+
+  // Sample data for when not authenticated
+  const sampleStats = {
+    savedDeals: 12,
+    claimedDeals: 8,
+    totalSavings: 145.50
+  };
 
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
   const formatDiscount = (percentage: number) => `${percentage}% OFF`;
@@ -40,21 +49,37 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Welcome back{user?.firstName ? `, ${user.firstName}` : ''}!
+                {isAuthenticated 
+                  ? `Welcome back${user?.firstName ? `, ${user.firstName}` : ''}!`
+                  : 'Welcome to FlashDeals!'
+                }
               </h1>
               <p className="text-gray-600 dark:text-gray-300">
-                Discover amazing deals near you
+                {isAuthenticated 
+                  ? 'Your personalized deal dashboard'
+                  : 'Preview your stats when you sign in'
+                }
               </p>
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/api/logout'}
-            className="flex items-center space-x-2"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </Button>
+          {isAuthenticated ? (
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/api/logout'}
+              className="flex items-center space-x-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => authModal.openModal('/home')}
+              className="flex items-center space-x-2"
+            >
+              <User className="w-4 h-4" />
+              <span>Sign In</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -67,9 +92,11 @@ export default function Home() {
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{savedDeals.length}</div>
+              <div className="text-2xl font-bold">
+                {isAuthenticated ? (savedDeals as any[]).length : sampleStats.savedDeals}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Deals you've bookmarked
+                {isAuthenticated ? "Deals you've bookmarked" : "Sample bookmarked deals"}
               </p>
             </CardContent>
           </Card>
@@ -80,9 +107,11 @@ export default function Home() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{claimedDeals.length}</div>
+              <div className="text-2xl font-bold">
+                {isAuthenticated ? (claimedDeals as any[]).length : sampleStats.claimedDeals}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Deals you've claimed
+                {isAuthenticated ? "Deals you've claimed" : "Sample claimed deals"}
               </p>
             </CardContent>
           </Card>
@@ -94,12 +123,15 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${claimedDeals.reduce((total: number, deal: any) => 
-                  total + (deal.deal?.originalPrice - deal.deal?.discountedPrice || 0), 0
-                ).toFixed(2)}
+                ${isAuthenticated 
+                  ? (claimedDeals as any[]).reduce((total: number, deal: any) => 
+                      total + (deal.deal?.originalPrice - deal.deal?.discountedPrice || 0), 0
+                    ).toFixed(2)
+                  : sampleStats.totalSavings.toFixed(2)
+                }
               </div>
               <p className="text-xs text-muted-foreground">
-                Money saved with deals
+                {isAuthenticated ? "Money saved with deals" : "Sample total savings"}
               </p>
             </CardContent>
           </Card>
