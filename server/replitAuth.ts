@@ -109,25 +109,32 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log('Auth callback received for hostname:', req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any) => {
       if (err) {
         console.error('Auth error:', err);
         return res.redirect("/api/login");
       }
       if (!user) {
+        console.log('No user found in auth callback');
         return res.redirect("/api/login");
       }
       
+      console.log('User authenticated successfully:', user?.claims?.sub);
       req.logIn(user, (err) => {
         if (err) {
           console.error('Login error:', err);
           return res.redirect("/api/login");
         }
         
+        console.log('User logged in successfully, redirecting...');
         // Redirect with a query parameter to trigger auth refresh
-        const redirectUrl = req.session?.returnTo || "/";
+        const redirectPath = req.session?.returnTo || "/";
         delete req.session?.returnTo;
-        res.redirect(`${redirectUrl}?auth=success`);
+        
+        // Simple redirect to path with auth success parameter
+        console.log('Redirecting to:', `${redirectPath}?auth=success`);
+        res.redirect(`${redirectPath}?auth=success`);
       });
     })(req, res, next);
   });
