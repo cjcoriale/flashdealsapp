@@ -19,6 +19,11 @@ export default function ProfilePage() {
 
   // Check if user is a merchant
   const isMerchant = user?.role === 'merchant';
+  
+  // Debug logging
+  console.log('Profile page - User:', user);
+  console.log('Profile page - Is merchant:', isMerchant);
+  console.log('Profile page - User role:', user?.role);
 
   // Mutation to promote user to merchant
   const promoteMutation = useMutation({
