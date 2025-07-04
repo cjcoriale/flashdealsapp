@@ -31,32 +31,40 @@ function Router() {
 
 function TokenHandler() {
   useEffect(() => {
-    // Check if there's a token in the URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    // Wait for page to be fully loaded
+    const handleToken = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      console.log('TokenHandler: Full URL:', window.location.href);
+      console.log('TokenHandler: URL params:', window.location.search);
+      console.log('TokenHandler: Found token in URL:', token);
+      console.log('TokenHandler: Current localStorage token:', localStorage.getItem('auth_token'));
+      
+      if (token) {
+        // Store the token in localStorage
+        localStorage.setItem('auth_token', token);
+        console.log('Auth token stored from URL:', token);
+        
+        // Clean up the URL by removing the token parameter
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('token');
+        newUrl.searchParams.delete('auth');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        console.log('URL cleaned, token should now be available for requests');
+        console.log('New localStorage token:', localStorage.getItem('auth_token'));
+        
+        // Don't reload, just let React Query refetch
+        return;
+      }
+    };
+
+    // Run immediately and also after a short delay to catch any timing issues
+    handleToken();
+    const timeoutId = setTimeout(handleToken, 500);
     
-    console.log('TokenHandler: URL params:', window.location.search);
-    console.log('TokenHandler: Found token in URL:', token);
-    console.log('TokenHandler: Current localStorage token:', localStorage.getItem('auth_token'));
-    
-    if (token) {
-      // Store the token in localStorage
-      localStorage.setItem('auth_token', token);
-      console.log('Auth token stored from URL:', token);
-      
-      // Clean up the URL by removing the token parameter
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('token');
-      newUrl.searchParams.delete('auth');
-      window.history.replaceState({}, '', newUrl.toString());
-      
-      console.log('URL cleaned, token should now be available for requests');
-      
-      // Force a page refresh to trigger auth state update
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
-    }
+    return () => clearTimeout(timeoutId);
   }, []);
   
   return null;
