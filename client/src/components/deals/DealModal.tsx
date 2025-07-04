@@ -56,6 +56,25 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
     onClose();
   };
 
+  // Direct DOM manipulation as fallback
+  useEffect(() => {
+    const modalElement = document.getElementById('deal-modal');
+    if (modalElement) {
+      modalElement.addEventListener('click', (e) => {
+        if (e.target === modalElement) {
+          console.log('Direct DOM click on background');
+          onClose();
+        }
+      });
+    }
+    
+    return () => {
+      if (modalElement) {
+        modalElement.removeEventListener('click', () => {});
+      }
+    };
+  }, [onClose]);
+
   const handleClaim = () => {
     claimMutation.mutate();
   };
@@ -93,7 +112,9 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end justify-center"
+      id="deal-modal"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center"
+      style={{ zIndex: 9999, pointerEvents: 'auto' }}
       onClick={(e) => {
         console.log('Background clicked');
         handleClose();
@@ -209,18 +230,15 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
           </div>
 
           {/* Close Button */}
-          <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Close button clicked');
-              handleClose();
+          <button 
+            onClick={() => {
+              console.log('Native button clicked');
+              onClose();
             }}
-            variant="outline"
-            className="w-full py-3 text-lg font-semibold"
+            className="w-full py-3 text-lg font-semibold bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors"
           >
-            Close
-          </Button>
+            Close Modal
+          </button>
         </div>
       </div>
     </div>
