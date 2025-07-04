@@ -17,7 +17,7 @@ export default function TopNavigation({ onSearch, searchQuery }: TopNavigationPr
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-20 p-4">
+    <div className="absolute top-0 left-0 right-0 z-20 p-4 pt-6">
       <div className="flex items-center justify-between">
         {/* Search Bar */}
         <div className="flex-1 mr-4">
