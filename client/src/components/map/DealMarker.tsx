@@ -35,14 +35,14 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
 
   const customIcon = new Icon({
     iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" r="20" fill="${color}" stroke="white" stroke-width="4"/>
-        <text x="24" y="30" text-anchor="middle" font-size="16" fill="white">${icon}</text>
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="18" fill="${color}" stroke="white" stroke-width="3"/>
+        <text x="20" y="26" text-anchor="middle" font-size="14" fill="white">${icon}</text>
       </svg>
     `),
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
-    popupAnchor: [0, -24],
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
   });
 
   const timeLeft = Math.max(0, Math.floor((new Date(deal.endTime).getTime() - Date.now()) / (1000 * 60 * 60)));
@@ -52,8 +52,13 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
       position={[deal.merchant.latitude, deal.merchant.longitude]}
       icon={customIcon}
       eventHandlers={{
-        click: () => {
+        click: (e) => {
           console.log('Marker clicked for deal:', deal.id);
+          console.log('Click event:', e);
+          onClick();
+        },
+        mousedown: () => {
+          console.log('Marker mousedown for deal:', deal.id);
           onClick();
         },
       }}

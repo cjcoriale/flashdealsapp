@@ -56,6 +56,11 @@ export default function InteractiveMap({
       zoom={zoom}
       className="leaflet-container"
       zoomControl={false}
+      eventHandlers={{
+        click: (e) => {
+          console.log('Map clicked at:', e.latlng);
+        }
+      }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
