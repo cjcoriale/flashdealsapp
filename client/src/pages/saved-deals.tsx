@@ -10,6 +10,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { MapPin, Clock, Trash2, Star, StarIcon } from "lucide-react";
 import { SavedDealWithDetails } from "@shared/schema";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import PageHeader from "@/components/layout/PageHeader";
 import AuthModal from "@/components/auth/AuthModal";
 
 export default function SavedDealsPage() {
@@ -118,24 +119,20 @@ export default function SavedDealsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center space-x-3">
-            <Star className="w-8 h-8 text-yellow-500" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Saved Deals
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isAuthenticated 
-                  ? `${savedDeals.length} deal${savedDeals.length !== 1 ? 's' : ''} saved`
-                  : "Preview of available deals"
-                }
-              </p>
-            </div>
+      <PageHeader 
+        title="Saved Deals" 
+        actions={
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Star className="w-4 h-4 text-yellow-500" />
+            <span>
+              {isAuthenticated 
+                ? `${savedDeals.length} deal${savedDeals.length !== 1 ? 's' : ''} saved`
+                : "Preview of available deals"
+              }
+            </span>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="container mx-auto px-4 py-8">
         {displayDeals.length === 0 ? (

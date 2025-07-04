@@ -13,6 +13,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { MapPin, Clock, Star, StarIcon, Search, Filter } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import PageHeader from "@/components/layout/PageHeader";
 import AuthModal from "@/components/auth/AuthModal";
 
 export default function DealsPage() {
@@ -128,13 +129,11 @@ export default function DealsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-            All Deals
-          </h1>
-          
-          {/* Search and Filters */}
+      <PageHeader title="All Deals" />
+      
+      {/* Search and Filters */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

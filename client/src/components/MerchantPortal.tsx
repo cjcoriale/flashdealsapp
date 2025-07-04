@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
+import MerchantLoginModal from "@/components/MerchantLoginModal";
 
 interface MerchantPortalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps)
   const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<'overview' | 'createDeal' | 'createMerchant'>('overview');
   const [selectedMerchant, setSelectedMerchant] = useState<number | null>(null);
+  const [showMerchantLogin, setShowMerchantLogin] = useState(false);
 
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["/api/my-merchants"],
@@ -156,13 +158,13 @@ export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps)
           <Card>
             <CardContent className="text-center py-8">
               <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No businesses yet</h3>
+              <h3 className="text-lg font-semibold mb-2">Welcome to Merchant Portal</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Add your first business to start creating deals
+                Create your business account to start adding deals to the map
               </p>
-              <Button onClick={() => setCurrentView('createMerchant')}>
+              <Button onClick={() => setShowMerchantLogin(true)}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Business
+                Get Started
               </Button>
             </CardContent>
           </Card>
@@ -336,18 +338,30 @@ export default function MerchantPortal({ isOpen, onClose }: MerchantPortalProps)
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Store className="w-5 h-5" />
-            <span>Merchant Portal</span>
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Store className="w-5 h-5" />
+              <span>Merchant Portal</span>
+            </DialogTitle>
+          </DialogHeader>
 
-        {currentView === 'overview' && renderOverview()}
-        {currentView === 'createDeal' && renderCreateDeal()}
-      </DialogContent>
-    </Dialog>
+          {currentView === 'overview' && renderOverview()}
+          {currentView === 'createDeal' && renderCreateDeal()}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Merchant Login Modal */}
+      <MerchantLoginModal
+        isOpen={showMerchantLogin}
+        onClose={() => setShowMerchantLogin(false)}
+        onSuccess={() => {
+          setShowMerchantLogin(false);
+          setCurrentView('overview');
+        }}
+      />
+    </>
   );
 }
