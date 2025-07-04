@@ -61,6 +61,12 @@ export default function MapPage() {
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
     logAction("Deal Viewed", `Deal ID: ${deal.id}, Title: ${deal.title}`);
+    
+    // Scroll to the corresponding deal card
+    const dealCard = document.querySelector(`[data-deal-id="${deal.id}"]`);
+    if (dealCard) {
+      dealCard.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -137,8 +143,8 @@ export default function MapPage() {
       {/* Floating Action Buttons */}
       <FloatingButtons
         onLocationClick={handleLocationRequest}
-        onNotificationClick={() => handleNotification("You have 3 new deal notifications")}
-        notificationCount={3}
+        onNotificationClick={() => handleNotification("New deals found in your area!")}
+        notificationCount={0}
       />
 
       {/* Bottom Navigation */}

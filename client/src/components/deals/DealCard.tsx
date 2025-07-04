@@ -36,6 +36,7 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
     <div
       className="deal-card min-w-80 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
       onClick={onClick}
+      data-deal-id={deal.id}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center">
