@@ -22,9 +22,8 @@ export default function SideMenu({ isOpen, onClose, onAuditClick, onMerchantClic
   };
 
   const menuItems = [
-    { icon: UserCircle, label: "Profile", href: "/home", onClick: () => onClose() },
+    { icon: UserCircle, label: "Profile", href: "/profile", onClick: () => onClose() },
     { icon: Heart, label: "Saved Deals", href: "/saved-deals", onClick: () => onClose() },
-    { icon: Store, label: "Merchant Portal", onClick: handleMerchantClick },
     { icon: Bell, label: "Notifications", onClick: () => onClose() },
     { icon: Settings, label: "Settings", onClick: () => onClose() },
     { icon: ClipboardList, label: "Audit Logs", onClick: handleAuditClick },

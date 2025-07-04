@@ -11,6 +11,7 @@ import DealsPage from "@/pages/deals";
 import SavedDealsPage from "@/pages/saved-deals";
 import AnalyticsPage from "@/pages/analytics";
 import MerchantDashboard from "@/pages/merchant-dashboard";
+import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/merchant" component={MerchantDashboard} />
       <Route path="/merchant-dashboard" component={MerchantDashboard} />
+      <Route path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );
