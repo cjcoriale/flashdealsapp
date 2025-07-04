@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, UserCircle, Heart, Bell, Settings, ClipboardList } from "lucide-react";
+import { X, UserCircle, Heart, Bell, Settings, ClipboardList, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -7,17 +7,24 @@ interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onAuditClick: () => void;
+  onMerchantClick: () => void;
 }
 
-export default function SideMenu({ isOpen, onClose, onAuditClick }: SideMenuProps) {
+export default function SideMenu({ isOpen, onClose, onAuditClick, onMerchantClick }: SideMenuProps) {
   const handleAuditClick = () => {
     onClose();
     onAuditClick();
   };
 
+  const handleMerchantClick = () => {
+    onClose();
+    onMerchantClick();
+  };
+
   const menuItems = [
     { icon: UserCircle, label: "Profile", href: "/home", onClick: () => onClose() },
     { icon: Heart, label: "Saved Deals", href: "/saved-deals", onClick: () => onClose() },
+    { icon: Store, label: "Merchant Portal", onClick: handleMerchantClick },
     { icon: Bell, label: "Notifications", onClick: () => onClose() },
     { icon: Settings, label: "Settings", onClick: () => onClose() },
     { icon: ClipboardList, label: "Audit Logs", onClick: handleAuditClick },

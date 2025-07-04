@@ -9,6 +9,7 @@ import SideMenu from "@/components/layout/SideMenu";
 import DealModal from "@/components/deals/DealModal";
 import AuditModal from "@/components/audit/AuditModal";
 import AuthModal from "@/components/auth/AuthModal";
+import MerchantPortal from "@/components/MerchantPortal";
 import DealCard from "@/components/deals/DealCard";
 import NotificationToast from "@/components/ui/NotificationToast";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -21,6 +22,7 @@ export default function MapPage() {
   const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
   const [showSideMenu, setShowSideMenu] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showMerchantPortal, setShowMerchantPortal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState<{ message: string; visible: boolean }>({
     message: "",
@@ -107,6 +109,11 @@ export default function MapPage() {
     logAction("Audit Dashboard Accessed", "User viewed audit logs");
   };
 
+  const handleMerchantPortalToggle = () => {
+    setShowMerchantPortal(!showMerchantPortal);
+    logAction("Merchant Portal Accessed", "User opened merchant portal");
+  };
+
   if (dealsLoading && deals.length === 0) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
@@ -167,6 +174,7 @@ export default function MapPage() {
         isOpen={showSideMenu}
         onClose={() => setShowSideMenu(false)}
         onAuditClick={handleAuditModalToggle}
+        onMerchantClick={handleMerchantPortalToggle}
       />
 
       {/* Deal Details Modal */}
@@ -186,6 +194,12 @@ export default function MapPage() {
       <AuditModal
         isOpen={showAuditModal}
         onClose={() => setShowAuditModal(false)}
+      />
+
+      {/* Merchant Portal */}
+      <MerchantPortal
+        isOpen={showMerchantPortal}
+        onClose={() => setShowMerchantPortal(false)}
       />
 
       {/* Auth Modal */}
