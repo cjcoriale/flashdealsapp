@@ -224,12 +224,12 @@ export default function DealsPage() {
                     </span>
                   </div>
                   
-                  <div className="flex space-x-2">
+                  <div className="flex gap-3 mt-4">
                     {isAuthenticated ? (
                       <>
                         <Button 
                           size="sm" 
-                          className="flex-1"
+                          className="flex-1 py-2.5"
                           onClick={() => claimDealMutation.mutate(deal.id)}
                           disabled={claimDealMutation.isPending}
                         >
@@ -238,6 +238,7 @@ export default function DealsPage() {
                         <Button 
                           size="sm" 
                           variant="outline"
+                          className="px-4 py-2.5"
                           onClick={() => saveDealMutation.mutate(deal.id)}
                           disabled={saveDealMutation.isPending || isDealSaved(deal.id)}
                         >
@@ -251,7 +252,7 @@ export default function DealsPage() {
                     ) : (
                       <Button 
                         size="sm" 
-                        className="flex-1"
+                        className="flex-1 py-2.5"
                         onClick={() => authModal.openModal(`/deals`)}
                       >
                         Sign In to Claim

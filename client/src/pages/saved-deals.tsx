@@ -219,12 +219,12 @@ export default function SavedDealsPage() {
                         </span>
                       </div>
                       
-                      <div className="flex space-x-2">
+                      <div className="flex gap-3 mt-4">
                         {isAuthenticated ? (
                           <>
                             <Button 
                               size="sm" 
-                              className="flex-1"
+                              className="flex-1 py-2.5"
                               onClick={() => claimDealMutation.mutate(deal.id)}
                               disabled={claimDealMutation.isPending || isExpired}
                             >
@@ -233,6 +233,7 @@ export default function SavedDealsPage() {
                             <Button 
                               size="sm" 
                               variant="outline"
+                              className="px-4 py-2.5"
                               onClick={() => unsaveDealMutation.mutate(deal.id)}
                               disabled={unsaveDealMutation.isPending}
                             >
@@ -242,7 +243,7 @@ export default function SavedDealsPage() {
                         ) : (
                           <Button 
                             size="sm" 
-                            className="flex-1"
+                            className="flex-1 py-2.5"
                             onClick={() => authModal.openModal('/saved-deals')}
                           >
                             Sign In to Claim

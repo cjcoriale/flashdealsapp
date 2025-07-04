@@ -20,11 +20,13 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
 
   const getCategoryColor = (category: string) => {
     const colorMap: { [key: string]: string } = {
-      'Food': 'bg-accent',
-      'Italian': 'bg-accent',
-      'Coffee': 'bg-secondary',
-      'Clothing': 'bg-red-500',
+      'Food': 'bg-red-500',
+      'Italian': 'bg-green-500', 
+      'Coffee': 'bg-amber-600',
+      'Clothing': 'bg-blue-500',
       'Wellness': 'bg-purple-500',
+      'Entertainment': 'bg-pink-500',
+      'Shopping': 'bg-indigo-500',
     };
     return colorMap[category] || 'bg-gray-500';
   };
@@ -34,7 +36,7 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
 
   return (
     <div
-      className="deal-card min-w-80 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
+      className="deal-card min-w-80 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200 border border-gray-200 dark:border-gray-700"
       onClick={onClick}
       data-deal-id={deal.id}
     >
@@ -44,8 +46,8 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
             <span className="text-white text-xl">{getCategoryIcon(deal.category)}</span>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">{deal.merchant.name}</h3>
-            <p className="text-sm text-gray-600 flex items-center">
+            <h3 className="font-semibold text-gray-800 dark:text-white">{deal.merchant.name}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
               <span>{deal.merchant.category}</span>
               <span className="mx-1">•</span>
               <MapPin className="w-3 h-3 mr-1" />
@@ -61,10 +63,10 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
       </div>
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-lg font-bold text-gray-800">${deal.discountedPrice}</span>
-          <span className="text-sm text-gray-500 line-through ml-2">${deal.originalPrice}</span>
+          <span className="text-lg font-bold text-gray-800 dark:text-white">${deal.discountedPrice}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">${deal.originalPrice}</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
           <Clock className="w-4 h-4 mr-1" />
           <span>{timeLeft}h left</span>
         </div>
