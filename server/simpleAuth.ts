@@ -5,23 +5,43 @@ import { storage } from "./storage";
 const authenticatedUsers = new Map<string, any>();
 
 export async function setupSimpleAuth(app: Express) {
-  // Simple login endpoint that creates a user and session
+  // Check if running on Replit and get user info
   app.get("/api/login", async (req, res) => {
     try {
-      console.log('Simple auth login attempt');
+      console.log('Auth login attempt');
       
-      // Create a demo user for development
-      const demoUser = {
-        id: "demo-user-123",
-        email: "demo@flashdeals.app",
-        firstName: "Demo",
-        lastName: "User",
-        profileImageUrl: "https://replit.com/public/images/mark.png",
-      };
+      let userData;
+      
+      // Try to get Replit user information from headers
+      const replitUser = req.headers['x-replit-user-name'];
+      const replitUserEmail = req.headers['x-replit-user-email'];
+      const replitUserId = req.headers['x-replit-user-id'];
+      
+      if (replitUser && replitUserId) {
+        // Use real Replit user data
+        console.log('Using Replit user:', replitUser);
+        userData = {
+          id: replitUserId as string,
+          email: replitUserEmail as string || `${replitUser}@replit.com`,
+          firstName: replitUser as string,
+          lastName: "User",
+          profileImageUrl: `https://replit.com/@${replitUser}/avatar`,
+        };
+      } else {
+        // Fallback to demo user
+        console.log('Using demo user (Replit headers not available)');
+        userData = {
+          id: "demo-user-123",
+          email: "demo@flashdeals.app",
+          firstName: "Demo",
+          lastName: "User",
+          profileImageUrl: "https://replit.com/public/images/mark.png",
+        };
+      }
 
       // Save user to database
-      const user = await storage.upsertUser(demoUser);
-      console.log('Demo user created/updated:', user.id);
+      const user = await storage.upsertUser(userData);
+      console.log('User created/updated:', user.id);
 
       // Store in memory session
       const sessionToken = `session-${Date.now()}-${Math.random()}`;
@@ -54,6 +74,17 @@ export async function setupSimpleAuth(app: Express) {
     }
     res.clearCookie('auth_token');
     res.redirect('/');
+  });
+
+  // Debug endpoint to check available headers
+  app.get('/api/debug/headers', (req, res) => {
+    console.log('All request headers:', req.headers);
+    res.json({
+      headers: req.headers,
+      replitUser: req.headers['x-replit-user-name'],
+      replitEmail: req.headers['x-replit-user-email'],
+      replitId: req.headers['x-replit-user-id']
+    });
   });
 
   // User info endpoint
