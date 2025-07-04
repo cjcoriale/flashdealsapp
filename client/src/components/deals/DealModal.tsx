@@ -40,8 +40,12 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   });
 
   const handleClose = () => {
+    console.log('Modal close handler called');
     setIsVisible(false);
-    setTimeout(onClose, 300);
+    setTimeout(() => {
+      console.log('Calling onClose after timeout');
+      onClose();
+    }, 300);
   };
 
   const handleClaim = () => {
