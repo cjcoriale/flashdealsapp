@@ -1,25 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
+import cookieParser from "cookie-parser";
 import { auditMiddleware, type AuditRequest, auditError } from "./middleware/audit";
 import { insertDealSchema, insertMerchantSchema, insertSavedDealSchema, insertDealClaimSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Cookie parser for simple auth
+  app.use(cookieParser());
+  
   // Auth middleware
-  await setupAuth(app);
+  await setupSimpleAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Note: Auth routes are now handled in setupSimpleAuth
 
   // Public deal routes (no auth required)
   app.get("/api/deals", auditMiddleware("View Deals"), async (req: AuditRequest, res) => {
