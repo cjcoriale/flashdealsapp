@@ -39,6 +39,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   });
 
   const handleClose = () => {
+    console.log('handleClose called');
     onClose();
   };
 

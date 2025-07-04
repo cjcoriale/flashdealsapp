@@ -164,7 +164,10 @@ export default function MapPage() {
       {selectedDeal && (
         <DealModal
           deal={selectedDeal}
-          onClose={() => setSelectedDeal(null)}
+          onClose={() => {
+            console.log('Modal onClose called in parent');
+            setSelectedDeal(null);
+          }}
           onClaim={() => {
             logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
             handleNotification("Deal claimed successfully!");
