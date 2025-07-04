@@ -44,16 +44,13 @@ export default function InteractiveMap({
 
   useEffect(() => {
     if (userLocation) {
-      console.log('Centering on user location:', userLocation);
       setMapCenter([userLocation.lat, userLocation.lng]);
       setZoom(15);
       onLocationUpdate(userLocation.lat, userLocation.lng);
     } else if (deals.length > 0) {
       // Center map on deals if no user location
       const center = calculateDealsCenter(deals);
-      console.log('Calculated deals center:', center, 'from', deals.length, 'deals');
       if (center) {
-        console.log('Setting map center to:', [center.lat, center.lng]);
         setMapCenter([center.lat, center.lng]);
         setZoom(deals.length === 1 ? 15 : 13);
       }
