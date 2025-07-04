@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DealWithMerchant } from "@shared/schema";
 import { X, Clock, Star, Phone, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,19 @@ interface DealModalProps {
 export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Add escape key listener
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        console.log('Escape key pressed');
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   const claimMutation = useMutation({
     mutationFn: async () => {
@@ -177,7 +190,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 mb-4">
             <Button 
               onClick={handleClaim}
               disabled={claimMutation.isPending}
@@ -194,6 +207,20 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
               Get Directions
             </Button>
           </div>
+
+          {/* Close Button */}
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Close button clicked');
+              handleClose();
+            }}
+            variant="outline"
+            className="w-full py-3 text-lg font-semibold"
+          >
+            Close
+          </Button>
         </div>
       </div>
     </div>
