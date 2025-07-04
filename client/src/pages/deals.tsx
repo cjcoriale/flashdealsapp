@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { MapPin, Clock, Star, StarIcon, Search, Filter } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
+import BottomNavigation from "@/components/layout/BottomNavigation";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function DealsPage() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const authModal = useAuthModal();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -122,7 +126,7 @@ export default function DealsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-6">
@@ -181,7 +185,7 @@ export default function DealsPage() {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg">{deal.title}</CardTitle>
-                    <Badge variant="secondary">
+                    <Badge variant="destructive" className="bg-red-500 text-white font-bold">
                       {formatDiscount(deal.discountPercentage)}
                     </Badge>
                   </div>
@@ -207,7 +211,10 @@ export default function DealsPage() {
                   </p>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <Badge variant={hoursLeft < 24 ? "destructive" : "secondary"} className="text-xs">
+                    <Badge 
+                      variant={hoursLeft < 24 ? "destructive" : "default"} 
+                      className={`text-xs ${hoursLeft < 24 ? 'bg-red-500' : 'bg-blue-500'} text-white`}
+                    >
                       <Clock className="w-3 h-3 mr-1" />
                       {hoursLeft}h left
                     </Badge>
@@ -244,7 +251,7 @@ export default function DealsPage() {
                       <Button 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => window.location.href = '/api/login'}
+                        onClick={() => authModal.openModal(`/deals`)}
                       >
                         Sign In to Claim
                       </Button>
@@ -282,6 +289,19 @@ export default function DealsPage() {
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="deals" 
+        onAuditClick={() => {}} 
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.closeModal}
+        redirectAfterAuth={authModal.redirectAfterAuth}
+      />
     </div>
   );
 }
