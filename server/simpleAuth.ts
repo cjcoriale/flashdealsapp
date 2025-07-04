@@ -65,7 +65,9 @@ export async function setupSimpleAuth(app: Express) {
 
       console.log('Session created, redirecting to home');
       // Send token in URL for client-side storage - use absolute URL to ensure proper redirect
-      const redirectUrl = `${req.protocol}://${req.get('host')}/?auth=success&token=${encodeURIComponent(sessionToken)}`;
+      // Force HTTPS for Replit environment
+      const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
+      const redirectUrl = `${protocol}://${req.get('host')}/?auth=success&token=${encodeURIComponent(sessionToken)}`;
       console.log('Redirecting to:', redirectUrl);
       res.redirect(redirectUrl);
     } catch (error) {
