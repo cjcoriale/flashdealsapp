@@ -205,6 +205,36 @@ export default function MerchantDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Quick Deal Creation */}
+        {merchants.length > 0 && (
+          <div className="mb-8">
+            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Plus className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <CardTitle className="text-blue-900 dark:text-blue-100">
+                        Create New Deal
+                      </CardTitle>
+                      <CardDescription className="text-blue-700 dark:text-blue-300">
+                        Add a flash deal for your customers to discover
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setShowDealForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Deal
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
+
         {/* Merchant Profiles */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">

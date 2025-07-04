@@ -24,6 +24,7 @@ function Router() {
       <Route path="/saved-deals" component={SavedDealsPage} />
       <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/merchant" component={MerchantDashboard} />
+      <Route path="/merchant-dashboard" component={MerchantDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
