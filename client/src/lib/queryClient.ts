@@ -16,8 +16,10 @@ export async function apiRequest(
   
   // Add authorization header if token exists
   const token = localStorage.getItem('auth_token');
+  console.log('apiRequest: localStorage token:', token);
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    console.log('apiRequest: Added Authorization header:', headers['Authorization']);
   }
   
   const res = await fetch(url, {

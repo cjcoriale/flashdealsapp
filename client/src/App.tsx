@@ -35,6 +35,10 @@ function TokenHandler() {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
+    console.log('TokenHandler: URL params:', window.location.search);
+    console.log('TokenHandler: Found token in URL:', token);
+    console.log('TokenHandler: Current localStorage token:', localStorage.getItem('auth_token'));
+    
     if (token) {
       // Store the token in localStorage
       localStorage.setItem('auth_token', token);
@@ -43,10 +47,15 @@ function TokenHandler() {
       // Clean up the URL by removing the token parameter
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('token');
+      newUrl.searchParams.delete('auth');
       window.history.replaceState({}, '', newUrl.toString());
       
+      console.log('URL cleaned, token should now be available for requests');
+      
       // Force a page refresh to trigger auth state update
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   }, []);
   
