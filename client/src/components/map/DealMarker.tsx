@@ -52,7 +52,10 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
       position={[deal.merchant.latitude, deal.merchant.longitude]}
       icon={customIcon}
       eventHandlers={{
-        click: onClick,
+        click: () => {
+          console.log('Marker clicked for deal:', deal.id);
+          onClick();
+        },
       }}
     >
       <Popup>
@@ -73,6 +76,15 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
               {timeLeft}h left
             </div>
           </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+            className="mt-2 w-full bg-primary text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90"
+          >
+            View Details
+          </button>
         </div>
       </Popup>
     </Marker>

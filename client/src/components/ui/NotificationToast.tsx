@@ -18,6 +18,8 @@ export default function NotificationToast({ message, visible, onClose }: Notific
     }
   }, [visible, onClose]);
 
+  if (!visible) return null;
+
   return (
     <div className={`notification-toast ${visible ? 'show' : ''} fixed top-20 left-4 right-4 z-50`}>
       <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-secondary">
