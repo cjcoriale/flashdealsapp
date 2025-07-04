@@ -14,10 +14,18 @@ if (!process.env.REPLIT_DOMAINS) {
 
 const getOidcConfig = memoize(
   async () => {
-    return await client.discovery(
+    console.log('Discovering OIDC config with:', {
+      issuer: process.env.ISSUER_URL ?? "https://replit.com/oidc",
+      clientId: process.env.REPL_ID!
+    });
+    
+    const config = await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
       process.env.REPL_ID!
     );
+    
+    console.log('OIDC config discovered successfully');
+    return config;
   },
   { maxAge: 3600 * 1000 }
 );
@@ -120,6 +128,10 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    console.log('Login request for hostname:', req.hostname);
+    console.log('Session ID:', req.sessionID);
+    console.log('Session data:', req.session);
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
