@@ -15,33 +15,14 @@ import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/map" component={MapPage} />
-          <Route path="/deals" component={DealsPage} />
-          <Route path="/saved-deals" component={SavedDealsPage} />
-          <Route path="/analytics" component={AnalyticsPage} />
-          <Route path="/merchant" component={MerchantDashboard} />
-        </>
-      )}
+      <Route path="/" component={MapPage} />
+      <Route path="/home" component={Home} />
+      <Route path="/deals" component={DealsPage} />
+      <Route path="/saved-deals" component={SavedDealsPage} />
+      <Route path="/analytics" component={AnalyticsPage} />
+      <Route path="/merchant" component={MerchantDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

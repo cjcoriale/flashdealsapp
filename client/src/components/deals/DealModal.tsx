@@ -1,15 +1,18 @@
 import { Clock, MapPin, X, Star, Users } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DealModalProps {
   deal: DealWithMerchant;
   onClose: () => void;
   onClaim: () => void;
+  onAuthRequired?: () => void;
 }
 
-export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
+export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: DealModalProps) {
   const [timeLeft, setTimeLeft] = useState(0);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const updateTimeLeft = () => {
@@ -129,12 +132,16 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
           <div className="space-y-3">
             <button 
               onClick={() => {
-                onClaim();
-                onClose();
+                if (isAuthenticated) {
+                  onClaim();
+                  onClose();
+                } else {
+                  onAuthRequired?.();
+                }
               }}
               className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-colors"
             >
-              Claim Deal
+              {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim Deal'}
             </button>
             
             <div className="flex space-x-3">

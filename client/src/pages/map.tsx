@@ -8,11 +8,14 @@ import FloatingButtons from "@/components/layout/FloatingButtons";
 import SideMenu from "@/components/layout/SideMenu";
 import DealModal from "@/components/deals/DealModal";
 import AuditModal from "@/components/audit/AuditModal";
+import AuthModal from "@/components/auth/AuthModal";
 import DealCard from "@/components/deals/DealCard";
 import NotificationToast from "@/components/ui/NotificationToast";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useLocation } from "@/hooks/useLocation";
 import { useAudit } from "@/hooks/useAudit";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 
 export default function MapPage() {
   const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
@@ -26,6 +29,8 @@ export default function MapPage() {
 
   const { location, requestLocation, isLoading: locationLoading } = useLocation();
   const { logAction } = useAudit();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const authModal = useAuthModal();
 
   const {
     data: deals = [],
@@ -173,6 +178,7 @@ export default function MapPage() {
             logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
             handleNotification("Deal claimed successfully!");
           }}
+          onAuthRequired={() => authModal.openModal(`/deals/${selectedDeal.id}`)}
         />
       )}
 
@@ -180,6 +186,13 @@ export default function MapPage() {
       <AuditModal
         isOpen={showAuditModal}
         onClose={() => setShowAuditModal(false)}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.closeModal}
+        redirectAfterAuth={authModal.redirectAfterAuth}
       />
 
       {/* Notification Toast */}
