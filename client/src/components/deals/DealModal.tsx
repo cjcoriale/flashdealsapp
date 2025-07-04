@@ -13,7 +13,6 @@ interface DealModalProps {
 }
 
 export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
-  const [isVisible, setIsVisible] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -40,12 +39,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   });
 
   const handleClose = () => {
-    console.log('Modal close handler called');
-    setIsVisible(false);
-    setTimeout(() => {
-      console.log('Calling onClose after timeout');
-      onClose();
-    }, 300);
+    onClose();
   };
 
   const handleClaim = () => {
@@ -89,7 +83,7 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
       onClick={handleClose}
     >
       <div 
-        className={`slide-up ${isVisible ? 'active' : ''} w-full max-w-lg bg-white rounded-t-3xl shadow-2xl`}
+        className="slide-up active w-full max-w-lg bg-white rounded-t-3xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
