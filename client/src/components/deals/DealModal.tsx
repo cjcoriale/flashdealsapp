@@ -81,7 +81,10 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
   return (
     <div 
       className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end justify-center"
-      onClick={handleClose}
+      onClick={(e) => {
+        console.log('Background clicked');
+        handleClose();
+      }}
     >
       <div 
         className="slide-up active w-full max-w-lg bg-white rounded-t-3xl shadow-2xl"
@@ -91,7 +94,10 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
           {/* Handle Bar */}
           <div 
             className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6 cursor-pointer hover:bg-gray-400 transition-colors"
-            onClick={handleClose}
+            onClick={(e) => {
+              console.log('Handle bar clicked');
+              handleClose();
+            }}
           ></div>
           
           {/* Deal Header */}
@@ -116,7 +122,12 @@ export default function DealModal({ deal, onClose, onClaim }: DealModalProps) {
               </div>
             </div>
             <button
-              onClick={handleClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('X button clicked');
+                handleClose();
+              }}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-6 h-6 text-gray-600" />
