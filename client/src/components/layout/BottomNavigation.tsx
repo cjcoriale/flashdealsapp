@@ -38,7 +38,7 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
               }`}
               onClick={() => handleNavClick(id)}
             >
-              <Icon className="w-5 h-5 mb-0.5" />
+              <Icon className="w-5 h-5 mb-0" />
               <span className="text-xs font-medium">{label}</span>
             </Button>
           </Link>
