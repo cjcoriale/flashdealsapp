@@ -1,0 +1,58 @@
+import { useState } from "react";
+import { Search, Filter, Menu } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+interface TopNavigationProps {
+  onSearch: (query: string) => void;
+  onMenuClick: () => void;
+  searchQuery: string;
+}
+
+export default function TopNavigation({ onSearch, onMenuClick, searchQuery }: TopNavigationProps) {
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearch(e.target.value);
+    onSearch(e.target.value);
+  };
+
+  return (
+    <div className="absolute top-0 left-0 right-0 z-20 p-4">
+      <div className="flex items-center justify-between">
+        {/* Search Bar */}
+        <div className="flex-1 mr-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Search deals, restaurants..."
+              value={localSearch}
+              onChange={handleSearchChange}
+              className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-lg"
+            />
+          </div>
+        </div>
+
+        {/* Filter Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 mr-2"
+        >
+          <Filter className="w-5 h-5 text-gray-600" />
+        </Button>
+
+        {/* Menu Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onMenuClick}
+          className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-200"
+        >
+          <Menu className="w-5 h-5 text-gray-600" />
+        </Button>
+      </div>
+    </div>
+  );
+}
