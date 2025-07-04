@@ -19,6 +19,12 @@ export default function ProfilePage() {
 
   // Check if user is a merchant
   const isMerchant = user?.role === 'merchant';
+  
+  // Debug: Let's see what we're working with
+  console.log('DEBUG - Raw user object:', JSON.stringify(user, null, 2));
+  console.log('DEBUG - user?.role:', user?.role);
+  console.log('DEBUG - typeof user?.role:', typeof user?.role);
+  console.log('DEBUG - isMerchant:', isMerchant);
 
   // Mutation to promote user to merchant
   const promoteMutation = useMutation({
