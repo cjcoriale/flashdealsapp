@@ -152,16 +152,16 @@ export default function ProfilePage() {
 
         {/* Merchant Section */}
         {isMerchant ? (
-          <Card>
+          <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Store className="w-5 h-5" />
-                    <span>Merchant Dashboard</span>
+                  <CardTitle className="flex items-center space-x-2 text-purple-700 dark:text-purple-300">
+                    <Crown className="w-5 h-5" />
+                    <span>Business Dashboard</span>
                   </CardTitle>
-                  <CardDescription>
-                    Manage your businesses and create deals
+                  <CardDescription className="text-purple-600 dark:text-purple-400">
+                    Manage your restaurants and create flash deals
                   </CardDescription>
                 </div>
                 <Button 
@@ -169,10 +169,11 @@ export default function ProfilePage() {
                     setShowMerchantPortal(true);
                     logAction("Merchant Portal Accessed", "User opened merchant portal from profile");
                   }}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-purple-600 hover:bg-purple-700 shadow-lg"
+                  size="lg"
                 >
                   <Store className="w-4 h-4 mr-2" />
-                  Open Merchant Portal
+                  Manage Business
                 </Button>
               </div>
             </CardHeader>

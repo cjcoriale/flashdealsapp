@@ -99,6 +99,15 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 04, 2025 22:20: UI CLEANUP & NAVIGATION IMPROVEMENTS - Clean map interface with focused profile page
+  * Removed hamburger menu button from map page for streamlined interface
+  * Kept search functionality while eliminating navigation clutter on map
+  * Enhanced profile page with beautiful merchant dashboard section
+  * Simplified stats display to focus on saved and claimed deals
+  * Added gradient styling to merchant portal section for better visual hierarchy
+  * User successfully promoted to merchant status and portal accessible via profile
+  * Map page now pure focus on deals discovery without navigation distractions
+
 - July 04, 2025 22:07: MERCHANT SYSTEM COMPLETE - Role-based access control fully operational
   * Direct user promotion to merchant status working via API endpoint
   * Merchant Portal now shows different interfaces based on user role

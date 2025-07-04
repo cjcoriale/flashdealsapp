@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { Search, Filter, Menu } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface TopNavigationProps {
   onSearch: (query: string) => void;
-  onMenuClick: () => void;
   searchQuery: string;
 }
 
-export default function TopNavigation({ onSearch, onMenuClick, searchQuery }: TopNavigationProps) {
+export default function TopNavigation({ onSearch, searchQuery }: TopNavigationProps) {
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,15 +42,7 @@ export default function TopNavigation({ onSearch, onMenuClick, searchQuery }: To
           <Filter className="w-5 h-5 text-gray-600" />
         </Button>
 
-        {/* Menu Button */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onMenuClick}
-          className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-200"
-        >
-          <Menu className="w-5 h-5 text-gray-600" />
-        </Button>
+
       </div>
     </div>
   );
