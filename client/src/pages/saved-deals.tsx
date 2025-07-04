@@ -176,39 +176,40 @@ export default function SavedDealsPage() {
                 const isExpired = timeLeft <= 0;
                 
                 return (
-                  <Card key={savedDeal.id} className={`hover:shadow-lg transition-shadow ${isExpired ? 'opacity-60' : ''}`}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{deal.title}</CardTitle>
-                        <Badge variant="destructive" className="bg-red-500 text-white font-bold">
+                  <Card key={savedDeal.id} className={`hover:shadow-lg transition-shadow overflow-hidden ${isExpired ? 'opacity-60' : ''}`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {deal.title}
+                        </CardTitle>
+                        <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 text-sm">
                           {formatDiscount(deal.discountPercentage)}
                         </Badge>
                       </div>
-                      <CardDescription className="flex items-center space-x-2">
+                      <CardDescription className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
                         <MapPin className="w-4 h-4" />
                         <span>{deal.merchant.name}</span>
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center mb-2">
-                        <div>
+                    <CardContent className="pt-0">
+                      <div className="mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg font-bold text-green-600">
+                            {formatPrice(deal.discountedPrice)}
+                          </span>
                           <span className="text-sm text-gray-500 line-through">
                             {formatPrice(deal.originalPrice)}
-                          </span>
-                          <span className="text-lg font-bold text-green-600 ml-2">
-                            {formatPrice(deal.discountedPrice)}
                           </span>
                         </div>
                       </div>
                       
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
                         {deal.description}
                       </p>
                       
                       <div className="flex items-center justify-between mb-4">
                         <Badge 
-                          variant={hoursLeft < 24 ? "destructive" : "default"} 
-                          className={`text-xs ${hoursLeft < 24 ? 'bg-red-500' : 'bg-blue-500'} text-white`}
+                          className={`text-xs ${hoursLeft < 24 || isExpired ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white px-2 py-1`}
                         >
                           <Clock className="w-3 h-3 mr-1" />
                           {isExpired ? "Expired" : `${hoursLeft}h left`}

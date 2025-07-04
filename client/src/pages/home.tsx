@@ -147,31 +147,33 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentDeals.slice(0, 6).map((deal: DealWithMerchant) => (
-              <Card key={deal.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{deal.title}</CardTitle>
-                    <Badge variant="secondary">
+              <Card key={deal.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {deal.title}
+                    </CardTitle>
+                    <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 text-sm">
                       {formatDiscount(deal.discountPercentage)}
                     </Badge>
                   </div>
-                  <CardDescription className="flex items-center space-x-2">
+                  <CardDescription className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
                     <MapPin className="w-4 h-4" />
                     <span>{deal.merchant.name}</span>
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-2">
-                    <div>
+                <CardContent className="pt-0">
+                  <div className="mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-bold text-green-600">
+                        {formatPrice(deal.discountedPrice)}
+                      </span>
                       <span className="text-sm text-gray-500 line-through">
                         {formatPrice(deal.originalPrice)}
                       </span>
-                      <span className="text-lg font-bold text-green-600 ml-2">
-                        {formatPrice(deal.discountedPrice)}
-                      </span>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
                     {deal.description}
                   </p>
                   <div className="flex space-x-2">
