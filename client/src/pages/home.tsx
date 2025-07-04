@@ -72,13 +72,22 @@ export default function Home() {
               <span>Sign Out</span>
             </Button>
           ) : (
-            <Button 
-              onClick={() => authModal.openModal('/home')}
-              className="flex items-center space-x-2"
-            >
-              <User className="w-4 h-4" />
-              <span>Sign In</span>
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                onClick={() => authModal.openModal('/home')}
+                className="flex items-center space-x-2"
+              >
+                <User className="w-4 h-4" />
+                <span>Sign In</span>
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/api/login'}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <span>Test Login</span>
+              </Button>
+            </div>
           )}
         </div>
       </div>
