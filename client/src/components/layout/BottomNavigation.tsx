@@ -31,14 +31,14 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
           <Link key={id} href={href}>
             <Button
               variant="ghost"
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center py-3 px-3 rounded-lg transition-all duration-200 ${
                 location === href 
                   ? 'text-primary bg-primary/10' 
                   : 'text-gray-500 hover:text-primary hover:bg-primary/5'
               }`}
               onClick={() => handleNavClick(id)}
             >
-              <Icon className="w-6 h-6 mb-1" />
+              <Icon className="w-5 h-5 mb-0.5" />
               <span className="text-xs font-medium">{label}</span>
             </Button>
           </Link>
