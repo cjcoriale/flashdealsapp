@@ -75,6 +75,7 @@ export default function InteractiveMap({
 
   return (
     <MapContainer
+      key={`${mapCenter[0]}-${mapCenter[1]}-${zoom}`}
       center={mapCenter}
       zoom={zoom}
       className="leaflet-container"
