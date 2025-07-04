@@ -127,7 +127,11 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log('Auth callback received for hostname:', req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any) => {
+    console.log('Available auth strategies:', Object.keys(passport._strategies));
+    
+    passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any, info: any) => {
+      console.log('Passport authenticate callback - err:', err, 'user:', user, 'info:', info);
+      
       if (err) {
         console.error('Auth error:', err);
         return res.redirect("/api/login");
