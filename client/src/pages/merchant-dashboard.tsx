@@ -273,6 +273,122 @@ export default function MerchantDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Create Merchant Form */}
+        {showMerchantForm && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Business Profile Required</CardTitle>
+              <CardDescription>
+                You need to create a business profile before you can create deals. Add your business name, image, and address below.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={merchantForm.handleSubmit(onCreateMerchant)} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Business Name</Label>
+                    <Input
+                      id="name"
+                      {...merchantForm.register("name")}
+                      placeholder="Your business name"
+                    />
+                    {merchantForm.formState.errors.name && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {merchantForm.formState.errors.name.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select onValueChange={(value) => merchantForm.setValue("category", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="restaurant">Restaurant</SelectItem>
+                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="services">Services</SelectItem>
+                        <SelectItem value="entertainment">Entertainment</SelectItem>
+                        <SelectItem value="health">Health & Beauty</SelectItem>
+                        <SelectItem value="fitness">Fitness</SelectItem>
+                        <SelectItem value="automotive">Automotive</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {merchantForm.formState.errors.category && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {merchantForm.formState.errors.category.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    {...merchantForm.register("description")}
+                    placeholder="Describe your business"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="imageUrl">Business Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    {...merchantForm.register("imageUrl")}
+                    placeholder="https://example.com/business-photo.jpg"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    {...merchantForm.register("address")}
+                    placeholder="123 Main St, City, State"
+                    onChange={(e) => {
+                      const address = e.target.value;
+                      merchantForm.setValue("address", address);
+                      // Simple geocoding simulation - in real app, use Google Maps API
+                      // For demo purposes, setting NYC coordinates
+                      merchantForm.setValue("latitude", 40.7128);
+                      merchantForm.setValue("longitude", -74.0060);
+                    }}
+                  />
+                  {merchantForm.formState.errors.address && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {merchantForm.formState.errors.address.message}
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="phone">Phone (Optional)</Label>
+                  <Input
+                    id="phone"
+                    {...merchantForm.register("phone")}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowMerchantForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createMerchantMutation.isPending}>
+                    {createMerchantMutation.isPending ? "Creating..." : "Create Business"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
@@ -358,32 +474,33 @@ export default function MerchantDashboard() {
           </CardContent>
         </Card>
 
-        {/* Merchant Profiles */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Your Businesses
-          </h2>
-          
-          {merchantsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            </div>
-          ) : merchants.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No businesses yet</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Create your first business profile to start offering deals
-                </p>
-                <Button onClick={() => setShowMerchantForm(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Business
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Merchant Profiles - Only show if businesses exist */}
+        {!showMerchantForm && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Your Businesses
+            </h2>
+            
+            {merchantsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              </div>
+            ) : merchants.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No businesses yet</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Create your first business profile to start offering deals
+                  </p>
+                  <Button onClick={() => setShowMerchantForm(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Business
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {merchants.map((merchant: any) => (
                 <Card 
                   key={merchant.id} 
@@ -412,12 +529,13 @@ export default function MerchantDashboard() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Selected Merchant Deals */}
-        {selectedMerchant && (
+        {!showMerchantForm && selectedMerchant && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -478,123 +596,7 @@ export default function MerchantDashboard() {
           </div>
         )}
 
-        {/* Create Merchant Form */}
-        {showMerchantForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Business Profile Required</CardTitle>
-              <CardDescription>
-                You need to create a business profile before you can create deals. Add your business name, image, and address below.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={merchantForm.handleSubmit(onCreateMerchant)} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Business Name</Label>
-                    <Input
-                      id="name"
-                      {...merchantForm.register("name")}
-                      placeholder="Your business name"
-                    />
-                    {merchantForm.formState.errors.name && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {merchantForm.formState.errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select onValueChange={(value) => merchantForm.setValue("category", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="restaurant">Restaurant</SelectItem>
-                        <SelectItem value="retail">Retail</SelectItem>
-                        <SelectItem value="services">Services</SelectItem>
-                        <SelectItem value="entertainment">Entertainment</SelectItem>
-                        <SelectItem value="health">Health & Beauty</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    {...merchantForm.register("description")}
-                    placeholder="Describe your business"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="imageUrl">Business Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    {...merchantForm.register("imageUrl")}
-                    placeholder="https://example.com/business-photo.jpg"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    {...merchantForm.register("address")}
-                    placeholder="Business address"
-                  />
-                </div>
-                
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="latitude">Latitude</Label>
-                    <Input
-                      id="latitude"
-                      type="number"
-                      step="any"
-                      {...merchantForm.register("latitude", { valueAsNumber: true })}
-                      placeholder="40.7128"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input
-                      id="longitude"
-                      type="number"
-                      step="any"
-                      {...merchantForm.register("longitude", { valueAsNumber: true })}
-                      placeholder="-74.0060"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      {...merchantForm.register("phone")}
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <Button type="submit" disabled={createMerchantMutation.isPending}>
-                    {createMerchantMutation.isPending ? "Creating..." : "Create Business"}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowMerchantForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Create Deal Form */}
         {showDealForm && selectedMerchant && (
