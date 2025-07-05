@@ -72,6 +72,13 @@ export default function MerchantDashboard() {
     }
   }, [merchants, merchantsLoading]);
 
+  // Auto-select first merchant when merchants are loaded
+  useEffect(() => {
+    if (!merchantsLoading && Array.isArray(merchants) && merchants.length > 0 && !selectedMerchant) {
+      setSelectedMerchant(merchants[0].id);
+    }
+  }, [merchantsLoading, merchants, selectedMerchant]);
+
   const merchantForm = useForm({
     resolver: zodResolver(merchantFormSchema),
     defaultValues: {
@@ -257,9 +264,11 @@ export default function MerchantDashboard() {
                 </AvatarFallback>
               </Avatar>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {selectedMerchant && Array.isArray(merchants) && merchants.length > 0 
-                  ? `${merchants.find((m: any) => m.id === selectedMerchant)?.name || 'Location'} Dashboard`
-                  : 'Create Deal'}
+                {Array.isArray(merchants) && merchants.length > 0 ? (
+                  selectedMerchant 
+                    ? `${merchants.find((m: any) => m.id === selectedMerchant)?.name || 'Location'} Dashboard`
+                    : `${merchants[0]?.name || 'Location'} Dashboard`
+                ) : 'Create Deal'}
               </h1>
             </div>
             <Button
