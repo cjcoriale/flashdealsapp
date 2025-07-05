@@ -106,7 +106,7 @@ Changelog:
   * STREAMLINED: Merchant navigation now has clean 2-tab layout (Create Deal, Map)
   * ENHANCED: Header layout with profile image left of title and prominent logout button on right
   * CONFIGURED: Both merchants and customers now land on Map page after login for deal discovery
-  * UPDATED: Customer navigation - "Home" renamed to "Deals", moved left of Map, removed duplicate Deals tab
+  * UPDATED: Customer navigation - "Home" renamed to "Deals", positioned right of Map, removed duplicate Deals tab
   * VERIFIED: Logout functionality properly clears session and returns to login screen
   * RESULT: All merchant functionality consolidated into dashboard with integrated profile display
 
