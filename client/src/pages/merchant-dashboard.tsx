@@ -197,7 +197,7 @@ export default function MerchantDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
@@ -229,20 +229,67 @@ export default function MerchantDashboard() {
               </div>
             </CardContent>
           </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => setShowDealForm(true)}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Plus className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-lg font-semibold text-gray-900 dark:text-white">Create</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">New Deal</div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
+
+        {/* Recent Deals */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Your Recent Deals
+            </CardTitle>
+            <CardDescription>
+              Manage your active flash deals
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {Array.isArray(merchantDeals) && merchantDeals.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  No deals yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Create your first flash deal to start attracting customers
+                </p>
+                <Button
+                  onClick={() => setShowDealForm(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Deal
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Array.isArray(merchantDeals) && merchantDeals.slice(0, 5).map((deal: any) => (
+                  <div
+                    key={deal.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold">{deal.title}</h4>
+                        <Badge variant="secondary">
+                          {deal.discountPercentage}% OFF
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                        ${deal.discountedPrice} (was ${deal.originalPrice})
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>{deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed</span>
+                        <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
+                          {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Merchant Profiles */}
         <div className="mb-8">
