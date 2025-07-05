@@ -206,7 +206,7 @@ export default function MerchantDashboard() {
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Merchant Dashboard
+                  Create Deal
                 </h1>
               </div>
               <div className="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -229,7 +229,7 @@ export default function MerchantDashboard() {
         <Card className="max-w-md mx-auto">
           <CardHeader className="text-center">
             <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <CardTitle>Merchant Dashboard</CardTitle>
+            <CardTitle>Create Deal</CardTitle>
             <CardDescription>
               Please sign in to access the merchant dashboard
             </CardDescription>
@@ -257,7 +257,9 @@ export default function MerchantDashboard() {
                 </AvatarFallback>
               </Avatar>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Merchant Dashboard
+                {selectedMerchant && Array.isArray(merchants) && merchants.length > 0 
+                  ? `${merchants.find((m: any) => m.id === selectedMerchant)?.name || 'Location'} Dashboard`
+                  : 'Create Deal'}
               </h1>
             </div>
             <Button
