@@ -42,6 +42,8 @@ export default function MapPage() {
     queryKey: ["/api/deals"],
     staleTime: 0, // Always fetch fresh data
     refetchInterval: 10000, // Refetch every 10 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const {
@@ -58,13 +60,18 @@ export default function MapPage() {
   useEffect(() => {
     logAction("App Initialized", "FlashDeals app started");
     
+    // Request location automatically on page load
+    if (!location) {
+      requestLocation();
+    }
+    
     // Auto-refresh deals every 30 seconds
     const interval = setInterval(() => {
       refetchDeals();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [logAction, refetchDeals]);
+  }, [logAction, refetchDeals, location, requestLocation]);
 
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
@@ -156,7 +163,10 @@ export default function MapPage() {
       {/* Floating Action Buttons */}
       <FloatingButtons
         onLocationClick={handleLocationRequest}
-        onNotificationClick={() => handleNotification("New deals found in your area!")}
+        onNotificationClick={() => {
+          refetchDeals();
+          handleNotification("Refreshing deals...");
+        }}
         notificationCount={0}
       />
 

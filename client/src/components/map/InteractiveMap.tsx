@@ -27,7 +27,7 @@ export default function InteractiveMap({
   onLocationUpdate 
 }: InteractiveMapProps) {
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
-  const [zoom, setZoom] = useState(13);
+  const [zoom, setZoom] = useState(10); // Start more zoomed out
 
   // Calculate center of deals
   const calculateDealsCenter = (dealsList: DealWithMerchant[]) => {
@@ -43,17 +43,17 @@ export default function InteractiveMap({
   };
 
   useEffect(() => {
-    if (userLocation) {
-      setMapCenter([userLocation.lat, userLocation.lng]);
-      setZoom(15);
-      onLocationUpdate(userLocation.lat, userLocation.lng);
-    } else if (deals.length > 0) {
-      // Center map on deals if no user location
+    if (deals.length > 0) {
+      // Always center on deals first to show all available deals
       const center = calculateDealsCenter(deals);
       if (center) {
         setMapCenter([center.lat, center.lng]);
-        setZoom(deals.length === 1 ? 15 : 13);
+        setZoom(6); // Very zoomed out to see all deals
       }
+    } else if (userLocation) {
+      setMapCenter([userLocation.lat, userLocation.lng]);
+      setZoom(11); // More zoomed out to see nearby deals
+      onLocationUpdate(userLocation.lat, userLocation.lng);
     }
   }, [userLocation, deals, onLocationUpdate]);
 
