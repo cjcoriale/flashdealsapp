@@ -72,7 +72,7 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
           </div>
         </div>
         <div className="text-right">
-          <div className={`${getCategoryColor(deal.category)} text-white px-3 py-1 rounded-full text-sm font-semibold`}>
+          <div className={`${getCategoryColor(deal.category)} text-white px-3 py-1 rounded-full text-sm font-semibold text-center`}>
             {deal.discountPercentage}% OFF
           </div>
         </div>
