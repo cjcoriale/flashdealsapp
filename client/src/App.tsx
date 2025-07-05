@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "./hooks/useAuth";
@@ -33,6 +33,8 @@ function Router() {
 }
 
 function TokenHandler() {
+  const queryClient = useQueryClient();
+  
   useEffect(() => {
     // Wait for page to be fully loaded
     const handleToken = () => {
@@ -57,6 +59,9 @@ function TokenHandler() {
         
         console.log('URL cleaned, token should now be available for requests');
         console.log('New localStorage token:', localStorage.getItem('auth_token'));
+        
+        // Invalidate auth query to force refetch with new token
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         
         // Don't reload, just let React Query refetch
         return;
