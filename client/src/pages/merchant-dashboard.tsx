@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,13 @@ export default function MerchantDashboard() {
     }
   });
 
+  // Auto-show business creation form if no businesses exist
+  useEffect(() => {
+    if (!merchantsLoading && Array.isArray(merchants) && merchants.length === 0) {
+      setShowMerchantForm(true);
+    }
+  }, [merchants, merchantsLoading]);
+
   const merchantForm = useForm({
     resolver: zodResolver(merchantFormSchema),
     defaultValues: {
@@ -75,6 +82,7 @@ export default function MerchantDashboard() {
       latitude: 0,
       longitude: 0,
       phone: "",
+      imageUrl: "",
     },
   });
 
