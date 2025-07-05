@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
@@ -208,16 +208,24 @@ export default function MerchantDashboard() {
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={user?.profileImageUrl || undefined} />
+                <AvatarFallback>
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Merchant Dashboard
               </h1>
             </div>
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={user?.profileImageUrl || undefined} />
-              <AvatarFallback>
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/api/auth/logout'}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>
