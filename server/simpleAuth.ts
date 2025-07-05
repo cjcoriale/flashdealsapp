@@ -6,7 +6,7 @@ import { storage } from "./storage";
 
 export async function setupSimpleAuth(app: Express) {
   // Check if running on Replit and get user info
-  app.get("/api/login", async (req, res) => {
+  app.get("/api/auth/login", async (req, res) => {
     try {
       console.log('Auth login attempt');
       
@@ -80,7 +80,7 @@ export async function setupSimpleAuth(app: Express) {
   });
 
   // Logout endpoint
-  app.get("/api/logout", async (req, res) => {
+  app.get("/api/auth/logout", async (req, res) => {
     const token = req.cookies.auth_token;
     if (token) {
       await storage.deleteAuthSession(token);
