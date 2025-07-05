@@ -212,30 +212,32 @@ export default function MerchantDashboard() {
   const renderStepIndicator = () => {
     const steps = ["Basic Info", "Pricing", "Timing"];
     return (
-      <div className="flex items-center justify-center mb-6">
-        {steps.map((step, index) => (
-          <div key={index} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              index + 1 <= dealFormStep 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-600'
-            }`}>
-              {index + 1}
+      <div className="flex items-center justify-center mb-6 overflow-x-auto">
+        <div className="flex items-center min-w-max px-4">
+          {steps.map((step, index) => (
+            <div key={index} className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                index + 1 <= dealFormStep 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
+                {index + 1}
+              </div>
+              <span className={`ml-2 text-xs sm:text-sm whitespace-nowrap ${
+                index + 1 <= dealFormStep 
+                  ? 'text-blue-600 font-medium' 
+                  : 'text-gray-500'
+              }`}>
+                {step}
+              </span>
+              {index < steps.length - 1 && (
+                <div className={`w-4 sm:w-8 h-0.5 mx-2 sm:mx-4 ${
+                  index + 1 < dealFormStep ? 'bg-blue-600' : 'bg-gray-200'
+                }`} />
+              )}
             </div>
-            <span className={`ml-2 text-sm ${
-              index + 1 <= dealFormStep 
-                ? 'text-blue-600 font-medium' 
-                : 'text-gray-500'
-            }`}>
-              {step}
-            </span>
-            {index < steps.length - 1 && (
-              <div className={`w-8 h-0.5 mx-4 ${
-                index + 1 < dealFormStep ? 'bg-blue-600' : 'bg-gray-200'
-              }`} />
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   };
@@ -749,7 +751,7 @@ export default function MerchantDashboard() {
                       <p className="text-gray-600 text-sm">Set your original and discounted prices</p>
                     </div>
                     
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="deal-original-price">Original Price *</Label>
                         <Input
@@ -807,7 +809,7 @@ export default function MerchantDashboard() {
                       <p className="text-gray-600 text-sm">When will this deal be available?</p>
                     </div>
                     
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="deal-start-time">Start Time *</Label>
                         <Input
