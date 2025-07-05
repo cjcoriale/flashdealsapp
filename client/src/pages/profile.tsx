@@ -101,6 +101,49 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
+        {/* Account Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Settings className="w-5 h-5" />
+              <span>Account Settings</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Email Notifications</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Receive updates about deals and account activity</div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Manage
+                </Button>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Location Preferences</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Set your preferred areas for deal discovery</div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Configure
+                </Button>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Privacy Settings</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Control your data and privacy preferences</div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Review
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* User Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
@@ -274,48 +317,6 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Account Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Settings className="w-5 h-5" />
-              <span>Account Settings</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Email Notifications</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Receive updates about deals and account activity</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Manage
-                </Button>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Location Preferences</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Set your preferred areas for deal discovery</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Configure
-                </Button>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Privacy Settings</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Control your data and privacy preferences</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Review
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Bottom Navigation */}
