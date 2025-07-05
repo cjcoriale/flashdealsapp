@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
@@ -195,11 +196,31 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      <PageHeader
-        title="Merchant Dashboard"
-        showBackButton={true}
-        backTo="/"
-      />
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+        <div className="px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.href = "/"}
+                className="p-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Merchant Dashboard
+              </h1>
+            </div>
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={user?.profileImageUrl || undefined} />
+              <AvatarFallback>
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
         {/* Recent Deals */}
