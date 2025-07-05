@@ -187,43 +187,36 @@ export default function MerchantDashboard() {
         title="Create Deal"
         showBackButton={true}
         backTo="/"
-      />
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Add Business Button */}
-        <div className="mb-6 flex justify-end">
+        actions={
           <Button onClick={() => setShowMerchantForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Business
           </Button>
-        </div>
+        }
+      />
+
+      <div className="container mx-auto px-4 py-8">
 
         {/* Quick Deal Creation */}
         {merchants.length > 0 && (
           <div className="mb-8">
-            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Plus className="w-6 h-6 text-blue-600" />
-                    <div>
-                      <CardTitle className="text-blue-900 dark:text-blue-100">
-                        Create New Deal
-                      </CardTitle>
-                      <CardDescription className="text-blue-700 dark:text-blue-300">
-                        Add a flash deal for your customers to discover
-                      </CardDescription>
-                    </div>
-                  </div>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Plus className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Ready to create a deal?</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Add a flash deal for your customers to discover
+                  </p>
                   <Button 
                     onClick={() => setShowDealForm(true)}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Deal
+                    Create New Deal
                   </Button>
                 </div>
-              </CardHeader>
+              </CardContent>
             </Card>
           </div>
         )}
