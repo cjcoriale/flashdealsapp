@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight } from "lucide-react";
+import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 
@@ -74,11 +74,31 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      <PageHeader
-        title="My Profile"
-        showBackButton={true}
-        backTo="/"
-      />
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+        <div className="px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={user?.profileImageUrl || undefined} />
+                <AvatarFallback>
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {user.firstName} {user.lastName}
+              </h1>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/api/auth/logout'}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Profile Header */}
