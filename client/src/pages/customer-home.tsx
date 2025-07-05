@@ -10,6 +10,7 @@ import DealModal from "@/components/deals/DealModal";
 import DealCard from "@/components/deals/DealCard";
 import { useLocation } from "@/hooks/useLocation";
 import { DealWithMerchant } from "@shared/schema";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 
 export default function CustomerHome() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,7 +54,7 @@ export default function CustomerHome() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="px-4 py-6">
@@ -136,6 +137,12 @@ export default function CustomerHome() {
           onClaim={handleDealClaim}
         />
       )}
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="home" 
+        onAuditClick={() => {}} 
+      />
     </div>
   );
 }

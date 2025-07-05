@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, Plus, Store, Users, TrendingUp, DollarSign, Eye, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 
 export default function MerchantHome() {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ export default function MerchantHome() {
   const totalRedemptions = deals.reduce((sum: number, deal: any) => sum + deal.redemptions, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="px-4 py-6">
@@ -187,6 +188,12 @@ export default function MerchantHome() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="home" 
+        onAuditClick={() => {}} 
+      />
     </div>
   );
 }
