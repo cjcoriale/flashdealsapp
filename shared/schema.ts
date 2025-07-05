@@ -25,6 +25,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Auth sessions table for simple auth
+export const authSessions = pgTable("auth_sessions", {
+  token: varchar("token").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
@@ -177,3 +185,7 @@ export type SavedDealWithDetails = SavedDeal & {
 export type DealClaimWithDetails = DealClaim & {
   deal: DealWithMerchant;
 };
+
+// Auth session types
+export type AuthSession = typeof authSessions.$inferSelect;
+export type InsertAuthSession = typeof authSessions.$inferInsert;

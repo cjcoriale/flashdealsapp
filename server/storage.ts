@@ -5,6 +5,7 @@ import {
   savedDeals,
   dealClaims,
   auditLogs,
+  authSessions,
   type User,
   type UpsertUser,
   type Merchant,
@@ -20,6 +21,8 @@ import {
   type DealClaimWithDetails,
   type AuditLog,
   type InsertAuditLog,
+  type AuthSession,
+  type InsertAuthSession,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
@@ -64,6 +67,12 @@ export interface IStorage {
     actionsToday: number;
     errors: number;
   }>;
+  
+  // Auth session operations
+  createAuthSession(session: InsertAuthSession): Promise<AuthSession>;
+  getAuthSession(token: string): Promise<AuthSession | undefined>;
+  deleteAuthSession(token: string): Promise<void>;
+  cleanupExpiredSessions(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -354,6 +363,31 @@ export class DatabaseStorage implements IStorage {
       actionsToday: actionsToday || 0,
       errors: errors || 0,
     };
+  }
+
+  // Auth session operations
+  async createAuthSession(sessionData: InsertAuthSession): Promise<AuthSession> {
+    const [session] = await db
+      .insert(authSessions)
+      .values(sessionData)
+      .returning();
+    return session;
+  }
+
+  async getAuthSession(token: string): Promise<AuthSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(authSessions)
+      .where(eq(authSessions.token, token));
+    return session;
+  }
+
+  async deleteAuthSession(token: string): Promise<void> {
+    await db.delete(authSessions).where(eq(authSessions.token, token));
+  }
+
+  async cleanupExpiredSessions(): Promise<void> {
+    await db.delete(authSessions).where(lte(authSessions.expiresAt, new Date()));
   }
 }
 

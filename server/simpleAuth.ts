@@ -2,7 +2,7 @@ import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
 
 // Simple authentication system for development
-const authenticatedUsers = new Map<string, any>();
+// Note: Now using database for persistent sessions
 
 export async function setupSimpleAuth(app: Express) {
   // Check if running on Replit and get user info
@@ -43,11 +43,14 @@ export async function setupSimpleAuth(app: Express) {
       const user = await storage.upsertUser(userData);
       console.log('User created/updated:', user.id);
 
-      // Store in memory session
+      // Store in database session
       const sessionToken = `session-${Date.now()}-${Math.random()}`;
-      authenticatedUsers.set(sessionToken, {
-        user: user,
-        expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+      const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+      
+      await storage.createAuthSession({
+        token: sessionToken,
+        userId: user.id,
+        expiresAt: expiresAt
       });
 
       // Set session cookie with more explicit settings
@@ -77,10 +80,10 @@ export async function setupSimpleAuth(app: Express) {
   });
 
   // Logout endpoint
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/logout", async (req, res) => {
     const token = req.cookies.auth_token;
     if (token) {
-      authenticatedUsers.delete(token);
+      await storage.deleteAuthSession(token);
     }
     res.clearCookie('auth_token');
     res.redirect('/');
@@ -115,17 +118,19 @@ export async function setupSimpleAuth(app: Express) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const session = authenticatedUsers.get(token);
-    if (!session || session.expires < Date.now()) {
-      authenticatedUsers.delete(token);
+    const session = await storage.getAuthSession(token);
+    if (!session || session.expiresAt < new Date()) {
+      if (session) {
+        await storage.deleteAuthSession(token);
+      }
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Always fetch fresh user data from database to ensure role updates are reflected
     try {
-      const freshUser = await storage.getUser(session.user.id);
+      const freshUser = await storage.getUser(session.userId);
       if (!freshUser) {
-        authenticatedUsers.delete(token);
+        await storage.deleteAuthSession(token);
         return res.status(401).json({ message: "Unauthorized" });
       }
       res.json(freshUser);
@@ -146,19 +151,17 @@ export async function setupSimpleAuth(app: Express) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const session = authenticatedUsers.get(token);
-    if (!session || session.expires < Date.now()) {
-      authenticatedUsers.delete(token);
+    const session = await storage.getAuthSession(token);
+    if (!session || session.expiresAt < new Date()) {
+      if (session) {
+        await storage.deleteAuthSession(token);
+      }
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     try {
-      const userId = session.user.id;
+      const userId = session.userId;
       const updatedUser = await storage.promoteUserToMerchant(userId);
-      
-      // Update session with new user data
-      session.user = updatedUser;
-      authenticatedUsers.set(token, session);
       
       res.json(updatedUser);
     } catch (error) {
@@ -180,12 +183,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const session = authenticatedUsers.get(token);
-  if (!session || session.expires < Date.now()) {
-    authenticatedUsers.delete(token);
+  const session = await storage.getAuthSession(token);
+  if (!session || session.expiresAt < new Date()) {
+    if (session) {
+      await storage.deleteAuthSession(token);
+    }
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  (req as any).user = { claims: { sub: session.user.id } };
+  (req as any).user = { claims: { sub: session.userId } };
   next();
 };
