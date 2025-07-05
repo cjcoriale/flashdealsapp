@@ -190,6 +190,11 @@ export default function MerchantDashboard() {
   };
 
   const handleCreateDealClick = () => {
+    console.log("Create Deal button clicked!");
+    console.log("Merchants:", merchants);
+    console.log("Selected merchant:", selectedMerchant);
+    console.log("Show deal form before:", showDealForm);
+    
     // Check if user has any businesses
     if (!Array.isArray(merchants) || merchants.length === 0) {
       // Force business creation first
@@ -202,6 +207,7 @@ export default function MerchantDashboard() {
       return;
     }
     setShowDealForm(true);
+    console.log("Show deal form after:", !showDealForm);
   };
 
   if (isLoading) {
