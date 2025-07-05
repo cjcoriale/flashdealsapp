@@ -104,6 +104,7 @@ export default function MerchantDashboard() {
       category: "",
       originalPrice: 0,
       discountedPrice: 0,
+      discountPercentage: 0,
       startTime: "",
       endTime: "",
       maxRedemptions: 100,
@@ -681,7 +682,14 @@ export default function MerchantDashboard() {
             <div className="space-y-4 px-4 pb-6">
               {renderStepIndicator()}
               
-              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-6">
+              <form onSubmit={dealForm.handleSubmit(onCreateDeal, (errors) => {
+                console.log("Form validation errors:", errors);
+                toast({
+                  title: "Form Error",
+                  description: "Please check all required fields",
+                  variant: "destructive",
+                });
+              })} className="space-y-6">
                 {/* Step 1: Basic Information */}
                 {dealFormStep === 1 && (
                   <div className="space-y-4">
@@ -918,6 +926,12 @@ export default function MerchantDashboard() {
                         type="submit" 
                         disabled={createDealMutation.isPending}
                         className="min-w-[120px]"
+                        onClick={(e) => {
+                          console.log("Create Deal button clicked");
+                          console.log("Form errors:", dealForm.formState.errors);
+                          console.log("Form values:", dealForm.getValues());
+                          console.log("Form is valid:", dealForm.formState.isValid);
+                        }}
                       >
                         {createDealMutation.isPending ? "Creating..." : "Create Deal"}
                       </Button>

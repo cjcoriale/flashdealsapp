@@ -196,6 +196,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req as any).user.claims.sub;
       const merchantId = parseInt(req.params.id);
       
+      console.log("Create deal request:", { userId, merchantId, body: req.body });
+      
       // Verify user owns this merchant
       const merchant = await storage.getMerchant(merchantId);
       if (!merchant || merchant.userId !== userId) {
@@ -203,11 +205,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const dealData = insertDealSchema.parse({ ...req.body, merchantId });
+      console.log("Parsed deal data:", dealData);
+      
       const deal = await storage.createDeal(dealData);
+      console.log("Created deal:", deal);
+      
       res.json(deal);
     } catch (error) {
+      console.error("Deal creation error:", error);
       auditError(req, error as Error, "Create Deal");
-      res.status(500).json({ message: "Failed to create deal" });
+      res.status(500).json({ message: "Failed to create deal", error: error.message });
     }
   });
 
