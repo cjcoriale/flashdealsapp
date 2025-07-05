@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 
 const merchantFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
@@ -180,7 +181,7 @@ export default function MerchantDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-6">
@@ -584,6 +585,12 @@ export default function MerchantDashboard() {
           </Card>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="merchant" 
+        onAuditClick={() => {}} 
+      />
     </div>
   );
 }
