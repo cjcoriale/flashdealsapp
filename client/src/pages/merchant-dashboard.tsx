@@ -184,13 +184,30 @@ export default function MerchantDashboard() {
   };
 
   const onCreateDeal = (data: any) => {
+    console.log("Form submitted with data:", data);
+    console.log("Selected merchant:", selectedMerchant);
+    
+    if (!selectedMerchant) {
+      toast({
+        title: "Error",
+        description: "Please select a business first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
-    createDealMutation.mutate({
+    
+    const dealData = {
       ...data,
+      merchantId: selectedMerchant,
       discountPercentage,
       startTime: new Date(data.startTime).toISOString(),
       endTime: new Date(data.endTime).toISOString(),
-    });
+    };
+    
+    console.log("Creating deal with data:", dealData);
+    createDealMutation.mutate(dealData);
   };
 
   const handleCreateDealClick = () => {
@@ -205,6 +222,12 @@ export default function MerchantDashboard() {
       setShowMerchantForm(true);
       return;
     }
+    
+    // Set the merchant ID in the form to the selected merchant
+    if (selectedMerchant) {
+      dealForm.setValue("merchantId", selectedMerchant);
+    }
+    
     setDealFormStep(1);
     setShowDealForm(true);
   };
@@ -651,7 +674,7 @@ export default function MerchantDashboard() {
           setShowDealForm(open);
           if (!open) setDealFormStep(1);
         }}>
-          <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+          <DialogContent className="sm:max-w-2xl w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-0">
             <DialogHeader className="px-4 pt-6 pb-2">
               <DialogTitle>Create New Deal - Step {dealFormStep} of 3</DialogTitle>
             </DialogHeader>
@@ -722,7 +745,10 @@ export default function MerchantDashboard() {
                     
                     <div>
                       <Label htmlFor="deal-merchant">Business Location *</Label>
-                      <Select onValueChange={(value) => dealForm.setValue("merchantId", parseInt(value))}>
+                      <Select 
+                        onValueChange={(value) => dealForm.setValue("merchantId", parseInt(value))}
+                        defaultValue={selectedMerchant ? selectedMerchant.toString() : undefined}
+                      >
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Select business location" />
                         </SelectTrigger>
