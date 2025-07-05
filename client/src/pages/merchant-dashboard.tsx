@@ -46,9 +46,21 @@ export default function MerchantDashboard() {
     enabled: isAuthenticated,
   });
 
+  // Get deals for selected merchant
   const { data: merchantDeals = [] } = useQuery({
     queryKey: ["/api/merchants", selectedMerchant, "deals"],
     enabled: selectedMerchant !== null,
+  });
+
+  // Get all deals for the current user's merchants for recent deals display
+  const { data: allUserDeals = [] } = useQuery({
+    queryKey: ["/api/deals"],
+    enabled: isAuthenticated,
+    select: (data: any[]) => {
+      // Filter deals to only show those from user's merchants
+      const userMerchantIds = Array.isArray(merchants) ? merchants.map((m: any) => m.id) : [];
+      return data.filter((deal: any) => userMerchantIds.includes(deal.merchantId));
+    }
   });
 
   const merchantForm = useForm({
@@ -213,7 +225,7 @@ export default function MerchantDashboard() {
               <div className="text-center">
                 <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Array.isArray(merchantDeals) ? merchantDeals.reduce((total: number, deal: any) => total + (deal.currentRedemptions || 0), 0) : 0}
+                  {Array.isArray(allUserDeals) ? allUserDeals.reduce((total: number, deal: any) => total + (deal.currentRedemptions || 0), 0) : 0}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">Total Redemptions</div>
               </div>
@@ -224,7 +236,7 @@ export default function MerchantDashboard() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(merchantDeals) ? merchantDeals.length : 0}</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(allUserDeals) ? allUserDeals.length : 0}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">Active Deals</div>
               </div>
             </CardContent>
@@ -243,7 +255,7 @@ export default function MerchantDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {Array.isArray(merchantDeals) && merchantDeals.length === 0 ? (
+            {Array.isArray(allUserDeals) && allUserDeals.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-4xl mb-4">🎯</div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -262,7 +274,7 @@ export default function MerchantDashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {Array.isArray(merchantDeals) && merchantDeals.slice(0, 5).map((deal: any) => (
+                {Array.isArray(allUserDeals) && allUserDeals.slice(0, 5).map((deal: any) => (
                   <div
                     key={deal.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
