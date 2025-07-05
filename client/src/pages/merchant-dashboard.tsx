@@ -199,12 +199,6 @@ export default function MerchantDashboard() {
         title="Merchant Dashboard"
         showBackButton={true}
         backTo="/"
-        actions={
-          <Button onClick={() => setShowMerchantForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Business
-          </Button>
-        }
       />
 
       <div className="container mx-auto px-4 py-8">
