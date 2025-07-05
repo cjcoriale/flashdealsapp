@@ -197,7 +197,7 @@ export default function MerchantDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
@@ -239,19 +239,6 @@ export default function MerchantDashboard() {
                 <Plus className="w-8 h-8 text-orange-600 mx-auto mb-2" />
                 <div className="text-lg font-semibold text-gray-900 dark:text-white">Create</div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">New Deal</div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => window.location.href = '/analytics'}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <TrendingUp className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
-                <div className="text-lg font-semibold text-gray-900 dark:text-white">Analytics</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">View Stats</div>
               </div>
             </CardContent>
           </Card>

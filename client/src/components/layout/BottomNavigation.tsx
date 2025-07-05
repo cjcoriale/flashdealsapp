@@ -19,7 +19,6 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
         { id: 'home', label: 'Dashboard', icon: Home, href: '/' },
         { id: 'map', label: 'Map', icon: Map, href: '/map' },
         { id: 'merchant', label: 'Create Deal', icon: Store, href: '/merchant-dashboard' },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics' },
         { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
       ];
     } else {
