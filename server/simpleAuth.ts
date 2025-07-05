@@ -74,11 +74,14 @@ export async function setupSimpleAuth(app: Express) {
       res.cookie('auth_token', sessionToken, cookieOptions);
       console.log('Cookie set with token:', sessionToken, 'and options:', cookieOptions);
 
-      console.log('Session created, redirecting to home');
+      console.log('Session created, redirecting based on role');
       // Send token in URL for client-side storage - use absolute URL to ensure proper redirect
       // Force HTTPS for Replit environment
       const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
-      const redirectUrl = `${protocol}://${req.get('host')}/?auth=success&token=${encodeURIComponent(sessionToken)}`;
+      
+      // Redirect merchants to Create Deal page, customers to home
+      const redirectPath = selectedRole === 'merchant' ? '/merchant-dashboard' : '/';
+      const redirectUrl = `${protocol}://${req.get('host')}${redirectPath}?auth=success&token=${encodeURIComponent(sessionToken)}`;
       console.log('Redirecting to:', redirectUrl);
       res.redirect(redirectUrl);
     } catch (error) {
