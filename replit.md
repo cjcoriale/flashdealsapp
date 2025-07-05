@@ -99,6 +99,14 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 05, 2025 02:27: MERCHANT INTERFACE CONSOLIDATION COMPLETE - Clean streamlined dashboard
+  * FIXED: JavaScript ReferenceError for undefined user variable in merchant dashboard header
+  * IMPLEMENTED: Profile image display next to dashboard title in merchant header
+  * REMOVED: Profile tab from merchant bottom navigation (consolidated into dashboard)
+  * STREAMLINED: Merchant navigation now has clean 3-tab layout (Dashboard, Map, Create Deal)
+  * RESULT: All merchant functionality consolidated into dashboard with integrated profile display
+  * VERIFIED: Create Deal page loads without errors and shows user profile image in header
+
 - July 05, 2025 01:03: ROLE-BASED AUTHENTICATION SYSTEM COMPLETE - Major architectural upgrade successful
   * IMPLEMENTED: Role selection modal during login (customer vs merchant choice)
   * FIXED: Authentication endpoints now properly handle role parameters (/api/auth/login?role=customer)
