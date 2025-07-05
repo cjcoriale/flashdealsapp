@@ -389,6 +389,63 @@ export default function MerchantDashboard() {
           </Card>
         )}
 
+        {/* Your Locations */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Your Locations
+          </h2>
+          
+          {merchantsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            </div>
+          ) : merchants.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No locations yet</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Create your first location to start offering deals
+                </p>
+                <Button onClick={() => setShowMerchantForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Location
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {merchants.map((merchant: any) => (
+                <Card 
+                  key={merchant.id} 
+                  className={`cursor-pointer transition-all ${
+                    selectedMerchant === merchant.id ? 'ring-2 ring-blue-500' : 'hover:shadow-lg'
+                  }`}
+                  onClick={() => setSelectedMerchant(merchant.id)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Store className="w-5 h-5" />
+                      {merchant.name}
+                    </CardTitle>
+                    <CardDescription>
+                      {merchant.category}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                      {merchant.description}
+                    </p>
+                    <p className="text-xs text-gray-500">{merchant.address}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+
+
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
@@ -474,72 +531,14 @@ export default function MerchantDashboard() {
           </CardContent>
         </Card>
 
-        {/* Merchant Profiles - Only show if businesses exist */}
-        {!showMerchantForm && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Your Businesses
-            </h2>
-            
-            {merchantsLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              </div>
-            ) : merchants.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No businesses yet</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    Create your first business profile to start offering deals
-                  </p>
-                  <Button onClick={() => setShowMerchantForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Business
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {merchants.map((merchant: any) => (
-                <Card 
-                  key={merchant.id} 
-                  className={`cursor-pointer transition-all ${
-                    selectedMerchant === merchant.id ? 'ring-2 ring-blue-500' : 'hover:shadow-lg'
-                  }`}
-                  onClick={() => setSelectedMerchant(merchant.id)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {merchant.name}
-                      <Badge variant={merchant.isActive ? "default" : "secondary"}>
-                        {merchant.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{merchant.category}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                      {merchant.description}
-                    </p>
-                    <p className="text-xs text-gray-500">{merchant.address}</p>
-                  </CardContent>
-                </Card>
-              ))}
-              </div>
-            )}
-          </div>
-        )}
+
 
         {/* Selected Merchant Deals */}
         {!showMerchantForm && selectedMerchant && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Deals for Selected Business
+                Deals for Selected Location
               </h2>
               <Button onClick={handleCreateDealClick}>
                 <Plus className="w-4 h-4 mr-2" />
