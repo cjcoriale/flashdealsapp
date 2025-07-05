@@ -34,6 +34,7 @@ const dealFormSchema = insertDealSchema.extend({
   discountedPrice: z.number().min(0.01, "Price must be greater than 0"),
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
+  merchantId: z.number().min(1, "Please select a business location"),
 });
 
 export default function MerchantDashboard() {
@@ -42,6 +43,7 @@ export default function MerchantDashboard() {
   const queryClient = useQueryClient();
   const [showMerchantForm, setShowMerchantForm] = useState(false);
   const [showDealForm, setShowDealForm] = useState(false);
+  const [dealFormStep, setDealFormStep] = useState(1);
   const [selectedMerchant, setSelectedMerchant] = useState<number | null>(null);
   
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
@@ -105,6 +107,7 @@ export default function MerchantDashboard() {
       startTime: "",
       endTime: "",
       maxRedemptions: 100,
+      merchantId: 0,
     },
   });
 
@@ -202,7 +205,39 @@ export default function MerchantDashboard() {
       setShowMerchantForm(true);
       return;
     }
+    setDealFormStep(1);
     setShowDealForm(true);
+  };
+
+  const renderStepIndicator = () => {
+    const steps = ["Basic Info", "Pricing", "Timing"];
+    return (
+      <div className="flex items-center justify-center mb-6">
+        {steps.map((step, index) => (
+          <div key={index} className="flex items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              index + 1 <= dealFormStep 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-600'
+            }`}>
+              {index + 1}
+            </div>
+            <span className={`ml-2 text-sm ${
+              index + 1 <= dealFormStep 
+                ? 'text-blue-600 font-medium' 
+                : 'text-gray-500'
+            }`}>
+              {step}
+            </span>
+            {index < steps.length - 1 && (
+              <div className={`w-8 h-0.5 mx-4 ${
+                index + 1 < dealFormStep ? 'bg-blue-600' : 'bg-gray-200'
+              }`} />
+            )}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -610,116 +645,256 @@ export default function MerchantDashboard() {
         )}
 
         {/* Create Deal Modal */}
-        <Dialog open={showDealForm} onOpenChange={setShowDealForm}>
+        <Dialog open={showDealForm} onOpenChange={(open) => {
+          setShowDealForm(open);
+          if (!open) setDealFormStep(1);
+        }}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Deal</DialogTitle>
+              <DialogTitle>Create New Deal - Step {dealFormStep} of 3</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-6">
+              {renderStepIndicator()}
+              
+              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-6">
+                {/* Step 1: Basic Information */}
+                {dealFormStep === 1 && (
+                  <div className="space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold">Basic Information</h3>
+                      <p className="text-gray-600 text-sm">Tell us about your deal</p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="deal-title">Deal Title *</Label>
+                      <Input
+                        id="deal-title"
+                        {...dealForm.register("title")}
+                        placeholder="e.g., 50% Off Lunch Special"
+                        className="mt-1"
+                      />
+                      {dealForm.formState.errors.title && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {dealForm.formState.errors.title.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="deal-description">Description</Label>
+                      <Textarea
+                        id="deal-description"
+                        {...dealForm.register("description")}
+                        placeholder="Describe your deal in detail..."
+                        rows={3}
+                        className="mt-1"
+                      />
+                      {dealForm.formState.errors.description && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {dealForm.formState.errors.description.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="deal-category">Category *</Label>
+                      <Select onValueChange={(value) => dealForm.setValue("category", value)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="food">Food & Dining</SelectItem>
+                          <SelectItem value="shopping">Shopping</SelectItem>
+                          <SelectItem value="services">Services</SelectItem>
+                          <SelectItem value="entertainment">Entertainment</SelectItem>
+                          <SelectItem value="health">Health & Beauty</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {dealForm.formState.errors.category && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {dealForm.formState.errors.category.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="deal-merchant">Business Location *</Label>
+                      <Select onValueChange={(value) => dealForm.setValue("merchantId", parseInt(value))}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select business location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.isArray(merchants) && merchants.map((merchant: any) => (
+                            <SelectItem key={merchant.id} value={merchant.id.toString()}>
+                              {merchant.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {dealForm.formState.errors.merchantId && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {dealForm.formState.errors.merchantId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Pricing */}
+                {dealFormStep === 2 && (
+                  <div className="space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold">Pricing Details</h3>
+                      <p className="text-gray-600 text-sm">Set your original and discounted prices</p>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="deal-original-price">Original Price *</Label>
+                        <Input
+                          id="deal-original-price"
+                          type="number"
+                          step="0.01"
+                          {...dealForm.register("originalPrice", { valueAsNumber: true })}
+                          placeholder="0.00"
+                          className="mt-1"
+                        />
+                        {dealForm.formState.errors.originalPrice && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {dealForm.formState.errors.originalPrice.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="deal-discounted-price">Sale Price *</Label>
+                        <Input
+                          id="deal-discounted-price"
+                          type="number"
+                          step="0.01"
+                          {...dealForm.register("discountedPrice", { valueAsNumber: true })}
+                          placeholder="0.00"
+                          className="mt-1"
+                        />
+                        {dealForm.formState.errors.discountedPrice && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {dealForm.formState.errors.discountedPrice.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Discount Preview */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Discount Preview</h4>
+                      <div className="text-sm text-blue-800">
+                        <div>Original Price: ${dealForm.watch("originalPrice") || 0}</div>
+                        <div>Sale Price: ${dealForm.watch("discountedPrice") || 0}</div>
+                        <div className="font-semibold">
+                          Savings: ${Math.max(0, (dealForm.watch("originalPrice") || 0) - (dealForm.watch("discountedPrice") || 0))} 
+                          ({dealForm.watch("originalPrice") > 0 ? Math.round(((dealForm.watch("originalPrice") - dealForm.watch("discountedPrice")) / dealForm.watch("originalPrice")) * 100) : 0}% off)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Timing */}
+                {dealFormStep === 3 && (
+                  <div className="space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold">Deal Timing</h3>
+                      <p className="text-gray-600 text-sm">When will this deal be available?</p>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="deal-start-time">Start Time *</Label>
+                        <Input
+                          id="deal-start-time"
+                          type="datetime-local"
+                          {...dealForm.register("startTime")}
+                          className="mt-1"
+                        />
+                        {dealForm.formState.errors.startTime && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {dealForm.formState.errors.startTime.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="deal-end-time">End Time *</Label>
+                        <Input
+                          id="deal-end-time"
+                          type="datetime-local"
+                          {...dealForm.register("endTime")}
+                          className="mt-1"
+                        />
+                        {dealForm.formState.errors.endTime && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {dealForm.formState.errors.endTime.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Deal Summary */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2">Deal Summary</h4>
+                      <div className="text-sm text-green-800 space-y-1">
+                        <div><strong>Title:</strong> {dealForm.watch("title") || "Not set"}</div>
+                        <div><strong>Category:</strong> {dealForm.watch("category") || "Not set"}</div>
+                        <div><strong>Price:</strong> ${dealForm.watch("discountedPrice") || 0} (was ${dealForm.watch("originalPrice") || 0})</div>
+                        <div><strong>Business:</strong> {
+                          Array.isArray(merchants) && merchants.find((m: any) => m.id === dealForm.watch("merchantId"))?.name || "Not selected"
+                        }</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center pt-6 border-t">
                   <div>
-                    <Label htmlFor="deal-title">Deal Title</Label>
-                    <Input
-                      id="deal-title"
-                      {...dealForm.register("title")}
-                      placeholder="e.g., 50% Off Lunch Special"
-                    />
-                    {dealForm.formState.errors.title && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {dealForm.formState.errors.title.message}
-                      </p>
+                    {dealFormStep > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setDealFormStep(dealFormStep - 1)}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Previous
+                      </Button>
                     )}
                   </div>
-                  <div>
-                    <Label htmlFor="deal-category">Category</Label>
-                    <Select onValueChange={(value) => dealForm.setValue("category", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="food">Food & Dining</SelectItem>
-                        <SelectItem value="shopping">Shopping</SelectItem>
-                        <SelectItem value="services">Services</SelectItem>
-                        <SelectItem value="entertainment">Entertainment</SelectItem>
-                        <SelectItem value="health">Health & Beauty</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  
+                  <div className="flex space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowDealForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    
+                    {dealFormStep < 3 ? (
+                      <Button 
+                        type="button" 
+                        onClick={() => setDealFormStep(dealFormStep + 1)}
+                        className="min-w-[120px]"
+                      >
+                        Next Step
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="submit" 
+                        disabled={createDealMutation.isPending}
+                        className="min-w-[120px]"
+                      >
+                        {createDealMutation.isPending ? "Creating..." : "Create Deal"}
+                      </Button>
+                    )}
                   </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="deal-description">Description</Label>
-                  <Textarea
-                    id="deal-description"
-                    {...dealForm.register("description")}
-                    placeholder="Describe your deal offer"
-                  />
-                </div>
-                
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="originalPrice">Original Price</Label>
-                    <Input
-                      id="originalPrice"
-                      type="number"
-                      step="0.01"
-                      {...dealForm.register("originalPrice", { valueAsNumber: true })}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="discountedPrice">Sale Price</Label>
-                    <Input
-                      id="discountedPrice"
-                      type="number"
-                      step="0.01"
-                      {...dealForm.register("discountedPrice", { valueAsNumber: true })}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="maxRedemptions">Max Claims</Label>
-                    <Input
-                      id="maxRedemptions"
-                      type="number"
-                      {...dealForm.register("maxRedemptions", { valueAsNumber: true })}
-                      placeholder="100"
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="startTime">Start Date & Time</Label>
-                    <Input
-                      id="startTime"
-                      type="datetime-local"
-                      {...dealForm.register("startTime")}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="endTime">End Date & Time</Label>
-                    <Input
-                      id="endTime"
-                      type="datetime-local"
-                      {...dealForm.register("endTime")}
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <Button type="submit" disabled={createDealMutation.isPending}>
-                    {createDealMutation.isPending ? "Creating..." : "Create Deal"}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowDealForm(false)}
-                  >
-                    Cancel
-                  </Button>
                 </div>
               </form>
             </div>
