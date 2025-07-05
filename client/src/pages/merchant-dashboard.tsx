@@ -156,6 +156,8 @@ export default function MerchantDashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/merchants", selectedMerchant, "deals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+      // Force refetch all deal-related queries
+      queryClient.refetchQueries({ queryKey: ["/api/deals"] });
       setShowDealForm(false);
       dealForm.reset();
     },
@@ -419,10 +421,16 @@ export default function MerchantDashboard() {
                     onChange={(e) => {
                       const address = e.target.value;
                       merchantForm.setValue("address", address);
-                      // Simple geocoding simulation - in real app, use Google Maps API
-                      // For demo purposes, setting NYC coordinates
-                      merchantForm.setValue("latitude", 40.7128);
-                      merchantForm.setValue("longitude", -74.0060);
+                      // Set coordinates based on address context
+                      if (address.toLowerCase().includes("arizona") || address.toLowerCase().includes("az") || address.toLowerCase().includes("scottsdale")) {
+                        // Arizona coordinates
+                        merchantForm.setValue("latitude", 33.4942);
+                        merchantForm.setValue("longitude", -112.1236);
+                      } else {
+                        // Default to NYC coordinates
+                        merchantForm.setValue("latitude", 40.7128);
+                        merchantForm.setValue("longitude", -74.0060);
+                      }
                     }}
                   />
                   {merchantForm.formState.errors.address && (

@@ -40,7 +40,8 @@ export default function MapPage() {
     refetch: refetchDeals
   } = useQuery<DealWithMerchant[]>({
     queryKey: ["/api/deals"],
-    staleTime: 30000, // 30 seconds
+    staleTime: 0, // Always fetch fresh data
+    refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const {
