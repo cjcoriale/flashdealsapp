@@ -58,22 +58,13 @@ export default function CustomerHome() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="px-4 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Discover Local Deals
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                {location ? `Near ${location.lat.toFixed(2)}, ${location.lng.toFixed(2)}` : "Loading location..."}
-              </p>
-            </div>
-            <Button
-              onClick={() => window.location.href = "/map"}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              View Map
-            </Button>
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Discover Local Deals
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              {location ? `Near ${location.lat.toFixed(2)}, ${location.lng.toFixed(2)}` : "Loading location..."}
+            </p>
           </div>
 
           {/* Search and Filter */}
