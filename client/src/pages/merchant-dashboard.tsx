@@ -185,9 +185,6 @@ export default function MerchantDashboard() {
   };
 
   const onCreateDeal = (data: any) => {
-    console.log("Form submitted with data:", data);
-    console.log("Selected merchant:", selectedMerchant);
-    
     if (!selectedMerchant) {
       toast({
         title: "Error",
@@ -207,7 +204,6 @@ export default function MerchantDashboard() {
       endTime: new Date(data.endTime).toISOString(),
     };
     
-    console.log("Creating deal with data:", dealData);
     createDealMutation.mutate(dealData);
   };
 

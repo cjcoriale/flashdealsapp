@@ -204,7 +204,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to create deals for this merchant" });
       }
 
-      const dealData = insertDealSchema.parse({ ...req.body, merchantId });
+      // Convert string dates to Date objects
+      const bodyWithDates = {
+        ...req.body,
+        merchantId,
+        startTime: new Date(req.body.startTime),
+        endTime: new Date(req.body.endTime)
+      };
+      
+      const dealData = insertDealSchema.parse(bodyWithDates);
       console.log("Parsed deal data:", dealData);
       
       const deal = await storage.createDeal(dealData);
