@@ -200,14 +200,6 @@ export default function MerchantDashboard() {
         <div className="px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.location.href = "/"}
-                className="p-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
               <Avatar className="w-10 h-10">
                 <AvatarImage src={user?.profileImageUrl || undefined} />
                 <AvatarFallback>
