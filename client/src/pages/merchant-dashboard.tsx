@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -190,11 +191,6 @@ export default function MerchantDashboard() {
   };
 
   const handleCreateDealClick = () => {
-    console.log("Create Deal button clicked!");
-    console.log("Merchants:", merchants);
-    console.log("Selected merchant:", selectedMerchant);
-    console.log("Show deal form before:", showDealForm);
-    
     // Check if user has any businesses
     if (!Array.isArray(merchants) || merchants.length === 0) {
       // Force business creation first
@@ -207,7 +203,6 @@ export default function MerchantDashboard() {
       return;
     }
     setShowDealForm(true);
-    console.log("Show deal form after:", !showDealForm);
   };
 
   if (isLoading) {
@@ -614,18 +609,13 @@ export default function MerchantDashboard() {
           </div>
         )}
 
-
-
-        {/* Create Deal Form */}
-        {showDealForm && selectedMerchant && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Deal</CardTitle>
-              <CardDescription>
-                Add a new deal for your selected business
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        {/* Create Deal Modal */}
+        <Dialog open={showDealForm} onOpenChange={setShowDealForm}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Deal</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
               <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -732,9 +722,9 @@ export default function MerchantDashboard() {
                   </Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Bottom Navigation */}
