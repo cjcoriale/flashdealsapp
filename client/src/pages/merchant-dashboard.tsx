@@ -35,7 +35,7 @@ const dealFormSchema = insertDealSchema.extend({
 });
 
 export default function MerchantDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showMerchantForm, setShowMerchantForm] = useState(false);
@@ -172,6 +172,32 @@ export default function MerchantDashboard() {
       endTime: new Date(data.endTime).toISOString(),
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+          <div className="px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Merchant Dashboard
+                </h1>
+              </div>
+              <div className="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
