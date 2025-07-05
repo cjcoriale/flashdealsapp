@@ -99,12 +99,13 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
-- July 04, 2025 23:46: MERCHANT DETECTION FIXED - Authentication now returns fresh user data
-  * Fixed critical bug where auth endpoint served stale session data instead of current database records
-  * Profile page now correctly detects merchant role from database instead of cached session
-  * Authentication endpoint fetches fresh user data on each request to reflect role updates
-  * Merchant badge and portal access now properly available for users with merchant role
-  * Map centering on deal locations working correctly with key-based re-rendering
+- July 05, 2025 00:35: MERCHANT AUTHENTICATION FULLY RESOLVED - Complete system overhaul successful
+  * FIXED: Persistent database sessions replacing memory-based storage (sessions survive server restarts)
+  * FIXED: React Query cache invalidation when new auth tokens received (eliminates stale state)
+  * FIXED: Authentication endpoint fetches fresh user data ensuring role updates reflect immediately
+  * FIXED: Bottom navigation z-index increased to prevent overlay issues
+  * CONFIRMED: User successfully promoted to merchant status with working portal access
+  * RESULT: Profile page correctly displays merchant badge and dashboard interface
 
 - July 04, 2025 22:20: UI CLEANUP & NAVIGATION IMPROVEMENTS - Clean map interface with focused profile page
   * Removed hamburger menu button from map page for streamlined interface

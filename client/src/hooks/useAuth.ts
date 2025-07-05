@@ -8,7 +8,8 @@ export function useAuth() {
   const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    staleTime: 0, // Always check for fresh auth state
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache auth state during navigation
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in memory longer
   });
 
   // Listen for auth state changes (e.g., after login redirect)
