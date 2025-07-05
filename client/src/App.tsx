@@ -31,16 +31,11 @@ function Router() {
         </Route>
       ) : isAuthenticated ? (
         <>
-          {/* Role-based home page routing */}
-          {user?.role === 'merchant' ? (
-            <Route path="/" component={MerchantHome} />
-          ) : (
-            <Route path="/" component={CustomerHome} />
-          )}
+          {/* Home route now shows map for all users */}
+          <Route path="/" component={MapPage} />
           
-          {/* Common routes for all authenticated users */}
-          <Route path="/map" component={MapPage} />
-          <Route path="/deals" component={DealsPage} />
+          {/* Role-based home content available via deals route */}
+          <Route path="/deals" component={user?.role === 'merchant' ? MerchantHome : CustomerHome} />
           <Route path="/profile" component={ProfilePage} />
           
           {/* Customer-specific routes */}
@@ -59,6 +54,7 @@ function Router() {
           )}
           
           {/* Legacy routes for backward compatibility */}
+          <Route path="/map" component={MapPage} />
           <Route path="/home" component={user?.role === 'merchant' ? MerchantHome : CustomerHome} />
         </>
       ) : (

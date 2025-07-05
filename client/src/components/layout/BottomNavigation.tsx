@@ -17,12 +17,12 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
     if (user?.role === 'merchant') {
       return [
         { id: 'merchant', label: 'Create Deal', icon: Store, href: '/merchant-dashboard' },
-        { id: 'map', label: 'Map', icon: Map, href: '/map' },
+        { id: 'map', label: 'Map', icon: Map, href: '/' },
       ];
     } else {
       return [
-        { id: 'map', label: 'Map', icon: Map, href: '/map' },
-        { id: 'deals', label: 'Deals', icon: List, href: '/' },
+        { id: 'map', label: 'Map', icon: Map, href: '/' },
+        { id: 'deals', label: 'Deals', icon: List, href: '/deals' },
         { id: 'saved', label: 'Saved', icon: Heart, href: '/saved-deals' },
         { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
       ];
