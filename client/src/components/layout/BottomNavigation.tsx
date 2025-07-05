@@ -16,9 +16,8 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
   const getNavItems = () => {
     if (user?.role === 'merchant') {
       return [
-        { id: 'home', label: 'Dashboard', icon: Home, href: '/' },
-        { id: 'map', label: 'Map', icon: Map, href: '/map' },
         { id: 'merchant', label: 'Create Deal', icon: Store, href: '/merchant-dashboard' },
+        { id: 'map', label: 'Map', icon: Map, href: '/map' },
       ];
     } else {
       return [

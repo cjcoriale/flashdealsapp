@@ -103,7 +103,7 @@ Changelog:
   * FIXED: JavaScript ReferenceError for undefined user variable in merchant dashboard header
   * IMPLEMENTED: Profile image display next to dashboard title in merchant header
   * REMOVED: Profile tab from merchant bottom navigation (consolidated into dashboard)
-  * STREAMLINED: Merchant navigation now has clean 3-tab layout (Dashboard, Map, Create Deal)
+  * STREAMLINED: Merchant navigation now has clean 2-tab layout (Create Deal, Map)
   * RESULT: All merchant functionality consolidated into dashboard with integrated profile display
   * VERIFIED: Create Deal page loads without errors and shows user profile image in header
 
