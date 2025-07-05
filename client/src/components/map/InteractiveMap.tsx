@@ -56,7 +56,7 @@ export default function InteractiveMap({
         setZoom(6); // Very zoomed out to see all deals
       }
     }
-  }, [userLocation, deals, onLocationUpdate]);
+  }, [userLocation?.lat, userLocation?.lng, deals.length]); // Fixed dependencies to prevent infinite loop
 
   // Create user location icon
   const userIcon = new Icon({

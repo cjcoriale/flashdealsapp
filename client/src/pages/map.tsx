@@ -55,7 +55,30 @@ export default function MapPage() {
     staleTime: 10000,
   });
 
-  const displayedDeals = searchQuery ? searchResults : deals;
+  // Filter deals by location if user location is available
+  const getNearbyDeals = (allDeals: DealWithMerchant[], userLat?: number, userLng?: number, radiusKm = 50) => {
+    if (!userLat || !userLng) return allDeals;
+    
+    return allDeals.filter(deal => {
+      const dealLat = deal.merchant.latitude;
+      const dealLng = deal.merchant.longitude;
+      
+      // Calculate distance using Haversine formula
+      const R = 6371; // Earth's radius in km
+      const dLat = (dealLat - userLat) * Math.PI / 180;
+      const dLng = (dealLng - userLng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(userLat * Math.PI / 180) * Math.cos(dealLat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+      
+      return distance <= radiusKm;
+    });
+  };
+
+  const nearbyDeals = location ? getNearbyDeals(deals, location.lat, location.lng) : deals;
+  const displayedDeals = searchQuery ? searchResults : nearbyDeals;
 
   useEffect(() => {
     logAction("App Initialized", "FlashDeals app started");
@@ -158,13 +181,50 @@ export default function MapPage() {
       {/* Deal Cards */}
       <div className="absolute bottom-16 left-0 right-0 z-30 px-4">
         <div className="flex space-x-4 overflow-x-auto pb-4">
-          {displayedDeals.map((deal) => (
-            <DealCard
-              key={deal.id}
-              deal={deal}
-              onClick={() => handleDealClick(deal)}
-            />
-          ))}
+          {displayedDeals.length > 0 ? (
+            displayedDeals.map((deal) => (
+              <DealCard
+                key={deal.id}
+                deal={deal}
+                onClick={() => handleDealClick(deal)}
+              />
+            ))
+          ) : location ? (
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">No Deals Nearby</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                We don't have any flash deals within 50km of your location right now.
+              </p>
+              <p className="text-gray-500 text-xs">
+                Check back later or explore the map for deals in other areas!
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Enable Location</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Allow location access to see deals near you
+              </p>
+              <button 
+                onClick={handleLocationRequest}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
+              >
+                Enable Location
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
