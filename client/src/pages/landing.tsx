@@ -14,13 +14,26 @@ export default function Landing() {
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
             Discover amazing local deals on an interactive map. Find restaurants, shops, and services offering limited-time discounts in your area.
           </p>
-          <Button 
-            onClick={() => window.location.href = '/api/login'} 
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-          >
-            Get Started
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => window.location.href = '/api/login'} 
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+            >
+              Get Started
+            </Button>
+            <Button 
+              onClick={() => {
+                // Simple redirect to login endpoint - it will handle the token redirect
+                window.location.href = '/api/auth/login';
+              }}
+              size="lg"
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
+            >
+              Quick Demo Login
+            </Button>
+          </div>
         </div>
 
         {/* Features Grid */}
