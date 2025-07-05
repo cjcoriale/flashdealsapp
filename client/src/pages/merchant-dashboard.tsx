@@ -35,7 +35,7 @@ const dealFormSchema = insertDealSchema.extend({
 });
 
 export default function MerchantDashboard() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showMerchantForm, setShowMerchantForm] = useState(false);
