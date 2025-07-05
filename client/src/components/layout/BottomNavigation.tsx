@@ -1,6 +1,7 @@
-import { Map, List, Heart, BarChart3, User } from "lucide-react";
+import { Map, List, Heart, BarChart3, User, Store, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 interface BottomNavigationProps {
   currentPage: string;
@@ -9,14 +10,30 @@ interface BottomNavigationProps {
 
 export default function BottomNavigation({ currentPage, onAuditClick }: BottomNavigationProps) {
   const [location] = useLocation();
+  const { user } = useAuth();
   
-  const navItems = [
-    { id: 'map', label: 'Map', icon: Map, href: '/' },
-    { id: 'deals', label: 'Deals', icon: List, href: '/deals' },
-    { id: 'saved', label: 'Saved', icon: Heart, href: '/saved-deals' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics' },
-    { id: 'profile', label: 'Profile', icon: User, href: '/home' },
-  ];
+  // Role-based navigation items
+  const getNavItems = () => {
+    if (user?.role === 'merchant') {
+      return [
+        { id: 'home', label: 'Dashboard', icon: Home, href: '/' },
+        { id: 'map', label: 'Map', icon: Map, href: '/map' },
+        { id: 'merchant', label: 'Create Deal', icon: Store, href: '/merchant-dashboard' },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics' },
+        { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
+      ];
+    } else {
+      return [
+        { id: 'home', label: 'Home', icon: Home, href: '/' },
+        { id: 'map', label: 'Map', icon: Map, href: '/map' },
+        { id: 'deals', label: 'Deals', icon: List, href: '/deals' },
+        { id: 'saved', label: 'Saved', icon: Heart, href: '/saved-deals' },
+        { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
+      ];
+    }
+  };
+  
+  const navItems = getNavItems();
 
   const handleNavClick = (id: string) => {
     if (id === 'analytics') {

@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Clock, Tag, Star } from "lucide-react";
+import RoleSelectionModal from "@/components/RoleSelectionModal";
 
 export default function Landing() {
+  const [showRoleModal, setShowRoleModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-16">
@@ -16,25 +20,27 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => window.location.href = '/api/login'} 
+              onClick={() => setShowRoleModal(true)} 
               size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
             >
               Get Started
             </Button>
             <Button 
-              onClick={() => {
-                // Simple redirect to login endpoint - it will handle the token redirect
-                window.location.href = '/api/auth/login';
-              }}
+              onClick={() => setShowRoleModal(true)}
               size="lg"
               variant="outline"
               className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
             >
-              Quick Demo Login
+              Sign In
             </Button>
           </div>
         </div>
+
+        <RoleSelectionModal 
+          isOpen={showRoleModal} 
+          onClose={() => setShowRoleModal(false)} 
+        />
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">

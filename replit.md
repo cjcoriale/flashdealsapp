@@ -99,6 +99,15 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 05, 2025 01:03: ROLE-BASED AUTHENTICATION SYSTEM COMPLETE - Major architectural upgrade successful
+  * IMPLEMENTED: Role selection modal during login (customer vs merchant choice)
+  * FIXED: Authentication endpoints now properly handle role parameters (/api/auth/login?role=customer)
+  * CREATED: Separate home pages - CustomerHome for discovery, MerchantHome for business dashboard
+  * UPDATED: Router with conditional role-based navigation and page access control
+  * ENHANCED: Bottom navigation now shows different options based on user role
+  * RESULT: Complete role-based user experience with targeted interfaces for each user type
+  * VERIFIED: Authentication flow routes users to appropriate interfaces based on selected role
+
 - July 05, 2025 00:35: MERCHANT AUTHENTICATION FULLY RESOLVED - Complete system overhaul successful
   * FIXED: Persistent database sessions replacing memory-based storage (sessions survive server restarts)
   * FIXED: React Query cache invalidation when new auth tokens received (eliminates stale state)

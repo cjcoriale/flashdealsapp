@@ -10,6 +10,12 @@ export async function setupSimpleAuth(app: Express) {
     try {
       console.log('Auth login attempt');
       
+      // Get role from query parameter
+      const selectedRole = req.query.role as 'customer' | 'merchant';
+      if (!selectedRole || !['customer', 'merchant'].includes(selectedRole)) {
+        return res.status(400).json({ error: 'Invalid role parameter' });
+      }
+      
       let userData;
       
       // Try to get Replit user information from headers
@@ -19,23 +25,25 @@ export async function setupSimpleAuth(app: Express) {
       
       if (replitUser && replitUserId) {
         // Use real Replit user data
-        console.log('Using Replit user:', replitUser);
+        console.log('Using Replit user:', replitUser, 'with role:', selectedRole);
         userData = {
           id: replitUserId as string,
           email: replitUserEmail as string || `${replitUser}@replit.com`,
           firstName: replitUser as string,
           lastName: "User",
           profileImageUrl: `https://replit.com/@${replitUser}/avatar`,
+          role: selectedRole,
         };
       } else {
         // Fallback to demo user
-        console.log('Using demo user (Replit headers not available)');
+        console.log('Using demo user (Replit headers not available) with role:', selectedRole);
         userData = {
           id: "demo-user-123",
           email: "demo@flashdeals.app",
           firstName: "Demo",
           lastName: "User",
           profileImageUrl: "https://replit.com/public/images/mark.png",
+          role: selectedRole,
         };
       }
 

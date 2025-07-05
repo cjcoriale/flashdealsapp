@@ -12,12 +12,14 @@ import SavedDealsPage from "@/pages/saved-deals";
 import AnalyticsPage from "@/pages/analytics";
 import MerchantDashboard from "@/pages/merchant-dashboard";
 import ProfilePage from "@/pages/profile";
+import CustomerHome from "@/pages/customer-home";
+import MerchantHome from "@/pages/merchant-home";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   return (
     <Switch>
@@ -29,14 +31,35 @@ function Router() {
         </Route>
       ) : isAuthenticated ? (
         <>
-          <Route path="/" component={MapPage} />
-          <Route path="/home" component={Home} />
+          {/* Role-based home page routing */}
+          {user?.role === 'merchant' ? (
+            <Route path="/" component={MerchantHome} />
+          ) : (
+            <Route path="/" component={CustomerHome} />
+          )}
+          
+          {/* Common routes for all authenticated users */}
+          <Route path="/map" component={MapPage} />
           <Route path="/deals" component={DealsPage} />
-          <Route path="/saved-deals" component={SavedDealsPage} />
-          <Route path="/analytics" component={AnalyticsPage} />
-          <Route path="/merchant" component={MerchantDashboard} />
-          <Route path="/merchant-dashboard" component={MerchantDashboard} />
           <Route path="/profile" component={ProfilePage} />
+          
+          {/* Customer-specific routes */}
+          {user?.role === 'customer' && (
+            <>
+              <Route path="/saved-deals" component={SavedDealsPage} />
+            </>
+          )}
+          
+          {/* Merchant-specific routes */}
+          {user?.role === 'merchant' && (
+            <>
+              <Route path="/merchant-dashboard" component={MerchantDashboard} />
+              <Route path="/analytics" component={AnalyticsPage} />
+            </>
+          )}
+          
+          {/* Legacy routes for backward compatibility */}
+          <Route path="/home" component={user?.role === 'merchant' ? MerchantHome : CustomerHome} />
         </>
       ) : (
         <Route path="/" component={Landing} />
