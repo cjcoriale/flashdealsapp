@@ -3,17 +3,16 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudit } from "@/hooks/useAudit";
 import PageHeader from "@/components/layout/PageHeader";
-import MerchantPortal from "@/components/MerchantPortal";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star } from "lucide-react";
+import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function ProfilePage() {
-  const [showMerchantPortal, setShowMerchantPortal] = useState(false);
   const { user, isLoading: authLoading } = useAuth();
   const { logAction } = useAudit();
 
@@ -110,7 +109,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
-                    <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                    <span>Joined {user.createdAt ? new Date(user.createdAt.toString()).toLocaleDateString() : 'Unknown'}</span>
                   </div>
                 </div>
               </div>
@@ -164,17 +163,9 @@ export default function ProfilePage() {
                     Manage your restaurants and create flash deals
                   </CardDescription>
                 </div>
-                <Button 
-                  onClick={() => {
-                    setShowMerchantPortal(true);
-                    logAction("Merchant Portal Accessed", "User opened merchant portal from profile");
-                  }}
-                  className="bg-purple-600 hover:bg-purple-700 shadow-lg"
-                  size="lg"
-                >
-                  <Store className="w-4 h-4 mr-2" />
-                  Manage Business
-                </Button>
+                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
+                  Dashboard integrated below ↓
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -248,6 +239,57 @@ export default function ProfilePage() {
           </Card>
         )}
 
+        {/* Merchant Dashboard - Inline */}
+        {isMerchant && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Store className="w-5 h-5" />
+                  <span>My Businesses</span>
+                </CardTitle>
+                <CardDescription>
+                  Manage your restaurants and locations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Merchant Dashboard</h3>
+                  <p className="text-gray-600 mb-4">Your business management tools are here</p>
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Business
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="w-5 h-5" />
+                  <span>Active Deals</span>
+                </CardTitle>
+                <CardDescription>
+                  Monitor your flash deals performance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Zap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Deal management coming soon</h3>
+                  <p className="text-gray-600 mb-4">Create and manage your flash deals</p>
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Deal
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Account Settings */}
         <Card>
           <CardHeader>
@@ -292,13 +334,7 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      {/* Merchant Portal Modal */}
-      {showMerchantPortal && (
-        <MerchantPortal
-          isOpen={showMerchantPortal}
-          onClose={() => setShowMerchantPortal(false)}
-        />
-      )}
+
     </div>
   );
 }
