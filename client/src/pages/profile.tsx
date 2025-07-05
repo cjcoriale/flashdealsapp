@@ -101,43 +101,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* Profile Header */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-4">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={user.profileImageUrl || undefined} />
-                <AvatarFallback className="text-xl">
-                  {user.firstName?.[0]}{user.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <h1 className="text-2xl font-bold">
-                    {user.firstName} {user.lastName}
-                  </h1>
-                  {isMerchant && (
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
-                      <Crown className="w-3 h-3 mr-1" />
-                      Merchant
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-300 space-x-4">
-                  <div className="flex items-center space-x-1">
-                    <Mail className="w-4 h-4" />
-                    <span>{user.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>Joined {user.createdAt ? new Date(user.createdAt.toString()).toLocaleDateString() : 'Unknown'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* User Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
