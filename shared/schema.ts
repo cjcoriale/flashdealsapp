@@ -55,6 +55,7 @@ export const merchants = pgTable("merchants", {
   longitude: real("longitude").notNull(),
   address: text("address").notNull(),
   phone: text("phone"),
+  imageUrl: text("image_url"),
   rating: real("rating").default(0),
   reviewCount: integer("review_count").default(0),
   isActive: boolean("is_active").default(true),

@@ -24,6 +24,7 @@ const merchantFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
+  imageUrl: z.string().url("Please enter a valid URL").optional(),
 });
 
 const dealFormSchema = insertDealSchema.extend({
@@ -173,6 +174,21 @@ export default function MerchantDashboard() {
     });
   };
 
+  const handleCreateDealClick = () => {
+    // Check if user has any businesses
+    if (!Array.isArray(merchants) || merchants.length === 0) {
+      // Force business creation first
+      toast({
+        title: "Business Required",
+        description: "You need to create a business profile before creating deals",
+        variant: "destructive",
+      });
+      setShowMerchantForm(true);
+      return;
+    }
+    setShowDealForm(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
@@ -296,7 +312,7 @@ export default function MerchantDashboard() {
                   Create your first flash deal to start attracting customers
                 </p>
                 <Button
-                  onClick={() => setShowDealForm(true)}
+                  onClick={handleCreateDealClick}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -399,7 +415,7 @@ export default function MerchantDashboard() {
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Deals for Selected Business
               </h2>
-              <Button onClick={() => setShowDealForm(true)}>
+              <Button onClick={handleCreateDealClick}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Deal
               </Button>
@@ -413,7 +429,7 @@ export default function MerchantDashboard() {
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     Start attracting customers by creating your first deal
                   </p>
-                  <Button onClick={() => setShowDealForm(true)}>
+                  <Button onClick={handleCreateDealClick}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Deal
                   </Button>
@@ -458,9 +474,9 @@ export default function MerchantDashboard() {
         {showMerchantForm && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Add New Business</CardTitle>
+              <CardTitle>Business Profile Required</CardTitle>
               <CardDescription>
-                Create a business profile to start offering deals
+                You need to create a business profile before you can create deals. Add your business name, image, and address below.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -503,6 +519,15 @@ export default function MerchantDashboard() {
                     id="description"
                     {...merchantForm.register("description")}
                     placeholder="Describe your business"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="imageUrl">Business Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    {...merchantForm.register("imageUrl")}
+                    placeholder="https://example.com/business-photo.jpg"
                   />
                 </div>
                 
