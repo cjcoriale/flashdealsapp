@@ -233,11 +233,6 @@ export default function MapPage() {
       <div className={`${displayedDeals.length === 0 ? 'bottom-60' : 'bottom-44'} right-4 fixed z-40 transition-all duration-300`}>
         <FloatingButtons
           onLocationClick={handleLocationRequest}
-          onNotificationClick={() => {
-            refetchDeals();
-            handleNotification("Refreshing deals...");
-          }}
-          notificationCount={0}
         />
       </div>
 
