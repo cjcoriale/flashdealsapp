@@ -94,7 +94,10 @@ export async function setupSimpleAuth(app: Express) {
       await storage.deleteAuthSession(token);
     }
     res.clearCookie('auth_token');
-    res.redirect('/');
+    // Clear any session data and redirect to login
+    const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
+    const redirectUrl = `${protocol}://${req.get('host')}/?logout=success`;
+    res.redirect(redirectUrl);
   });
 
   // Debug endpoint to check available headers

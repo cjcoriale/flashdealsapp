@@ -77,11 +77,27 @@ function TokenHandler() {
     const handleToken = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
+      const logoutParam = urlParams.get('logout');
       
       console.log('TokenHandler: Full URL:', window.location.href);
       console.log('TokenHandler: URL params:', window.location.search);
       console.log('TokenHandler: Found token in URL:', token);
       console.log('TokenHandler: Current localStorage token:', localStorage.getItem('auth_token'));
+      
+      // Handle logout
+      if (logoutParam === 'success') {
+        console.log('TokenHandler: Logout detected, clearing auth token');
+        localStorage.removeItem('auth_token');
+        
+        // Clean up the URL by removing the logout parameter
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('logout');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        // Invalidate auth query to force refetch and show login state
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        return;
+      }
       
       if (token) {
         // Store the token in localStorage
