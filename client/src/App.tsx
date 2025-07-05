@@ -17,16 +17,30 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Switch>
-      <Route path="/" component={MapPage} />
-      <Route path="/home" component={Home} />
-      <Route path="/deals" component={DealsPage} />
-      <Route path="/saved-deals" component={SavedDealsPage} />
-      <Route path="/analytics" component={AnalyticsPage} />
-      <Route path="/merchant" component={MerchantDashboard} />
-      <Route path="/merchant-dashboard" component={MerchantDashboard} />
-      <Route path="/profile" component={ProfilePage} />
+      {isLoading ? (
+        <Route>
+          <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        </Route>
+      ) : isAuthenticated ? (
+        <>
+          <Route path="/" component={MapPage} />
+          <Route path="/home" component={Home} />
+          <Route path="/deals" component={DealsPage} />
+          <Route path="/saved-deals" component={SavedDealsPage} />
+          <Route path="/analytics" component={AnalyticsPage} />
+          <Route path="/merchant" component={MerchantDashboard} />
+          <Route path="/merchant-dashboard" component={MerchantDashboard} />
+          <Route path="/profile" component={ProfilePage} />
+        </>
+      ) : (
+        <Route path="/" component={Landing} />
+      )}
       <Route component={NotFound} />
     </Switch>
   );
