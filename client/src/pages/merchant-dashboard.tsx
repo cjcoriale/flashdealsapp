@@ -184,7 +184,7 @@ export default function MerchantDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <PageHeader
-        title="Create Deal"
+        title="Merchant Dashboard"
         showBackButton={true}
         backTo="/"
         actions={
@@ -196,25 +196,70 @@ export default function MerchantDashboard() {
       />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Store className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(merchants) ? merchants.length : 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Total Businesses</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {Array.isArray(merchantDeals) ? merchantDeals.reduce((total: number, deal: any) => total + (deal.currentRedemptions || 0), 0) : 0}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Total Redemptions</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Plus className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(merchantDeals) ? merchantDeals.length : 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Active Deals</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Quick Deal Creation */}
-        {merchants.length > 0 && (
-          <div className="mb-8">
-            <Card>
+        {/* Quick Actions */}
+        {Array.isArray(merchants) && merchants.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => setShowDealForm(true)}
+            >
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <Plus className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Ready to create a deal?</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    Add a flash deal for your customers to discover
+                  <Plus className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold mb-2">Create Deal</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    Add a new flash deal for customers
                   </p>
-                  <Button 
-                    onClick={() => setShowDealForm(true)}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New Deal
-                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => window.location.href = '/analytics'}
+            >
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <TrendingUp className="w-10 h-10 text-green-600 mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold mb-2">View Analytics</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    Track deal performance and insights
+                  </p>
                 </div>
               </CardContent>
             </Card>
