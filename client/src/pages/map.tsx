@@ -230,7 +230,7 @@ export default function MapPage() {
       </div>
 
       {/* Floating Action Buttons */}
-      <div className={`${displayedDeals.length === 0 ? 'bottom-60' : 'bottom-32'} right-4 fixed z-40 transition-all duration-300`}>
+      <div className={`${displayedDeals.length === 0 ? 'bottom-60' : 'bottom-44'} right-4 fixed z-40 transition-all duration-300`}>
         <FloatingButtons
           onLocationClick={handleLocationRequest}
           onNotificationClick={() => {
