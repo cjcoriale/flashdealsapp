@@ -277,9 +277,9 @@ export default function MerchantDashboard() {
         {showMerchantForm && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Business Profile Required</CardTitle>
+              <CardTitle>Create a Business to Get Started</CardTitle>
               <CardDescription>
-                You need to create a business profile before you can create deals. Add your business name, image, and address below.
+                Set up your business profile to start offering flash deals to local customers. Add your business name, image, and address below.
               </CardDescription>
             </CardHeader>
             <CardContent>

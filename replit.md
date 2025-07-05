@@ -99,6 +99,15 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 05, 2025 03:08: BUSINESS CREATION ENFORCEMENT COMPLETE - User-friendly automated flow
+  * FIXED: Business creation form now automatically appears when merchants have no businesses
+  * ENHANCED: Changed title from "Business Profile Required" to "Create a Business to Get Started"
+  * IMPROVED: Form appears prominently at top of Create Deal page with welcoming messaging
+  * STREAMLINED: Automatic detection prevents merchants from accessing deal creation without business
+  * ADDED: Image URL field to business creation form with proper validation
+  * UPDATED: Database schema includes imageUrl column for business photos
+  * RESULT: Seamless onboarding flow guides new merchants through business setup before deal creation
+
 - July 05, 2025 02:34: MERCHANT INTERFACE CONSOLIDATION COMPLETE - Clean streamlined dashboard
   * FIXED: JavaScript ReferenceError for undefined user variable in merchant dashboard header
   * IMPLEMENTED: Profile image display on left side of dashboard title with logout button on right
