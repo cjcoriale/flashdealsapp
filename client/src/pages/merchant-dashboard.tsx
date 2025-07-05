@@ -197,7 +197,7 @@ export default function MerchantDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
@@ -223,48 +223,39 @@ export default function MerchantDashboard() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <Plus className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(merchantDeals) ? merchantDeals.length : 0}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">Active Deals</div>
               </div>
             </CardContent>
           </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => setShowDealForm(true)}
+          >
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Plus className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">Create</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">New Deal</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => window.location.href = '/analytics'}
+          >
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <TrendingUp className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">Analytics</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">View Stats</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Quick Actions */}
-        {Array.isArray(merchants) && merchants.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => setShowDealForm(true)}
-            >
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <Plus className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold mb-2">Create Deal</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Add a new flash deal for customers
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => window.location.href = '/analytics'}
-            >
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <TrendingUp className="w-10 h-10 text-green-600 mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold mb-2">View Analytics</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Track deal performance and insights
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* Merchant Profiles */}
         <div className="mb-8">
