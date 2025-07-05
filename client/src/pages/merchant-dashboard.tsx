@@ -249,6 +249,31 @@ export default function MerchantDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {Array.isArray(allUserDeals) ? allUserDeals.reduce((total: number, deal: any) => total + (deal.currentRedemptions || 0), 0) : 0}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Total Redemptions</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(allUserDeals) ? allUserDeals.length : 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Active Deals</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Recent Deals */}
         <Card className="mb-8">
           <CardHeader>
@@ -365,41 +390,6 @@ export default function MerchantDashboard() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Store className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(merchants) ? merchants.length : 0}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">Total Businesses</div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Array.isArray(allUserDeals) ? allUserDeals.reduce((total: number, deal: any) => total + (deal.currentRedemptions || 0), 0) : 0}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">Total Redemptions</div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{Array.isArray(allUserDeals) ? allUserDeals.length : 0}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">Active Deals</div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Selected Merchant Deals */}
