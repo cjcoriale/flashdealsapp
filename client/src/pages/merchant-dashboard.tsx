@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import PageHeader from "@/components/layout/PageHeader";
 
 const merchantFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
@@ -182,30 +183,21 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Store className="w-8 h-8 text-blue-600" />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Merchant Dashboard
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Manage your business and create deals
-                </p>
-              </div>
-            </div>
-            <Button onClick={() => setShowMerchantForm(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Business
-            </Button>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Create Deal"
+        showBackButton={true}
+        backTo="/"
+      />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Add Business Button */}
+        <div className="mb-6 flex justify-end">
+          <Button onClick={() => setShowMerchantForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Business
+          </Button>
+        </div>
+
         {/* Quick Deal Creation */}
         {merchants.length > 0 && (
           <div className="mb-8">

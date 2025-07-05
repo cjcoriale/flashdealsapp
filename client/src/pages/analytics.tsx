@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, Users, Activity, AlertTriangle, TrendingUp, Clock, Star, Target } from "lucide-react";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import AuthModal from "@/components/auth/AuthModal";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function AnalyticsPage() {
   const { isAuthenticated } = useAuth();
@@ -83,22 +84,11 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center space-x-3">
-            <BarChart3 className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Analytics Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                Your usage statistics and platform insights
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Analytics"
+        showBackButton={true}
+        backTo="/"
+      />
 
       <div className="container mx-auto px-4 py-8">
         {!isAuthenticated && (

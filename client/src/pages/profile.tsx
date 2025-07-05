@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -72,7 +73,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <PageHeader
         title="My Profile"
         showBackButton={true}
@@ -334,7 +335,11 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        currentPage="profile" 
+        onAuditClick={() => {}} 
+      />
     </div>
   );
 }
