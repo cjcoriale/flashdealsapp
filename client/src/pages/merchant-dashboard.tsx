@@ -651,11 +651,11 @@ export default function MerchantDashboard() {
           setShowDealForm(open);
           if (!open) setDealFormStep(1);
         }}>
-          <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="px-4">
+          <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+            <DialogHeader className="px-4 pt-6 pb-2">
               <DialogTitle>Create New Deal - Step {dealFormStep} of 3</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 px-[4%] pb-4 max-w-[95%] mx-auto">
+            <div className="space-y-4 px-4 pb-6">
               {renderStepIndicator()}
               
               <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-6">
