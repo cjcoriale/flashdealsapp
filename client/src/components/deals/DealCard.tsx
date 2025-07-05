@@ -4,9 +4,10 @@ import { Clock, MapPin } from "lucide-react";
 interface DealCardProps {
   deal: DealWithMerchant;
   onClick: () => void;
+  userLocation?: { lat: number; lng: number };
 }
 
-export default function DealCard({ deal, onClick }: DealCardProps) {
+export default function DealCard({ deal, onClick, userLocation }: DealCardProps) {
   const getCategoryIcon = (category: string) => {
     const iconMap: { [key: string]: string } = {
       'food': '🍕',
@@ -47,8 +48,24 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
     return colorMap[category] || 'bg-gray-500';
   };
 
+  // Calculate distance using Haversine formula
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
   const timeLeft = Math.max(0, Math.floor((new Date(deal.endTime).getTime() - Date.now()) / (1000 * 60 * 60)));
-  const distance = "0.2"; // Mock distance - in real app, calculate based on user location
+  
+  const distance = userLocation 
+    ? calculateDistance(userLocation.lat, userLocation.lng, deal.merchant.latitude, deal.merchant.longitude).toFixed(1)
+    : "–";
 
   return (
     <div
