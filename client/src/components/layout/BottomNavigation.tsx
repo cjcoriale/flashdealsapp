@@ -21,9 +21,8 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
       ];
     } else {
       return [
-        { id: 'home', label: 'Home', icon: Home, href: '/' },
+        { id: 'deals', label: 'Deals', icon: List, href: '/' },
         { id: 'map', label: 'Map', icon: Map, href: '/map' },
-        { id: 'deals', label: 'Deals', icon: List, href: '/deals' },
         { id: 'saved', label: 'Saved', icon: Heart, href: '/saved-deals' },
         { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
       ];
