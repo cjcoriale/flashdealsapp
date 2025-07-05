@@ -79,8 +79,8 @@ export async function setupSimpleAuth(app: Express) {
       // Force HTTPS for Replit environment
       const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
       
-      // Redirect merchants to Create Deal page, customers to home
-      const redirectPath = selectedRole === 'merchant' ? '/merchant-dashboard' : '/';
+      // Redirect merchants to Map page, customers to home
+      const redirectPath = selectedRole === 'merchant' ? '/map' : '/';
       const redirectUrl = `${protocol}://${req.get('host')}${redirectPath}?auth=success&token=${encodeURIComponent(sessionToken)}`;
       console.log('Redirecting to:', redirectUrl);
       res.redirect(redirectUrl);
