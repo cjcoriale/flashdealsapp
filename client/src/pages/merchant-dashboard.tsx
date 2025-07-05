@@ -649,7 +649,7 @@ export default function MerchantDashboard() {
           setShowDealForm(open);
           if (!open) setDealFormStep(1);
         }}>
-          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-y-auto">
             <DialogHeader className="px-6">
               <DialogTitle>Create New Deal - Step {dealFormStep} of 3</DialogTitle>
             </DialogHeader>
