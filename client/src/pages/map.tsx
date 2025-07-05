@@ -60,18 +60,25 @@ export default function MapPage() {
   useEffect(() => {
     logAction("App Initialized", "FlashDeals app started");
     
-    // Request location automatically on page load
-    if (!location) {
-      requestLocation();
-    }
-    
     // Auto-refresh deals every 30 seconds
     const interval = setInterval(() => {
       refetchDeals();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [logAction, refetchDeals, location, requestLocation]);
+  }, [logAction, refetchDeals]);
+
+  // Separate effect for location request on initial load only
+  useEffect(() => {
+    // Request location once on mount, but only if we don't have it yet
+    const timeoutId = setTimeout(() => {
+      if (!location && !locationLoading) {
+        requestLocation();
+      }
+    }, 1000); // Small delay to let the page load
+
+    return () => clearTimeout(timeoutId);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
@@ -137,6 +144,7 @@ export default function MapPage() {
           onDealClick={handleDealClick}
           onLocationUpdate={(lat, lng) => {
             logAction("Location Updated", `Lat: ${lat}, Lng: ${lng}`);
+            handleNotification("Location updated! Map centered on your area.");
           }}
         />
       </div>

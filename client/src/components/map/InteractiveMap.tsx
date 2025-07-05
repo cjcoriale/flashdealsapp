@@ -43,17 +43,18 @@ export default function InteractiveMap({
   };
 
   useEffect(() => {
-    if (deals.length > 0) {
-      // Always center on deals first to show all available deals
+    if (userLocation) {
+      // If we have user location, center on user but zoomed out to see deals
+      setMapCenter([userLocation.lat, userLocation.lng]);
+      setZoom(8); // Zoomed out to see deals in wider area
+      onLocationUpdate(userLocation.lat, userLocation.lng);
+    } else if (deals.length > 0) {
+      // If no user location yet, center on deals
       const center = calculateDealsCenter(deals);
       if (center) {
         setMapCenter([center.lat, center.lng]);
         setZoom(6); // Very zoomed out to see all deals
       }
-    } else if (userLocation) {
-      setMapCenter([userLocation.lat, userLocation.lng]);
-      setZoom(11); // More zoomed out to see nearby deals
-      onLocationUpdate(userLocation.lat, userLocation.lng);
     }
   }, [userLocation, deals, onLocationUpdate]);
 
