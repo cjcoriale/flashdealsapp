@@ -88,20 +88,21 @@ export default function DealCard({ deal, onClick, userLocation }: DealCardProps)
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <div className={`${getCategoryColor(deal.category)} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-center whitespace-nowrap`}>
-            {deal.discountPercentage}% OFF
-          </div>
-        </div>
+
       </div>
       <div className="flex items-center justify-between">
         <div>
           <span className="text-lg font-bold text-gray-800 dark:text-white">${deal.discountedPrice}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">${deal.originalPrice}</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-          <Clock className="w-4 h-4 mr-1" />
-          <span>{timeLeft}h left</span>
+        <div className="flex items-center gap-2">
+          <div className={`${getCategoryColor(deal.category)} text-white px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
+            {deal.discountPercentage}%
+          </div>
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <Clock className="w-4 h-4 mr-1" />
+            <span>{timeLeft}h left</span>
+          </div>
         </div>
       </div>
     </div>

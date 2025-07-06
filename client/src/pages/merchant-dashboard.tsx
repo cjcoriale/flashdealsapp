@@ -607,20 +607,20 @@ export default function MerchantDashboard() {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold">{deal.title}</h4>
-                        <Badge variant="secondary">
-                          {deal.discountPercentage}% OFF
-                        </Badge>
-                      </div>
+                      <h4 className="font-semibold mb-2">{deal.title}</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                         ${deal.discountedPrice} (was ${deal.originalPrice})
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>{deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed</span>
-                        <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
-                          {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {deal.discountPercentage}%
+                          </Badge>
+                          <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
+                            {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
