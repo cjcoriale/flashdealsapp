@@ -51,9 +51,9 @@ export default function MerchantDashboard() {
     enabled: isAuthenticated,
   });
 
-  // Get deals for selected merchant
-  const { data: merchantDeals = [] } = useQuery({
-    queryKey: ["/api/merchants", selectedMerchant, "deals"],
+  // Get expired deals for selected merchant
+  const { data: expiredDeals = [] } = useQuery({
+    queryKey: ["/api/merchants", selectedMerchant, "deals", "expired"],
     enabled: selectedMerchant !== null,
   });
 
@@ -180,6 +180,53 @@ export default function MerchantDashboard() {
       });
     },
   });
+
+  const repostDealMutation = useMutation({
+    mutationFn: async ({ dealId, startTime, endTime }: { dealId: number, startTime: string, endTime: string }) => {
+      return await apiRequest("POST", `/api/deals/${dealId}/repost`, { startTime, endTime });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Deal reposted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/merchants", selectedMerchant, "deals", "expired"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to repost deal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRepostDeal = (deal: any) => {
+    // Set new times - start now, end in 24 hours
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    const startTime = now.toISOString();
+    const endTime = tomorrow.toISOString();
+    
+    repostDealMutation.mutate({ 
+      dealId: deal.id, 
+      startTime, 
+      endTime 
+    });
+  };
 
   const onCreateMerchant = (data: any) => {
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
@@ -612,12 +659,12 @@ export default function MerchantDashboard() {
 
 
 
-        {/* Selected Merchant Deals */}
+        {/* Previous Deals Section */}
         {!showMerchantForm && selectedMerchant && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Deals for Selected Location
+                Previous Deals
               </h2>
               <Button onClick={handleCreateDealClick}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -625,13 +672,13 @@ export default function MerchantDashboard() {
               </Button>
             </div>
             
-            {merchantDeals.length === 0 ? (
+            {expiredDeals.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No deals created</h3>
+                  <h3 className="text-lg font-semibold mb-2">No previous deals</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    Start attracting customers by creating your first deal
+                    Create your first deal and it will appear here when it expires
                   </p>
                   <Button onClick={handleCreateDealClick}>
                     <Plus className="w-4 h-4 mr-2" />
@@ -641,7 +688,7 @@ export default function MerchantDashboard() {
               </Card>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {merchantDeals.map((deal: any) => (
+                {expiredDeals.map((deal: any) => (
                   <Card key={deal.id}>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
@@ -658,14 +705,21 @@ export default function MerchantDashboard() {
                       <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                         {deal.description}
                       </p>
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-sm mb-4">
                         <span className="text-gray-500">
                           {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
                         </span>
-                        <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
-                          {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
+                        <Badge variant="destructive">
+                          Expired
                         </Badge>
                       </div>
+                      <Button 
+                        onClick={() => handleRepostDeal(deal)}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        size="sm"
+                      >
+                        Repost Deal
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}

@@ -191,6 +191,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/merchants/:id/deals/expired", auditMiddleware("View Expired Deals"), async (req: AuditRequest, res) => {
+    try {
+      const merchantId = parseInt(req.params.id);
+      const expiredDeals = await storage.getExpiredDealsByMerchant(merchantId);
+      res.json(expiredDeals);
+    } catch (error) {
+      auditError(req, error as Error, "View Expired Deals");
+      res.status(500).json({ message: "Failed to fetch expired deals" });
+    }
+  });
+
+  app.post("/api/deals/:id/repost", isAuthenticated, auditMiddleware("Repost Deal"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const dealId = parseInt(req.params.id);
+      
+      // Get the original deal
+      const originalDeal = await storage.getDeal(dealId);
+      if (!originalDeal) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+      
+      // Verify user owns this deal's merchant
+      const merchant = await storage.getMerchant(originalDeal.merchantId);
+      if (!merchant || merchant.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to repost this deal" });
+      }
+      
+      // Create new deal with updated times
+      const { startTime, endTime } = req.body;
+      const { id, createdAt, ...dealDataWithoutId } = originalDeal;
+      const newDealData = {
+        ...dealDataWithoutId,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        currentRedemptions: 0, // Reset redemptions
+        isActive: true
+      };
+      
+      const newDeal = await storage.createDeal(newDealData);
+      res.json(newDeal);
+    } catch (error) {
+      console.error("Deal repost error:", error);
+      auditError(req, error as Error, "Repost Deal");
+      res.status(500).json({ message: "Failed to repost deal" });
+    }
+  });
+
   app.post("/api/merchants/:id/deals", isAuthenticated, auditMiddleware("Create Deal"), async (req: AuditRequest, res) => {
     try {
       const userId = (req as any).user.claims.sub;

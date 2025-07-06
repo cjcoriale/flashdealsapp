@@ -25,7 +25,7 @@ import {
   type InsertAuthSession,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, lt, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -45,6 +45,7 @@ export interface IStorage {
   getAllActiveDeals(): Promise<DealWithMerchant[]>;
   getDealsByLocation(lat: number, lng: number, radius: number): Promise<DealWithMerchant[]>;
   getDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
+  getExpiredDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
   createDeal(deal: InsertDeal): Promise<Deal>;
   updateDeal(id: number, deal: Partial<InsertDeal>): Promise<Deal>;
   updateDealRedemptions(id: number): Promise<void>;
@@ -199,6 +200,25 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(merchants, eq(deals.merchantId, merchants.id))
       .where(eq(deals.merchantId, merchantId))
       .orderBy(desc(deals.createdAt))
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
+  }
+
+  async getExpiredDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(deals.merchantId, merchantId),
+          sql`${deals.endTime} < ${now}` // Deals that have ended
+        )
+      )
+      .orderBy(desc(deals.endTime))
       .then(rows => rows.map(row => ({
         ...row.deals,
         merchant: row.merchants
