@@ -53,7 +53,7 @@ export default function MerchantDashboard() {
 
   // Get expired deals for selected merchant
   const { data: expiredDeals = [] } = useQuery({
-    queryKey: ["/api/merchants", selectedMerchant, "deals", "expired"],
+    queryKey: [`/api/merchants/${selectedMerchant}/deals/expired`],
     enabled: selectedMerchant !== null,
   });
 
@@ -190,7 +190,7 @@ export default function MerchantDashboard() {
         title: "Success",
         description: "Deal reposted successfully!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/merchants", selectedMerchant, "deals", "expired"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals/expired`] });
       queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
     },
     onError: (error) => {

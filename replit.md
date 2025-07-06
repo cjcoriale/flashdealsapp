@@ -99,6 +99,14 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 06, 2025 07:24: PREVIOUS DEALS & REPOST FUNCTIONALITY COMPLETE - Real expired deals management
+  * REPLACED: "Deals Selected for Location" section with "Previous Deals" showing only authentic expired deals
+  * IMPLEMENTED: Database endpoint for expired deals filtered by merchant ownership
+  * ADDED: Repost functionality allowing merchants to reactivate expired deals with 24-hour duration
+  * ENHANCED: UI displays expired deals with "Repost Deal" buttons for easy deal management
+  * VERIFIED: Real data integration - no mock cards, only genuine previous deals from merchant's businesses
+  * TESTED: API endpoints working correctly - expired deals fetch and repost creation both functional
+  * RESULT: Merchants can now view their past deals and quickly repost them to market again
 - July 05, 2025 03:08: BUSINESS CREATION ENFORCEMENT COMPLETE - User-friendly automated flow
   * FIXED: Business creation form now automatically appears when merchants have no businesses
   * ENHANCED: Changed title from "Business Profile Required" to "Create a Business to Get Started"
