@@ -691,12 +691,7 @@ export default function MerchantDashboard() {
                 {expiredDeals.map((deal: any) => (
                   <Card key={deal.id}>
                     <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span className="truncate pr-2">{deal.title}</span>
-                        <Badge variant="secondary" className="shrink-0 text-xs">
-                          {deal.discountPercentage}%
-                        </Badge>
-                      </CardTitle>
+                      <CardTitle>{deal.title}</CardTitle>
                       <CardDescription>
                         ${deal.discountedPrice} (was ${deal.originalPrice})
                       </CardDescription>
@@ -709,9 +704,14 @@ export default function MerchantDashboard() {
                         <span className="text-gray-500">
                           {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
                         </span>
-                        <Badge variant="destructive">
-                          Expired
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {deal.discountPercentage}%
+                          </Badge>
+                          <Badge variant="destructive">
+                            Expired
+                          </Badge>
+                        </div>
                       </div>
                       <Button 
                         onClick={() => handleRepostDeal(deal)}
