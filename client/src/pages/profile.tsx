@@ -12,6 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut, MapPinIcon, Clock } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -126,19 +132,129 @@ export default function ProfilePage() {
                 {user.firstName} {user.lastName}
               </h1>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = '/api/auth/logout'}
-              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem>
+                  <User className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Bell className="w-4 h-4 mr-2" />
+                  Notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Privacy Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email Preferences
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => window.location.href = '/api/auth/logout'}
+                  className="text-red-600 dark:text-red-400"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
+        {/* My Deals Section for Customers */}
+        {!isMerchant && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <ShoppingBag className="w-5 h-5 text-green-600" />
+                <span>My Deals</span>
+              </CardTitle>
+              <CardDescription>
+                Deals you've claimed and saved
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Claimed Deals */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
+                    <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
+                    Claimed ({claimedDeals?.length || 0})
+                  </h3>
+                  {claimedDeals?.length > 0 ? (
+                    <div className="space-y-2">
+                      {claimedDeals.slice(0, 3).map((claimedDeal) => (
+                        <div
+                          key={claimedDeal.id}
+                          className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-green-900 dark:text-green-100">
+                                {claimedDeal.deal.title}
+                              </p>
+                              <p className="text-xs text-green-700 dark:text-green-300">
+                                {claimedDeal.deal.merchant.name}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              Claimed
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No claimed deals yet</p>
+                  )}
+                </div>
+
+                {/* Saved Deals */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
+                    <Heart className="w-4 h-4 mr-2 text-red-500" />
+                    Saved ({savedDeals?.length || 0})
+                  </h3>
+                  {savedDeals?.length > 0 ? (
+                    <div className="space-y-2">
+                      {savedDeals.slice(0, 3).map((savedDeal) => (
+                        <div
+                          key={savedDeal.id}
+                          className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-blue-900 dark:text-blue-100">
+                                {savedDeal.deal.title}
+                              </p>
+                              <p className="text-xs text-blue-700 dark:text-blue-300">
+                                {savedDeal.deal.merchant.name}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                              Saved
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No saved deals yet</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Available Deals Section for Customers */}
         {!isMerchant && (
           <Card>
