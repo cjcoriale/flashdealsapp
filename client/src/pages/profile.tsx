@@ -2,20 +2,25 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudit } from "@/hooks/useAudit";
+import { useToast } from "@/hooks/use-toast";
 import PageHeader from "@/components/layout/PageHeader";
+import DealCard from "@/components/deals/DealCard";
+import DealModal from "@/components/deals/DealModal";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut } from "lucide-react";
+import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut, MapPinIcon, Clock } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import { DealWithMerchant } from "@shared/schema";
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
   const { logAction } = useAudit();
+  const { toast } = useToast();
 
   // Check if user is a merchant
   const isMerchant = user?.role === 'merchant';
@@ -47,6 +52,39 @@ export default function ProfilePage() {
     queryKey: ["/api/my-merchants"],
     enabled: !!user && isMerchant,
   });
+
+  // Fetch all available deals for customer users
+  const { data: allDeals = [] } = useQuery({
+    queryKey: ["/api/deals"],
+    enabled: !!user && !isMerchant,
+  });
+
+  const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
+
+  const handleDealClick = (deal: DealWithMerchant) => {
+    setSelectedDeal(deal);
+    logAction("Deal Viewed", `Viewed deal: ${deal.title}`);
+  };
+
+  // Mutation to claim a deal
+  const claimDealMutation = useMutation({
+    mutationFn: async (dealId: number) => {
+      const response = await apiRequest(`/api/deals/${dealId}/claim`, "POST", {});
+      return response;
+    },
+    onSuccess: (_, dealId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/claimed-deals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+      logAction("Deal Claimed", `Claimed deal ID: ${dealId}`);
+    },
+  });
+
+  const handleDealClaim = () => {
+    if (selectedDeal) {
+      claimDealMutation.mutate(selectedDeal.id);
+      setSelectedDeal(null);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -101,6 +139,49 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
+        {/* Available Deals Section for Customers */}
+        {!isMerchant && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Zap className="w-5 h-5 text-blue-600" />
+                <span>Available Deals</span>
+              </CardTitle>
+              <CardDescription>
+                Discover flash deals near you
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Array.isArray(allDeals) && allDeals.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {allDeals.slice(0, 6).map((deal: DealWithMerchant) => (
+                    <DealCard
+                      key={deal.id}
+                      deal={deal}
+                      onClick={() => handleDealClick(deal)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No deals available</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Check back later for new flash deals in your area
+                  </p>
+                </div>
+              )}
+              {Array.isArray(allDeals) && allDeals.length > 6 && (
+                <div className="mt-4 text-center">
+                  <Button variant="outline" onClick={() => window.location.href = '/'}>
+                    View All Deals on Map
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Account Settings */}
         <Card>
           <CardHeader>
@@ -318,6 +399,15 @@ export default function ProfilePage() {
         )}
 
       </div>
+
+      {/* Deal Modal for Customers */}
+      {selectedDeal && (
+        <DealModal
+          deal={selectedDeal}
+          onClose={() => setSelectedDeal(null)}
+          onClaim={handleDealClaim}
+        />
+      )}
 
       {/* Bottom Navigation */}
       <BottomNavigation 
