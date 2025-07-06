@@ -680,7 +680,7 @@ export default function MerchantDashboard() {
             </div>
             
             {(() => {
-              // Combine expired deals and recent active deals (created in last 24 hours) 
+              // Get recent active deals (created in last 24 hours) - these are reposted deals
               const recentActiveDeals = Array.isArray(allMerchantDeals) 
                 ? allMerchantDeals.filter((deal: any) => {
                     const isActive = new Date(deal.endTime) > new Date();
@@ -689,7 +689,15 @@ export default function MerchantDashboard() {
                   })
                 : [];
               
-              const combinedDeals = [...(Array.isArray(expiredDeals) ? expiredDeals : []), ...recentActiveDeals];
+              // Get titles of reposted deals to filter out their expired counterparts
+              const repostedDealTitles = new Set(recentActiveDeals.map((deal: any) => deal.title));
+              
+              // Filter expired deals to exclude ones that have been reposted
+              const filteredExpiredDeals = Array.isArray(expiredDeals) 
+                ? expiredDeals.filter((deal: any) => !repostedDealTitles.has(deal.title))
+                : [];
+              
+              const combinedDeals = [...filteredExpiredDeals, ...recentActiveDeals];
               
               if (combinedDeals.length === 0) {
                 return (
