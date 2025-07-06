@@ -13,7 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
@@ -330,7 +336,9 @@ export default function MerchantDashboard() {
                   Create Deal
                 </h1>
               </div>
-              <div className="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <Button variant="outline" size="sm" disabled>
+                <Settings className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -385,14 +393,38 @@ export default function MerchantDashboard() {
                 ) : 'Create Deal'}
               </h1>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = '/api/auth/logout'}
-              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem>
+                  <User className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Bell className="w-4 h-4 mr-2" />
+                  Notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Privacy Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email Preferences
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => window.location.href = '/api/auth/logout'}
+                  className="text-red-600 dark:text-red-400"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

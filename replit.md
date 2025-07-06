@@ -99,6 +99,15 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 06, 2025 23:51: SETTINGS MENU STANDARDIZATION COMPLETE - Unified navigation experience
+  * ADDED: Settings dropdown menu to merchant dashboard replacing previous logout button  
+  * STANDARDIZED: Consistent settings menu across customer profile and merchant dashboard
+  * ENHANCED: Settings dropdown includes Edit Profile, Notifications, Privacy Settings, Email Preferences, and Logout
+  * IMPLEMENTED: "My Deals" section on customer profile showing claimed and saved deals summary
+  * IMPROVED: Two-column layout for claimed vs saved deals with proper badges and color coding
+  * REFINED: Clean merchant dashboard header with avatar, dynamic title, and settings dropdown
+  * RESULT: Unified user experience with consistent navigation patterns for both customer and merchant users
+
 - July 06, 2025 07:24: PREVIOUS DEALS & REPOST FUNCTIONALITY COMPLETE - Real expired deals management
   * REPLACED: "Deals Selected for Location" section with "Previous Deals" showing only authentic expired deals
   * IMPLEMENTED: Database endpoint for expired deals filtered by merchant ownership
