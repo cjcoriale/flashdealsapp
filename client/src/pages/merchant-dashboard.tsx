@@ -692,9 +692,9 @@ export default function MerchantDashboard() {
                   <Card key={deal.id}>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
-                        {deal.title}
-                        <Badge variant="secondary">
-                          {deal.discountPercentage}% OFF
+                        <span className="truncate pr-2">{deal.title}</span>
+                        <Badge variant="secondary" className="shrink-0 text-xs">
+                          {deal.discountPercentage}%
                         </Badge>
                       </CardTitle>
                       <CardDescription>
