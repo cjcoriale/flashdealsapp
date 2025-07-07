@@ -321,6 +321,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recurring deals management
+  app.post("/api/deals/process-recurring", isAuthenticated, auditMiddleware("Process Recurring Deals"), async (req: AuditRequest, res) => {
+    try {
+      const processedCount = await processRecurringDeals();
+      res.json({ message: `Processed ${processedCount} recurring deals`, count: processedCount });
+    } catch (error) {
+      auditError(req, error as Error, "Process Recurring Deals");
+      res.status(500).json({ message: "Failed to process recurring deals" });
+    }
+  });
+
+  // Background task to process recurring deals
+  const processRecurringDeals = async () => {
+    try {
+      const allDeals = await storage.getAllExpiredDeals();
+      let processedCount = 0;
+
+      for (const deal of allDeals) {
+        if (deal.isRecurring && deal.recurringInterval) {
+          const now = new Date();
+          const lastRecurred = deal.lastRecurredAt ? new Date(deal.lastRecurredAt) : new Date(deal.createdAt);
+          
+          let shouldRecur = false;
+          
+          switch (deal.recurringInterval) {
+            case 'daily':
+              shouldRecur = now.getTime() - lastRecurred.getTime() >= 24 * 60 * 60 * 1000;
+              break;
+            case 'weekly':
+              shouldRecur = now.getTime() - lastRecurred.getTime() >= 7 * 24 * 60 * 60 * 1000;
+              break;
+            case 'monthly':
+              shouldRecur = now.getTime() - lastRecurred.getTime() >= 30 * 24 * 60 * 60 * 1000;
+              break;
+          }
+          
+          if (shouldRecur) {
+            // Create a new deal with the same properties but new timing
+            const newDeal = {
+              merchantId: deal.merchantId,
+              title: deal.title,
+              description: deal.description,
+              originalPrice: deal.originalPrice,
+              discountedPrice: deal.discountedPrice,
+              discountPercentage: deal.discountPercentage,
+              category: deal.category,
+              startTime: now,
+              endTime: new Date(now.getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+              maxRedemptions: deal.maxRedemptions,
+              currentRedemptions: 0,
+              isActive: true,
+              isRecurring: true,
+              recurringInterval: deal.recurringInterval,
+            };
+            
+            await storage.createDeal(newDeal);
+            
+            // Update the original deal's lastRecurredAt timestamp
+            await storage.updateDeal(deal.id, { lastRecurredAt: now });
+            
+            processedCount++;
+          }
+        }
+      }
+      
+      return processedCount;
+    } catch (error) {
+      console.error("Error processing recurring deals:", error);
+      return 0;
+    }
+  };
+
+  // Start recurring deals processor (every hour)
+  setInterval(async () => {
+    try {
+      const processedCount = await processRecurringDeals();
+      if (processedCount > 0) {
+        console.log(`Processed ${processedCount} recurring deals`);
+      }
+    } catch (error) {
+      console.error("Error in recurring deals processor:", error);
+    }
+  }, 60 * 60 * 1000); // Run every hour
+
   const httpServer = createServer(app);
   return httpServer;
 }

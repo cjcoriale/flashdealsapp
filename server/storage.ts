@@ -46,6 +46,7 @@ export interface IStorage {
   getDealsByLocation(lat: number, lng: number, radius: number): Promise<DealWithMerchant[]>;
   getDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
   getExpiredDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
+  getAllExpiredDeals(): Promise<Deal[]>;
   createDeal(deal: InsertDeal): Promise<Deal>;
   updateDeal(id: number, deal: Partial<InsertDeal>): Promise<Deal>;
   updateDealRedemptions(id: number): Promise<void>;
@@ -223,6 +224,15 @@ export class DatabaseStorage implements IStorage {
         ...row.deals,
         merchant: row.merchants
       })));
+  }
+
+  async getAllExpiredDeals(): Promise<Deal[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(deals)
+      .where(sql`${deals.endTime} < ${now}`)
+      .orderBy(desc(deals.endTime));
   }
 
   async createDeal(dealData: InsertDeal): Promise<Deal> {

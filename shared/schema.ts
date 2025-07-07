@@ -76,6 +76,9 @@ export const deals = pgTable("deals", {
   maxRedemptions: integer("max_redemptions").default(100),
   currentRedemptions: integer("current_redemptions").default(0),
   isActive: boolean("is_active").default(true),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringInterval: text("recurring_interval"), // daily, weekly, monthly
+  lastRecurredAt: timestamp("last_recurred_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -157,7 +160,7 @@ export const dealClaimsRelations = relations(dealClaims, ({ one }) => ({
 // Schema types
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertMerchantSchema = createInsertSchema(merchants).omit({ id: true, createdAt: true });
-export const insertDealSchema = createInsertSchema(deals).omit({ id: true, createdAt: true });
+export const insertDealSchema = createInsertSchema(deals).omit({ id: true, createdAt: true, lastRecurredAt: true });
 export const insertSavedDealSchema = createInsertSchema(savedDeals).omit({ id: true, savedAt: true });
 export const insertDealClaimSchema = createInsertSchema(dealClaims).omit({ id: true, claimedAt: true });
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, timestamp: true });

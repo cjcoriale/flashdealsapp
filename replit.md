@@ -99,6 +99,16 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 07, 2025 00:35: RECURRING DEALS SYSTEM COMPLETE - Automated deal reposting functionality
+  * ADDED: Recurring deals option in deal creation form with daily, weekly, monthly intervals
+  * IMPLEMENTED: Background processor that automatically reposts expired recurring deals
+  * ENHANCED: Database schema with isRecurring, recurringInterval, and lastRecurredAt fields
+  * CREATED: Visual indicators showing recurring status with clock icon badges
+  * DEVELOPED: API endpoint for manual recurring deal processing
+  * AUTOMATED: Hourly background job to check and repost recurring deals
+  * VALIDATED: Form validation ensures recurring interval is selected when enabled
+  * RESULT: Merchants can now set deals to automatically repost, reducing manual work
+
 - July 07, 2025 00:03: DEAL MANAGEMENT IMPROVEMENTS COMPLETE - Enhanced merchant experience  
   * RENAMED: "Previous Deals" section to "My Deals" for better user understanding
   * IMPLEMENTED: Chronological sorting with most recent deals displayed at the top

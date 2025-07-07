@@ -41,6 +41,16 @@ const dealFormSchema = insertDealSchema.extend({
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
   merchantId: z.number().min(1, "Please select a business location"),
+  isRecurring: z.boolean().optional(),
+  recurringInterval: z.string().optional(),
+}).refine((data) => {
+  if (data.isRecurring && !data.recurringInterval) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Recurring interval is required when deal is set to recurring",
+  path: ["recurringInterval"],
 });
 
 export default function MerchantDashboard() {
@@ -121,6 +131,8 @@ export default function MerchantDashboard() {
       endTime: "",
       maxRedemptions: 100,
       merchantId: 0,
+      isRecurring: false,
+      recurringInterval: "",
     },
   });
 
@@ -656,6 +668,12 @@ export default function MerchantDashboard() {
                           <Badge variant="secondary" className="text-xs">
                             {deal.discountPercentage}%
                           </Badge>
+                          {deal.isRecurring && (
+                            <Badge variant="outline" className="text-xs">
+                              <Clock className="w-3 h-3 mr-1" />
+                              Recurring
+                            </Badge>
+                          )}
                           <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
                             {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
                           </Badge>
@@ -774,6 +792,12 @@ export default function MerchantDashboard() {
                               <Badge variant="secondary" className="text-xs">
                                 {deal.discountPercentage}%
                               </Badge>
+                              {deal.isRecurring && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Recurring
+                                </Badge>
+                              )}
                               <Badge variant={isActive ? "default" : "destructive"}>
                                 {isActive ? "Active" : "Expired"}
                               </Badge>
@@ -1001,6 +1025,53 @@ export default function MerchantDashboard() {
                       </div>
                     </div>
                     
+                    {/* Recurring Options */}
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <input
+                          type="checkbox"
+                          id="recurring-checkbox"
+                          checked={dealForm.watch("isRecurring") || false}
+                          onChange={(e) => {
+                            dealForm.setValue("isRecurring", e.target.checked);
+                            if (!e.target.checked) {
+                              dealForm.setValue("recurringInterval", "");
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Label htmlFor="recurring-checkbox" className="text-sm font-medium">
+                          Make this a recurring deal
+                        </Label>
+                      </div>
+                      
+                      {dealForm.watch("isRecurring") && (
+                        <div className="ml-6 space-y-2">
+                          <p className="text-sm text-gray-600">
+                            This deal will automatically repost when it expires
+                          </p>
+                          <div>
+                            <Label htmlFor="recurring-interval" className="text-sm">Repeat every:</Label>
+                            <Select onValueChange={(value) => dealForm.setValue("recurringInterval", value)}>
+                              <SelectTrigger className="mt-1 w-48">
+                                <SelectValue placeholder="Select interval" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {dealForm.formState.errors.recurringInterval && (
+                              <p className="text-sm text-red-600 mt-1">
+                                {dealForm.formState.errors.recurringInterval.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
                     {/* Deal Summary */}
                     <div className="bg-green-50 p-4 rounded-lg">
                       <h4 className="font-medium text-green-900 mb-2">Deal Summary</h4>
@@ -1011,6 +1082,9 @@ export default function MerchantDashboard() {
                         <div><strong>Business:</strong> {
                           Array.isArray(merchants) && merchants.find((m: any) => m.id === dealForm.watch("merchantId"))?.name || "Not selected"
                         }</div>
+                        {dealForm.watch("isRecurring") && (
+                          <div><strong>Recurring:</strong> {dealForm.watch("recurringInterval") || "Not set"}</div>
+                        )}
                       </div>
                     </div>
                   </div>
