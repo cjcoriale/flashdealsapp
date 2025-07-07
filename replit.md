@@ -99,6 +99,13 @@ FlashDeals is a location-based deals discovery application that displays local f
 
 ```
 Changelog:
+- July 07, 2025 00:03: DEAL MANAGEMENT IMPROVEMENTS COMPLETE - Enhanced merchant experience  
+  * RENAMED: "Previous Deals" section to "My Deals" for better user understanding
+  * IMPLEMENTED: Chronological sorting with most recent deals displayed at the top
+  * OPTIMIZED: Deal sorting logic using creation date in descending order
+  * ENHANCED: Merchant can now easily find their latest deals without scrolling
+  * RESULT: Improved merchant workflow with intuitive deal organization and naming
+
 - July 06, 2025 23:51: SETTINGS MENU STANDARDIZATION COMPLETE - Unified navigation experience
   * ADDED: Settings dropdown menu to merchant dashboard replacing previous logout button  
   * STANDARDIZED: Consistent settings menu across customer profile and merchant dashboard

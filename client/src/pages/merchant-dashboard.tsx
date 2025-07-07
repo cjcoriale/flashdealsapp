@@ -698,12 +698,12 @@ export default function MerchantDashboard() {
 
 
 
-        {/* Previous Deals Section */}
+        {/* My Deals Section */}
         {!showMerchantForm && selectedMerchant && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Previous Deals
+                My Deals
               </h2>
               <Button onClick={handleCreateDealClick}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -729,7 +729,8 @@ export default function MerchantDashboard() {
                 ? expiredDeals.filter((deal: any) => !repostedDealTitles.has(deal.title))
                 : [];
               
-              const combinedDeals = [...filteredExpiredDeals, ...recentActiveDeals];
+              const combinedDeals = [...filteredExpiredDeals, ...recentActiveDeals]
+                .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
               
               if (combinedDeals.length === 0) {
                 return (
