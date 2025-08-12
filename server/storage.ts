@@ -163,9 +163,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteMerchant(id: number): Promise<void> {
-    await db
-      .delete(merchants)
-      .where(eq(merchants.id, id));
+    await db.delete(merchants).where(eq(merchants.id, id));
   }
 
   // Deal operations

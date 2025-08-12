@@ -71,6 +71,8 @@ export default function MerchantDashboard() {
   const [isSearching, setIsSearching] = useState(false);
   const [editingMerchant, setEditingMerchant] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [currentlyManaging, setCurrentlyManaging] = useState<any>(null);
   
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
@@ -114,8 +116,17 @@ export default function MerchantDashboard() {
   useEffect(() => {
     if (!merchantsLoading && Array.isArray(merchants) && merchants.length > 0 && !selectedMerchant) {
       setSelectedMerchant(merchants[0].id);
+      setCurrentlyManaging(merchants[0]);
     }
   }, [merchantsLoading, merchants, selectedMerchant]);
+
+  // Update currently managing when selected merchant changes
+  useEffect(() => {
+    if (selectedMerchant && Array.isArray(merchants)) {
+      const merchant = merchants.find((m: any) => m.id === selectedMerchant);
+      setCurrentlyManaging(merchant);
+    }
+  }, [selectedMerchant, merchants]);
 
   const merchantForm = useForm({
     resolver: zodResolver(merchantFormSchema),
@@ -732,6 +743,115 @@ export default function MerchantDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Currently Managing Box */}
+        {currentlyManaging && (
+          <Card className="mb-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden">
+                    {currentlyManaging.imageUrl ? (
+                      <img 
+                        src={currentlyManaging.imageUrl} 
+                        alt={currentlyManaging.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+                        <Store className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Currently Managing</p>
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">{currentlyManaging.name}</h3>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">{currentlyManaging.address}</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
+                  Active
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Location Search */}
+        {Array.isArray(merchants) && merchants.length > 1 && (
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <Label htmlFor="location-search" className="text-sm font-medium mb-2 block">
+                Switch Location
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="location-search"
+                  value={locationSearchQuery}
+                  onChange={(e) => setLocationSearchQuery(e.target.value)}
+                  placeholder="Search your locations..."
+                  className="flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setLocationSearchQuery("")}
+                >
+                  Clear
+                </Button>
+              </div>
+              
+              {/* Filtered Locations */}
+              {locationSearchQuery && (
+                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                  {merchants
+                    .filter((merchant: any) => 
+                      merchant.name.toLowerCase().includes(locationSearchQuery.toLowerCase()) ||
+                      merchant.address.toLowerCase().includes(locationSearchQuery.toLowerCase())
+                    )
+                    .map((merchant: any) => (
+                      <div
+                        key={merchant.id}
+                        className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                          selectedMerchant === merchant.id 
+                            ? 'border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800' 
+                            : 'border-gray-200 dark:border-gray-700'
+                        }`}
+                        onClick={() => {
+                          setSelectedMerchant(merchant.id);
+                          setCurrentlyManaging(merchant);
+                          setLocationSearchQuery("");
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded overflow-hidden">
+                            {merchant.imageUrl ? (
+                              <img 
+                                src={merchant.imageUrl} 
+                                alt={merchant.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <Store className="w-4 h-4 text-gray-500" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{merchant.name}</p>
+                            <p className="text-xs text-gray-500">{merchant.address}</p>
+                          </div>
+                          {selectedMerchant === merchant.id && (
+                            <Badge variant="secondary" className="text-xs">Current</Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Create Merchant Form */}
         {showMerchantForm && (
           <Card className="mb-8">
