@@ -516,42 +516,63 @@ async function searchGooglePlaces(query: string): Promise<any[]> {
       return [];
     }
 
-    // Use Google Places Text Search API
-    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + " restaurant")}&key=${apiKey}`;
+    // Use Google Places API (New) - Text Search
+    const searchUrl = `https://places.googleapis.com/v1/places:searchText`;
     
-    console.log("Searching Google Places for:", query);
-    const response = await fetch(searchUrl);
+    console.log("Searching Google Places (New API) for:", query);
+    
+    const requestBody = {
+      textQuery: query + " restaurant",
+      maxResultCount: 10,
+      includedType: "restaurant"
+    };
+
+    const response = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos,places.nationalPhoneNumber,places.priceLevel,places.id'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
     const data = await response.json();
 
-    if (data.status !== 'OK') {
-      console.error("Google Places API error:", data.status, data.error_message);
+    if (!response.ok) {
+      console.error("Google Places API error:", response.status, data);
       return [];
     }
 
-    const results = data.results.slice(0, 10).map((place: any) => {
+    if (!data.places || data.places.length === 0) {
+      console.log("No places found for query:", query);
+      return [];
+    }
+
+    const results = data.places.map((place: any) => {
       // Get photo URL if available
       let photo = null;
       if (place.photos && place.photos.length > 0) {
-        const photoReference = place.photos[0].photo_reference;
-        photo = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${apiKey}`;
+        const photoName = place.photos[0].name;
+        photo = `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=400&key=${apiKey}`;
       }
 
       return {
-        name: place.name,
-        address: place.formatted_address,
+        name: place.displayName?.text || "Unknown",
+        address: place.formattedAddress || "Address not available",
         category: "restaurant",
-        phone: place.formatted_phone_number || null,
+        phone: place.nationalPhoneNumber || null,
         rating: place.rating || null,
         photo: photo,
-        latitude: place.geometry.location.lat,
-        longitude: place.geometry.location.lng,
-        place_id: place.place_id,
-        price_level: place.price_level || null,
-        user_ratings_total: place.user_ratings_total || null
+        latitude: place.location?.latitude || null,
+        longitude: place.location?.longitude || null,
+        place_id: place.id,
+        price_level: place.priceLevel || null,
+        user_ratings_total: place.userRatingCount || null
       };
     });
 
-    console.log(`Found ${results.length} places from Google`);
+    console.log(`Found ${results.length} places from Google Places (New API)`);
     return results;
 
   } catch (error) {
