@@ -241,23 +241,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUserId = (req as any).user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
       
+      console.log("Search request debug:", {
+        userId: currentUserId,
+        userRole: currentUser?.role,
+        query: req.body.query
+      });
+      
       if (!currentUser || currentUser.role !== 'super_merchant') {
+        console.log("Access denied - role check failed");
         return res.status(403).json({ message: "Super merchant access required" });
       }
 
       const { query } = req.body;
       if (!query || typeof query !== 'string') {
+        console.log("Invalid query:", query);
         return res.status(400).json({ message: "Search query is required" });
       }
 
       // Simulate business search results (in production, integrate with Google Places API or similar)
       const mockResults = generateMockBusinessResults(query);
       
-      res.json({ 
+      console.log("Generated mock results:", mockResults.length);
+      
+      const response = { 
         query,
         results: mockResults,
         count: mockResults.length
-      });
+      };
+      
+      console.log("Sending response:", response);
+      res.json(response);
     } catch (error) {
       auditError(req, error as Error, "Search Businesses");
       res.status(500).json({ message: "Failed to search businesses" });
@@ -490,35 +503,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in recurring deals processor:", error);
     }
   }, 60 * 60 * 1000); // Run every hour
-
-  // Search businesses endpoint for super merchants
-  app.post("/api/super-merchant/search-businesses", isAuthenticated, auditMiddleware("Search Businesses"), async (req: AuditRequest, res) => {
-    try {
-      const currentUserId = (req as any).user.claims.sub;
-      const currentUser = await storage.getUser(currentUserId);
-      
-      if (!currentUser || currentUser.role !== 'super_merchant') {
-        return res.status(403).json({ message: "Super merchant access required" });
-      }
-
-      const { query } = req.body;
-      if (!query || typeof query !== 'string') {
-        return res.status(400).json({ message: "Search query is required" });
-      }
-
-      // Simulate business search results (in production, integrate with Google Places API or similar)
-      const mockResults = generateMockBusinessResults(query);
-      
-      res.json({ 
-        query,
-        results: mockResults,
-        count: mockResults.length
-      });
-    } catch (error) {
-      auditError(req, error as Error, "Search Businesses");
-      res.status(500).json({ message: "Failed to search businesses" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
