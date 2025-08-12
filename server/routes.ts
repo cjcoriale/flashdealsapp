@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Deal creation error:", error);
       auditError(req, error as Error, "Create Deal");
-      res.status(500).json({ message: "Failed to create deal", error: error.message });
+      res.status(500).json({ message: "Failed to create deal", error: (error as Error).message });
     }
   });
 
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const deal of allDeals) {
         if (deal.isRecurring && deal.recurringInterval) {
           const now = new Date();
-          const lastRecurred = deal.lastRecurredAt ? new Date(deal.lastRecurredAt) : new Date(deal.createdAt);
+          const lastRecurred = deal.lastRecurredAt ? new Date(deal.lastRecurredAt) : new Date(deal.createdAt!);
           
           let shouldRecur = false;
           
@@ -379,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.createDeal(newDeal);
             
             // Update the original deal's lastRecurredAt timestamp
-            await storage.updateDeal(deal.id, { lastRecurredAt: now });
+            await storage.updateDeal(deal.id, { lastRecurredAt: now } as any);
             
             processedCount++;
           }

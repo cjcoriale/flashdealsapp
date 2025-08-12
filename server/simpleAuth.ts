@@ -1,11 +1,134 @@
 import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 
 // Simple authentication system for development
 // Note: Now using database for persistent sessions
 
+// Validation schemas
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  role: z.enum(['customer', 'merchant'])
+});
+
+const signinSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1)
+});
+
 export async function setupSimpleAuth(app: Express) {
-  // Check if running on Replit and get user info
+  // Signup endpoint for new users
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const validatedData = signupSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+
+      // Create user with unique ID
+      const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const userData = {
+        id: userId,
+        email: validatedData.email,
+        password: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        profileImageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(validatedData.firstName + ' ' + validatedData.lastName)}&background=random`,
+        role: validatedData.role,
+      };
+
+      const user = await storage.upsertUser(userData);
+      console.log('New user created:', user.id);
+
+      // Create session
+      const sessionToken = `session-${Date.now()}-${Math.random()}`;
+      const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+      
+      await storage.createAuthSession({
+        token: sessionToken,
+        userId: user.id,
+        expiresAt: expiresAt
+      });
+
+      res.json({ 
+        message: "Account created successfully",
+        token: sessionToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid input data" });
+      }
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  // Signin endpoint for existing users
+  app.post("/api/auth/signin", async (req, res) => {
+    try {
+      const validatedData = signinSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Check password
+      const isValidPassword = await bcrypt.compare(validatedData.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Create session
+      const sessionToken = `session-${Date.now()}-${Math.random()}`;
+      const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+      
+      await storage.createAuthSession({
+        token: sessionToken,
+        userId: user.id,
+        expiresAt: expiresAt
+      });
+
+      console.log('User signed in:', user.id);
+      res.json({ 
+        message: "Signed in successfully",
+        token: sessionToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      console.error('Signin error:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid input data" });
+      }
+      res.status(500).json({ message: "Sign in failed" });
+    }
+  });
+
+  // Keep existing demo login for development/testing
   app.get("/api/auth/login", async (req, res) => {
     try {
       console.log('Auth login attempt');

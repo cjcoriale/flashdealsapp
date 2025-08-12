@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Clock, Tag, Star } from "lucide-react";
-import RoleSelectionModal from "@/components/RoleSelectionModal";
+import SignupModal from "@/components/SignupModal";
 
 export default function Landing() {
-  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -20,14 +20,14 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => setShowRoleModal(true)} 
+              onClick={() => setShowSignupModal(true)} 
               size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
             >
               Get Started
             </Button>
             <Button 
-              onClick={() => setShowRoleModal(true)}
+              onClick={() => setShowSignupModal(true)}
               size="lg"
               variant="outline"
               className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
@@ -37,9 +37,9 @@ export default function Landing() {
           </div>
         </div>
 
-        <RoleSelectionModal 
-          isOpen={showRoleModal} 
-          onClose={() => setShowRoleModal(false)} 
+        <SignupModal 
+          isOpen={showSignupModal} 
+          onClose={() => setShowSignupModal(false)} 
         />
 
         {/* Features Grid */}
