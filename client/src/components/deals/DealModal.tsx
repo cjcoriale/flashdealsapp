@@ -105,16 +105,16 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
                 </div>
               </div>
               
-              <div className="text-right">
-                <div className="flex items-center text-orange-600 mb-1">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-medium">
-                    {hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`} left
-                  </span>
+              <div className="flex items-center text-orange-600 mb-1">
+                <Clock className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">
+                </span>
+<div className="text-right">
                 </div>
                 <div className="text-lg font-semibold text-green-600">${(deal.originalPrice - deal.discountedPrice).toFixed(2)} saved</div>
               </div>
             </div>
+            
             
             {/* Availability */}
             <div className="flex items-center justify-between text-sm text-gray-600 mb-6">
@@ -129,6 +129,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
           </div>
 
           {/* Action Buttons */}
+          
           <div className="space-y-3">
             <button 
               onClick={() => {
@@ -155,6 +156,9 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
               )}
               <button 
                 onClick={() => {
+                  
+
+                  
                   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deal.merchant.address)}`;
                   window.open(mapUrl, '_blank');
                 }}
