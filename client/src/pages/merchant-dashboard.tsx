@@ -70,6 +70,14 @@ export default function MerchantDashboard() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   
+  // Debug logging for search state
+  console.log("Current search state:", {
+    searchQuery,
+    searchResults: searchResults.length,
+    isSearching,
+    showBulkBusinessForm
+  });
+  
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["/api/my-merchants"],
     enabled: isAuthenticated,
@@ -315,14 +323,18 @@ export default function MerchantDashboard() {
   const searchBusinessesMutation = useMutation({
     mutationFn: async (query: string) => {
       setIsSearching(true);
-      return await apiRequest("POST", '/api/super-merchant/search-businesses', { query });
+      const response = await apiRequest("POST", '/api/super-merchant/search-businesses', { query });
+      console.log("Search API response:", response);
+      return response;
     },
     onSuccess: (data: any) => {
-      setSearchResults(data.results || []);
+      console.log("Search mutation success data:", data);
+      const results = data?.results || [];
+      setSearchResults(results);
       setIsSearching(false);
       toast({
         title: "Search Complete",
-        description: `Found ${data.results?.length || 0} businesses`,
+        description: `Found ${results.length} businesses`,
       });
     },
     onError: (error) => {
