@@ -1044,7 +1044,7 @@ export default function MerchantDashboard() {
                       <Input
                         id="deal-title"
                         {...dealForm.register("title")}
-                        placeholder="e.g., 50% Off Lunch Special"
+                        placeholder="Enter your deal title"
                         className="mt-1"
                       />
                       {dealForm.formState.errors.title && (
@@ -1059,7 +1059,7 @@ export default function MerchantDashboard() {
                       <Textarea
                         id="deal-description"
                         {...dealForm.register("description")}
-                        placeholder="Describe your deal in detail..."
+                        placeholder="Provide details about your deal"
                         rows={3}
                         className="mt-1"
                       />
@@ -1077,12 +1077,14 @@ export default function MerchantDashboard() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="food">Food & Dining</SelectItem>
-                          <SelectItem value="shopping">Shopping</SelectItem>
-                          <SelectItem value="services">Services</SelectItem>
-                          <SelectItem value="entertainment">Entertainment</SelectItem>
-                          <SelectItem value="health">Health & Beauty</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          {/* Categories will be populated based on business types */}
+                          {Array.isArray(merchants) && merchants.length > 0 && 
+                            [...new Set(merchants.map((m: any) => m.category))].map((category: string) => (
+                              <SelectItem key={category} value={category}>
+                                {category.charAt(0).toUpperCase() + category.slice(1)}
+                              </SelectItem>
+                            ))
+                          }
                         </SelectContent>
                       </Select>
                       {dealForm.formState.errors.category && (
