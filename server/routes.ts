@@ -235,6 +235,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search businesses endpoint for super merchants
+  app.post("/api/super-merchant/search-businesses", isAuthenticated, auditMiddleware("Search Businesses"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.role !== 'super_merchant') {
+        return res.status(403).json({ message: "Super merchant access required" });
+      }
+
+      const { query } = req.body;
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      // Simulate business search results (in production, integrate with Google Places API or similar)
+      const mockResults = generateMockBusinessResults(query);
+      
+      res.json({ 
+        query,
+        results: mockResults,
+        count: mockResults.length
+      });
+    } catch (error) {
+      auditError(req, error as Error, "Search Businesses");
+      res.status(500).json({ message: "Failed to search businesses" });
+    }
+  });
+
   app.get("/api/merchants/:id/deals", auditMiddleware("View Merchant Deals"), async (req: AuditRequest, res) => {
     try {
       const merchantId = parseInt(req.params.id);
@@ -462,6 +491,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }, 60 * 60 * 1000); // Run every hour
 
+  // Search businesses endpoint for super merchants
+  app.post("/api/super-merchant/search-businesses", isAuthenticated, auditMiddleware("Search Businesses"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.role !== 'super_merchant') {
+        return res.status(403).json({ message: "Super merchant access required" });
+      }
+
+      const { query } = req.body;
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      // Simulate business search results (in production, integrate with Google Places API or similar)
+      const mockResults = generateMockBusinessResults(query);
+      
+      res.json({ 
+        query,
+        results: mockResults,
+        count: mockResults.length
+      });
+    } catch (error) {
+      auditError(req, error as Error, "Search Businesses");
+      res.status(500).json({ message: "Failed to search businesses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+function generateMockBusinessResults(query: string): any[] {
+  const queryLower = query.toLowerCase();
+  const results = [];
+
+  // Generate relevant business results based on query
+  if (queryLower.includes('pizza')) {
+    results.push(
+      {
+        name: "Tony's Authentic Pizzeria",
+        address: "145 Bleecker St, New York, NY 10012",
+        category: "restaurant",
+        phone: "+1 (212) 555-0145",
+        rating: 4.5,
+        photo: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400",
+        latitude: 40.7282,
+        longitude: -74.0059
+      },
+      {
+        name: "Slice Heaven",
+        address: "789 Broadway, New York, NY 10003",
+        category: "restaurant", 
+        phone: "+1 (212) 555-0789",
+        rating: 4.2,
+        photo: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400",
+        latitude: 40.7328,
+        longitude: -73.9903
+      }
+    );
+  }
+
+  if (queryLower.includes('coffee')) {
+    results.push(
+      {
+        name: "Artisan Coffee Co.",
+        address: "234 Pine St, Seattle, WA 98101",
+        category: "restaurant",
+        phone: "+1 (206) 555-0234",
+        rating: 4.7,
+        photo: "https://images.unsplash.com/photo-1498804103079-a6351b050096?w=400",
+        latitude: 47.6097,
+        longitude: -122.3331
+      },
+      {
+        name: "Brew & Beans",
+        address: "567 Capitol Hill, Seattle, WA 98102",
+        category: "restaurant",
+        phone: "+1 (206) 555-0567", 
+        rating: 4.3,
+        photo: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400",
+        latitude: 47.6205,
+        longitude: -122.3212
+      }
+    );
+  }
+
+  if (queryLower.includes('sushi')) {
+    results.push(
+      {
+        name: "Sakura Sushi Bar",
+        address: "321 Union St, San Francisco, CA 94133",
+        category: "restaurant",
+        phone: "+1 (415) 555-0321",
+        rating: 4.6,
+        photo: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400",
+        latitude: 37.8024,
+        longitude: -122.4058
+      }
+    );
+  }
+
+  if (queryLower.includes('barbecue') || queryLower.includes('bbq')) {
+    results.push(
+      {
+        name: "Smoky Joe's BBQ",
+        address: "456 South St, Austin, TX 78701",
+        category: "restaurant",
+        phone: "+1 (512) 555-0456",
+        rating: 4.4,
+        photo: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400",
+        latitude: 30.2672,
+        longitude: -97.7431
+      }
+    );
+  }
+
+  if (queryLower.includes('taco')) {
+    results.push(
+      {
+        name: "El Taco Loco",
+        address: "890 Sunset Blvd, Los Angeles, CA 90026",
+        category: "restaurant",
+        phone: "+1 (213) 555-0890",
+        rating: 4.1,
+        photo: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400",
+        latitude: 34.0522,
+        longitude: -118.2437
+      }
+    );
+  }
+
+  // Add some default restaurants if no specific matches
+  if (results.length === 0) {
+    results.push(
+      {
+        name: "Local Bistro",
+        address: "123 Main St, Your City, State 12345",
+        category: "restaurant",
+        phone: "+1 (555) 123-4567",
+        rating: 4.0,
+        photo: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400",
+        latitude: 40.7128,
+        longitude: -74.0060
+      },
+      {
+        name: "Corner Cafe",
+        address: "456 Oak Ave, Your City, State 12345", 
+        category: "restaurant",
+        phone: "+1 (555) 456-7890",
+        rating: 3.9,
+        photo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400",
+        latitude: 40.7589,
+        longitude: -73.9851
+      }
+    );
+  }
+
+  return results.slice(0, 8); // Return max 8 results
 }

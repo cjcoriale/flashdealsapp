@@ -63,6 +63,12 @@ export default function MerchantDashboard() {
   const [selectedMerchant, setSelectedMerchant] = useState<number | null>(null);
   const [showSuperMerchantTools, setShowSuperMerchantTools] = useState(false);
   const [showBulkBusinessForm, setShowBulkBusinessForm] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [superMerchantPassword, setSuperMerchantPassword] = useState("");
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["/api/my-merchants"],
@@ -305,6 +311,62 @@ export default function MerchantDashboard() {
     },
   });
 
+  // Search businesses mutation
+  const searchBusinessesMutation = useMutation({
+    mutationFn: async (query: string) => {
+      setIsSearching(true);
+      return await apiRequest("POST", '/api/super-merchant/search-businesses', { query });
+    },
+    onSuccess: (data) => {
+      setSearchResults(data.results || []);
+      setIsSearching(false);
+      toast({
+        title: "Search Complete",
+        description: `Found ${data.results?.length || 0} businesses`,
+      });
+    },
+    onError: (error) => {
+      setIsSearching(false);
+      toast({
+        title: "Search Failed",
+        description: "Could not search businesses. Try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create business from search result mutation
+  const createFromSearchMutation = useMutation({
+    mutationFn: async (businessData: any) => {
+      return await apiRequest("POST", "/api/merchants", businessData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
+      toast({
+        title: "Business Created",
+        description: "Business created successfully from search result",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to create business",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRepostDeal = (deal: any) => {
     // Set new times - start now, end in 24 hours
     const now = new Date();
@@ -368,6 +430,42 @@ export default function MerchantDashboard() {
     
     setDealFormStep(1);
     setShowDealForm(true);
+  };
+
+  const verifyPassword = () => {
+    // Simple password verification (in production, use more secure method)
+    if (superMerchantPassword === "flashdeals2025") {
+      setIsPasswordVerified(true);
+      setShowPasswordPrompt(false);
+      setShowBulkBusinessForm(true);
+      setSuperMerchantPassword("");
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Incorrect password",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      searchBusinessesMutation.mutate(searchQuery);
+    }
+  };
+
+  const createBusinessFromResult = (result: any) => {
+    const businessData = {
+      name: result.name,
+      category: result.category || "restaurant",
+      description: result.description || `${result.name} - ${result.address}`,
+      address: result.address,
+      latitude: result.latitude || 40.7128,
+      longitude: result.longitude || -74.0060,
+      phone: result.phone || "",
+      imageUrl: result.imageUrl || result.photo || "",
+    };
+    createFromSearchMutation.mutate(businessData);
   };
 
   const renderStepIndicator = () => {
@@ -487,9 +585,9 @@ export default function MerchantDashboard() {
                 )}
                 {user?.role === 'super_merchant' && (
                   <>
-                    <DropdownMenuItem onClick={() => setShowBulkBusinessForm(true)}>
+                    <DropdownMenuItem onClick={() => setShowPasswordPrompt(true)}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Bulk Create Businesses
+                      Super Merchant Tools
                     </DropdownMenuItem>
                     <Badge variant="secondary" className="mx-2 mb-2 text-xs">
                       Super Merchant
@@ -1228,171 +1326,164 @@ export default function MerchantDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Bulk Business Creation Form */}
-        <Dialog open={showBulkBusinessForm} onOpenChange={setShowBulkBusinessForm}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        {/* Password Prompt Dialog */}
+        <Dialog open={showPasswordPrompt} onOpenChange={setShowPasswordPrompt}>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Bulk Create Businesses</DialogTitle>
+              <DialogTitle>Super Merchant Access</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Enter the super merchant password to access advanced business creation tools.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={superMerchantPassword}
+                  onChange={(e) => setSuperMerchantPassword(e.target.value)}
+                  placeholder="Enter password"
+                  onKeyPress={(e) => e.key === 'Enter' && verifyPassword()}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowPasswordPrompt(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={verifyPassword}>
+                  Access Tools
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Business Search and Creation Interface */}
+        <Dialog open={showBulkBusinessForm} onOpenChange={setShowBulkBusinessForm}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Business Search & Creation Tools</DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900 mb-2">Super Merchant Tools</h3>
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-semibold text-blue-900 mb-2">Super Merchant Search Tools</h3>
                 <p className="text-sm text-blue-700">
-                  As a Super Merchant, you can create multiple businesses at once to populate the app with diverse content and deals.
+                  Search for real businesses online and quickly add them to your app with pre-populated information.
                 </p>
               </div>
 
-              <div className="grid gap-4">
-                <Button
-                  onClick={() => {
-                    const sampleBusinesses = [
-                      {
-                        name: "Gourmet Pizza Palace",
-                        category: "restaurant",
-                        description: "Authentic wood-fired pizzas with fresh ingredients",
-                        address: "123 Main St, New York, NY",
-                        latitude: 40.7128,
-                        longitude: -74.0060,
-                        phone: "+1 (212) 555-0123",
-                        imageUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400"
-                      },
-                      {
-                        name: "Urban Coffee Roasters",
-                        category: "restaurant",
-                        description: "Locally roasted coffee and artisanal pastries",
-                        address: "456 Broadway, New York, NY",
-                        latitude: 40.7589,
-                        longitude: -73.9851,
-                        phone: "+1 (212) 555-0124",
-                        imageUrl: "https://images.unsplash.com/photo-1498804103079-a6351b050096?w=400"
-                      },
-                      {
-                        name: "Desert Bloom Spa",
-                        category: "health",
-                        description: "Luxury spa treatments in the heart of Scottsdale",
-                        address: "789 Desert Ave, Scottsdale, AZ",
-                        latitude: 33.4942,
-                        longitude: -111.9261,
-                        phone: "+1 (480) 555-0125",
-                        imageUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400"
-                      },
-                      {
-                        name: "Tech Gadget Store",
-                        category: "retail", 
-                        description: "Latest electronics and tech accessories",
-                        address: "321 Tech Way, Austin, TX",
-                        latitude: 30.2672,
-                        longitude: -97.7431,
-                        phone: "+1 (512) 555-0126",
-                        imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400"
-                      },
-                      {
-                        name: "Fitness Revolution",
-                        category: "fitness",
-                        description: "State-of-the-art gym with personal training",
-                        address: "654 Muscle Blvd, Miami, FL",
-                        latitude: 25.7617,
-                        longitude: -80.1918,
-                        phone: "+1 (305) 555-0127",
-                        imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400"
-                      }
-                    ];
-                    createBulkBusinessesMutation.mutate(sampleBusinesses);
-                  }}
-                  disabled={createBulkBusinessesMutation.isPending}
-                  className="w-full"
-                >
-                  {createBulkBusinessesMutation.isPending ? (
-                    "Creating Businesses..."
-                  ) : (
-                    "Create 5 Sample Businesses"
-                  )}
-                </Button>
-
-                <div className="text-center text-gray-500">
-                  <span className="text-sm">This will create diverse businesses across different cities and categories</span>
+              {/* Search Interface */}
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Search for businesses (e.g., 'pizza New York', 'coffee shops Portland')"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSearch}
+                    disabled={isSearching || !searchQuery.trim()}
+                  >
+                    {isSearching ? "Searching..." : "Search"}
+                  </Button>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const restaurantBusinesses = [
-                        {
-                          name: "Taco Fiesta",
-                          category: "restaurant",
-                          description: "Authentic Mexican street tacos",
-                          address: "111 Taco St, Los Angeles, CA",
-                          latitude: 34.0522,
-                          longitude: -118.2437,
-                          phone: "+1 (213) 555-0201",
-                          imageUrl: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400"
-                        },
-                        {
-                          name: "Sushi Zen",
-                          category: "restaurant", 
-                          description: "Fresh sushi and Japanese cuisine",
-                          address: "222 Zen Way, San Francisco, CA",
-                          latitude: 37.7749,
-                          longitude: -122.4194,
-                          phone: "+1 (415) 555-0202",
-                          imageUrl: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400"
-                        },
-                        {
-                          name: "BBQ Junction",
-                          category: "restaurant",
-                          description: "Slow-smoked BBQ and Southern comfort food",
-                          address: "333 Smoke Ln, Nashville, TN",
-                          latitude: 36.1627,
-                          longitude: -86.7816,
-                          phone: "+1 (615) 555-0203",
-                          imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
-                        }
-                      ];
-                      createBulkBusinessesMutation.mutate(restaurantBusinesses);
-                    }}
-                    disabled={createBulkBusinessesMutation.isPending}
-                  >
-                    Create 3 Restaurants
-                  </Button>
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Search Results ({searchResults.length} found)</h4>
+                    <div className="grid gap-4 max-h-96 overflow-y-auto">
+                      {searchResults.map((result: any, index: number) => (
+                        <Card key={index} className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h5 className="font-semibold">{result.name}</h5>
+                                {result.rating && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    ⭐ {result.rating}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 mb-1">{result.address}</p>
+                              <p className="text-sm text-gray-500 mb-2">{result.category || "Restaurant"}</p>
+                              {result.phone && (
+                                <p className="text-xs text-gray-500">{result.phone}</p>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-2 ml-4">
+                              {result.photo && (
+                                <img 
+                                  src={result.photo} 
+                                  alt={result.name}
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              )}
+                              <Button
+                                size="sm"
+                                onClick={() => createBusinessFromResult(result)}
+                                disabled={createFromSearchMutation.isPending}
+                              >
+                                {createFromSearchMutation.isPending ? "Adding..." : "Add Business"}
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                  <Button
-                    variant="outline" 
-                    onClick={() => {
-                      const retailBusinesses = [
-                        {
-                          name: "Fashion Forward",
-                          category: "retail",
-                          description: "Trendy clothing and accessories",
-                          address: "444 Style Ave, Chicago, IL",
-                          latitude: 41.8781,
-                          longitude: -87.6298,
-                          phone: "+1 (312) 555-0301",
-                          imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400"
-                        },
-                        {
-                          name: "Book Haven",
-                          category: "retail",
-                          description: "Independent bookstore with rare finds",
-                          address: "555 Reading Rd, Portland, OR",
-                          latitude: 45.5152,
-                          longitude: -122.6784,
-                          phone: "+1 (503) 555-0302",
-                          imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
-                        }
-                      ];
-                      createBulkBusinessesMutation.mutate(retailBusinesses);
-                    }}
-                    disabled={createBulkBusinessesMutation.isPending}
-                  >
-                    Create 2 Retail Stores
-                  </Button>
+                {/* Quick Action Buttons */}
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-3">Quick Actions</h4>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("restaurants New York")}
+                    >
+                      NYC Restaurants
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("coffee shops Seattle")}
+                    >
+                      Seattle Coffee
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("pizza Los Angeles")}
+                    >
+                      LA Pizza
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("sushi San Francisco")}
+                    >
+                      SF Sushi
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("barbecue Austin")}
+                    >
+                      Austin BBQ
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("tacos Miami")}
+                    >
+                      Miami Tacos
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold mb-2">Custom Business Creation</h4>
+                  <h4 className="font-semibold mb-2">Manual Business Creation</h4>
                   <p className="text-sm text-gray-600 mb-4">
-                    Want to create specific businesses? Use the regular "Create Business" form above for custom locations.
+                    Need to create a specific business manually? Use the regular business creation form.
                   </p>
                   <Button variant="outline" onClick={() => {
                     setShowBulkBusinessForm(false);
