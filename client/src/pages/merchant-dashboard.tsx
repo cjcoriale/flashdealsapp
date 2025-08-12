@@ -70,13 +70,8 @@ export default function MerchantDashboard() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   
-  // Debug logging for search state
-  console.log("Current search state:", {
-    searchQuery,
-    searchResults: searchResults.length,
-    isSearching,
-    showBulkBusinessForm
-  });
+  // Debug logging for search state (can be removed in production)
+  // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
   
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["/api/my-merchants"],
@@ -462,6 +457,7 @@ export default function MerchantDashboard() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
+      setSearchResults([]); // Clear previous results
       searchBusinessesMutation.mutate(searchQuery);
     }
   };

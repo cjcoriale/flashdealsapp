@@ -534,6 +534,36 @@ function generateMockBusinessResults(query: string): any[] {
         photo: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400",
         latitude: 40.7328,
         longitude: -73.9903
+      },
+      {
+        name: "Brooklyn Style Pizza Co.",
+        address: "456 Park Ave, Brooklyn, NY 11215",
+        category: "restaurant",
+        phone: "+1 (718) 555-0456",
+        rating: 4.3,
+        photo: "https://images.unsplash.com/photo-1534308983923-353928dc5df9?w=400",
+        latitude: 40.6782,
+        longitude: -73.9442
+      },
+      {
+        name: "Artisan Wood Fire Pizza",
+        address: "321 5th Ave, Manhattan, NY 10016",
+        category: "restaurant",
+        phone: "+1 (212) 555-0321",
+        rating: 4.7,
+        photo: "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=400",
+        latitude: 40.7505,
+        longitude: -73.9934
+      },
+      {
+        name: "Giuseppe's Pizza Palace",
+        address: "987 Atlantic Ave, Queens, NY 11238",
+        category: "restaurant",
+        phone: "+1 (718) 555-0987",
+        rating: 4.0,
+        photo: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400",
+        latitude: 40.6892,
+        longitude: -73.9442
       }
     );
   }
@@ -559,6 +589,36 @@ function generateMockBusinessResults(query: string): any[] {
         photo: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400",
         latitude: 47.6205,
         longitude: -122.3212
+      },
+      {
+        name: "The Daily Grind",
+        address: "123 University Way, Seattle, WA 98105",
+        category: "restaurant",
+        phone: "+1 (206) 555-0123",
+        rating: 4.1,
+        photo: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400",
+        latitude: 47.6587,
+        longitude: -122.3050
+      },
+      {
+        name: "Roaster's Corner",
+        address: "789 1st Ave, Seattle, WA 98104",
+        category: "restaurant",
+        phone: "+1 (206) 555-0789",
+        rating: 4.5,
+        photo: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400",
+        latitude: 47.6039,
+        longitude: -122.3351
+      },
+      {
+        name: "Espresso Central",
+        address: "456 Fremont Ave, Seattle, WA 98103",
+        category: "restaurant",
+        phone: "+1 (206) 555-0456",
+        rating: 4.4,
+        photo: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400",
+        latitude: 47.6506,
+        longitude: -122.3480
       }
     );
   }
@@ -608,6 +668,81 @@ function generateMockBusinessResults(query: string): any[] {
     );
   }
 
+  if (queryLower.includes('burger')) {
+    results.push(
+      {
+        name: "The Burger Joint",
+        address: "234 Main St, Los Angeles, CA 90210",
+        category: "restaurant",
+        phone: "+1 (310) 555-0234",
+        rating: 4.2,
+        photo: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",
+        latitude: 34.0522,
+        longitude: -118.2437
+      },
+      {
+        name: "Gourmet Burgers & Fries",
+        address: "567 Hollywood Blvd, Los Angeles, CA 90028",
+        category: "restaurant",
+        phone: "+1 (323) 555-0567",
+        rating: 4.5,
+        photo: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400",
+        latitude: 34.1016,
+        longitude: -118.3267
+      }
+    );
+  }
+
+  if (queryLower.includes('chinese') || queryLower.includes('asian')) {
+    results.push(
+      {
+        name: "Golden Dragon Chinese Restaurant",
+        address: "789 Chinatown Ave, San Francisco, CA 94108",
+        category: "restaurant",
+        phone: "+1 (415) 555-0789",
+        rating: 4.3,
+        photo: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400",
+        latitude: 37.7946,
+        longitude: -122.4068
+      },
+      {
+        name: "Panda Express Plus",
+        address: "123 Grant Ave, San Francisco, CA 94108",
+        category: "restaurant",
+        phone: "+1 (415) 555-0123",
+        rating: 4.0,
+        photo: "https://images.unsplash.com/photo-1563379091339-03246963d3d9?w=400",
+        latitude: 37.7955,
+        longitude: -122.4068
+      }
+    );
+  }
+
+  if (queryLower.includes('mexican') || queryLower.includes('taco')) {
+    results.push(
+      {
+        name: "El Taco Loco",
+        address: "890 Sunset Blvd, Los Angeles, CA 90026",
+        category: "restaurant",
+        phone: "+1 (213) 555-0890",
+        rating: 4.1,
+        photo: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400",
+        latitude: 34.0522,
+        longitude: -118.2437
+      },
+      {
+        name: "Authentic Mexican Cantina",
+        address: "456 Olvera St, Los Angeles, CA 90012",
+        category: "restaurant",
+        phone: "+1 (213) 555-0456",
+        rating: 4.4,
+        photo: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400",
+        latitude: 34.0570,
+        longitude: -118.2368
+      }
+    );
+  }
+
   // Add some default restaurants if no specific matches
   if (results.length === 0) {
     results.push(
@@ -630,9 +765,19 @@ function generateMockBusinessResults(query: string): any[] {
         photo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400",
         latitude: 40.7589,
         longitude: -73.9851
+      },
+      {
+        name: "Downtown Deli",
+        address: "789 Business District, Your City, State 12345",
+        category: "restaurant",
+        phone: "+1 (555) 789-0123",
+        rating: 4.1,
+        photo: "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=400",
+        latitude: 40.7614,
+        longitude: -73.9776
       }
     );
   }
 
-  return results.slice(0, 8); // Return max 8 results
+  return results.slice(0, 10); // Return max 10 results
 }
