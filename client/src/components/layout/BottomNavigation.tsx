@@ -14,10 +14,10 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
   
   // Role-based navigation items
   const getNavItems = () => {
-    if (user?.role === 'merchant') {
+    if (user?.role === 'merchant' || user?.role === 'super_merchant') {
       return [
         { id: 'merchant', label: 'Create Deal', icon: Store, href: '/merchant-dashboard' },
-        { id: 'map', label: 'Map', icon: Map, href: '/' },
+        { id: 'map', label: 'Map', icon: Map, href: '/map' },
       ];
     } else {
       return [

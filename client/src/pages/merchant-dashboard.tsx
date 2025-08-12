@@ -283,11 +283,11 @@ export default function MerchantDashboard() {
     mutationFn: async (businesses: any[]) => {
       return await apiRequest("POST", '/api/super-merchant/bulk-businesses', { businesses });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
       toast({
         title: "Success",
-        description: `Created ${data.businesses.length} businesses successfully!`,
+        description: `Created ${data.businesses?.length || 0} businesses successfully!`,
       });
       setShowBulkBusinessForm(false);
     },
@@ -317,7 +317,7 @@ export default function MerchantDashboard() {
       setIsSearching(true);
       return await apiRequest("POST", '/api/super-merchant/search-businesses', { query });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setSearchResults(data.results || []);
       setIsSearching(false);
       toast({
@@ -756,7 +756,7 @@ export default function MerchantDashboard() {
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             </div>
-          ) : merchants.length === 0 ? (
+          ) : (merchants as any[]).length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
                 <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -772,7 +772,7 @@ export default function MerchantDashboard() {
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {merchants.map((merchant: any) => (
+              {(merchants as any[]).map((merchant: any) => (
                 <Card 
                   key={merchant.id} 
                   className={`cursor-pointer transition-all ${

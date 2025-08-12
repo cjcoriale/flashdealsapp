@@ -73,8 +73,9 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
         throw new Error(data.message || 'Signup failed');
       }
 
-      // Redirect to app with token
-      window.location.href = `/map?auth=success&token=${encodeURIComponent(data.token)}`;
+      // Redirect based on role - merchants to dashboard, customers to map
+      const redirectPath = selectedRole === 'merchant' ? '/merchant-dashboard' : '/map';
+      window.location.href = `${redirectPath}?auth=success&token=${encodeURIComponent(data.token)}`;
     } catch (error: any) {
       toast({
         title: "Signup Failed",
@@ -108,8 +109,10 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
         throw new Error(data.message || 'Sign in failed');
       }
 
-      // Redirect to app with token
-      window.location.href = `/map?auth=success&token=${encodeURIComponent(data.token)}`;
+      // Check user role from response and redirect accordingly
+      const userRole = data.user?.role;
+      const redirectPath = (userRole === 'merchant' || userRole === 'super_merchant') ? '/merchant-dashboard' : '/map';
+      window.location.href = `${redirectPath}?auth=success&token=${encodeURIComponent(data.token)}`;
     } catch (error: any) {
       toast({
         title: "Sign In Failed",
