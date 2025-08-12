@@ -537,7 +537,8 @@ async function searchGooglePlaces(query: string): Promise<any[]> {
     }
 
     if (data.status !== 'OK') {
-      console.error("Google Places API error:", data.status, data.error_message);
+      console.error("Google Places API error:", data.status, data.error_message || data);
+      console.log("Full API response:", JSON.stringify(data, null, 2));
       return [];
     }
 
