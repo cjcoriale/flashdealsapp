@@ -984,93 +984,6 @@ export default function MerchantDashboard() {
           </Card>
         )}
 
-        {/* Your Locations */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Your Locations
-          </h2>
-          
-          {merchantsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            </div>
-          ) : (merchants as any[]).length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No locations yet</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Create your first location to start offering deals
-                </p>
-                <Button onClick={() => setShowMerchantForm(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Location
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(merchants as any[]).map((merchant: any) => (
-                <Card 
-                  key={merchant.id} 
-                  className={`cursor-pointer transition-all ${
-                    selectedMerchant === merchant.id ? 'ring-2 ring-blue-500' : 'hover:shadow-lg'
-                  }`}
-                  onClick={() => setSelectedMerchant(merchant.id)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Store className="w-5 h-5" />
-                        {merchant.name}
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditMerchant(merchant);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit Business
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteMerchant(merchant.id);
-                            }}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete Business
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </CardTitle>
-                    <CardDescription>
-                      {merchant.category}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                      {merchant.description}
-                    </p>
-                    <p className="text-xs text-gray-500">{merchant.address}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-
-
         {/* Recent Deals */}
         <Card className="mb-8">
           <CardHeader>
@@ -1165,6 +1078,91 @@ export default function MerchantDashboard() {
 
 
 
+
+        {/* Change Locations */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Change Locations
+          </h2>
+          
+          {merchantsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            </div>
+          ) : (merchants as any[]).length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No locations yet</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Create your first location to start offering deals
+                </p>
+                <Button onClick={() => setShowMerchantForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Location
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(merchants as any[]).map((merchant: any) => (
+                <Card 
+                  key={merchant.id} 
+                  className={`cursor-pointer transition-all ${
+                    selectedMerchant === merchant.id ? 'ring-2 ring-blue-500' : 'hover:shadow-lg'
+                  }`}
+                  onClick={() => setSelectedMerchant(merchant.id)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Store className="w-5 h-5" />
+                        {merchant.name}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditMerchant(merchant);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Business
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteMerchant(merchant.id);
+                            }}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Business
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </CardTitle>
+                    <CardDescription>
+                      {merchant.category}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                      {merchant.description}
+                    </p>
+                    <p className="text-xs text-gray-500">{merchant.address}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* My Deals Section */}
         {!showMerchantForm && selectedMerchant && (
