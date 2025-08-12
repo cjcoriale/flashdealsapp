@@ -168,6 +168,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Super merchant promotion (admin endpoint)
+  app.post("/api/users/:id/promote-super-merchant", isAuthenticated, auditMiddleware("Promote Super Merchant"), async (req: AuditRequest, res) => {
+    try {
+      const targetUserId = req.params.id;
+      const currentUserId = (req as any).user.claims.sub;
+      
+      // For now, allow self-promotion for testing - in production this would need admin check
+      if (targetUserId !== currentUserId) {
+        return res.status(403).json({ message: "Unauthorized to promote other users" });
+      }
+
+      const user = await storage.promoteUserToSuperMerchant(targetUserId);
+      res.json({ message: "User promoted to super merchant", user });
+    } catch (error) {
+      auditError(req, error as Error, "Promote Super Merchant");
+      res.status(500).json({ message: "Failed to promote user to super merchant" });
+    }
+  });
+
   app.post("/api/merchants", isAuthenticated, auditMiddleware("Create Merchant"), async (req: AuditRequest, res) => {
     try {
       const userId = (req as any).user.claims.sub;
@@ -177,6 +196,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       auditError(req, error as Error, "Create Merchant");
       res.status(500).json({ message: "Failed to create merchant" });
+    }
+  });
+
+  // Super merchant bulk business creation
+  app.post("/api/super-merchant/bulk-businesses", isAuthenticated, auditMiddleware("Bulk Create Businesses"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.role !== 'super_merchant') {
+        return res.status(403).json({ message: "Super merchant access required" });
+      }
+
+      const { businesses } = req.body;
+      if (!Array.isArray(businesses) || businesses.length === 0) {
+        return res.status(400).json({ message: "Businesses array is required" });
+      }
+
+      const createdBusinesses = [];
+      for (const businessData of businesses) {
+        try {
+          const merchantData = insertMerchantSchema.parse({ ...businessData, userId: currentUserId });
+          const merchant = await storage.createMerchant(merchantData);
+          createdBusinesses.push(merchant);
+        } catch (error) {
+          console.error(`Failed to create business: ${businessData.name}`, error);
+        }
+      }
+
+      res.json({ 
+        message: `Created ${createdBusinesses.length} businesses successfully`,
+        businesses: createdBusinesses 
+      });
+    } catch (error) {
+      auditError(req, error as Error, "Bulk Create Businesses");
+      res.status(500).json({ message: "Failed to create businesses in bulk" });
     }
   });
 
@@ -246,9 +301,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Create deal request:", { userId, merchantId, body: req.body });
       
-      // Verify user owns this merchant
+      // Verify user owns this merchant or is super merchant
       const merchant = await storage.getMerchant(merchantId);
-      if (!merchant || merchant.userId !== userId) {
+      const currentUser = await storage.getUser(userId);
+      
+      if (!merchant || (merchant.userId !== userId && currentUser?.role !== 'super_merchant')) {
         return res.status(403).json({ message: "Unauthorized to create deals for this merchant" });
       }
 

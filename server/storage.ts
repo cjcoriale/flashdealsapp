@@ -33,6 +33,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   promoteUserToMerchant(userId: string): Promise<User>;
+  promoteUserToSuperMerchant(userId: string): Promise<User>;
   
   // Merchant operations
   getMerchant(id: number): Promise<Merchant | undefined>;
@@ -110,6 +111,18 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         role: 'merchant',
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async promoteUserToSuperMerchant(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        role: 'super_merchant',
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

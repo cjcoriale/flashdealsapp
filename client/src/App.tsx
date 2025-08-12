@@ -35,7 +35,11 @@ function Router() {
           <Route path="/" component={MapPage} />
           
           {/* Role-based home content available via deals route */}
-          <Route path="/deals" component={user?.role === 'merchant' ? MerchantHome : CustomerHome} />
+          <Route path="/deals" component={
+            user?.role === 'super_merchant' ? MerchantHome : 
+            user?.role === 'merchant' ? MerchantHome : 
+            CustomerHome
+          } />
           <Route path="/profile" component={ProfilePage} />
           
           {/* Customer-specific routes */}
@@ -46,7 +50,7 @@ function Router() {
           )}
           
           {/* Merchant-specific routes */}
-          {user?.role === 'merchant' && (
+          {(user?.role === 'merchant' || user?.role === 'super_merchant') && (
             <>
               <Route path="/merchant-dashboard" component={MerchantDashboard} />
               <Route path="/analytics" component={AnalyticsPage} />
@@ -55,7 +59,11 @@ function Router() {
           
           {/* Legacy routes for backward compatibility */}
           <Route path="/map" component={MapPage} />
-          <Route path="/home" component={user?.role === 'merchant' ? MerchantHome : CustomerHome} />
+          <Route path="/home" component={
+            user?.role === 'super_merchant' ? MerchantHome :
+            user?.role === 'merchant' ? MerchantHome : 
+            CustomerHome
+          } />
         </>
       ) : (
         <Route path="/" component={Landing} />

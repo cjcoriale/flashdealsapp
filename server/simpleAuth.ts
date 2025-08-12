@@ -12,7 +12,7 @@ const signupSchema = z.object({
   password: z.string().min(6),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  role: z.enum(['customer', 'merchant'])
+  role: z.enum(['customer', 'merchant', 'super_merchant'])
 });
 
 const signinSchema = z.object({
