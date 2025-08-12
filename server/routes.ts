@@ -258,21 +258,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
 
-      // Try Google Places API first, fall back to mock data if restricted
-      let results = await searchGooglePlaces(query);
+      // Use Google Places API for real business search
+      const googleResults = await searchGooglePlaces(query);
       
-      // If Google Places returns no results due to API restrictions, use mock data
-      if (results.length === 0) {
-        console.log("Google Places returned no results, using enhanced mock data");
-        results = generateMockBusinessResults(query);
-      }
-      
-      console.log("Final results:", results.length);
+      console.log("Google Places results:", googleResults.length);
       
       const response = { 
         query,
-        results: results,
-        count: results.length
+        results: googleResults,
+        count: googleResults.length
       };
       
       console.log("Sending response:", response);
