@@ -516,63 +516,60 @@ async function searchGooglePlaces(query: string): Promise<any[]> {
       return [];
     }
 
-    // Use Google Places API (New) - Text Search
-    const searchUrl = `https://places.googleapis.com/v1/places:searchText`;
+    // Try Nearby Search first, then fall back to Text Search if needed
+    const location = "33.4484,-112.0740"; // Phoenix, AZ coordinates as default
+    const radius = "50000"; // 50km radius
     
-    console.log("Searching Google Places (New API) for:", query);
+    // Use Google Places Nearby Search API (this should work with basic Places API)
+    const nearbyUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=restaurant&keyword=${encodeURIComponent(query)}&key=${apiKey}`;
     
-    const requestBody = {
-      textQuery: query + " restaurant",
-      maxResultCount: 10,
-      includedType: "restaurant"
-    };
+    console.log("Searching Google Places Nearby Search for:", query);
+    
+    let response = await fetch(nearbyUrl);
+    let data = await response.json();
 
-    const response = await fetch(searchUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos,places.nationalPhoneNumber,places.priceLevel,places.id'
-      },
-      body: JSON.stringify(requestBody)
-    });
+    // If nearby search fails or returns no results, try text search
+    if (data.status !== 'OK' || !data.results || data.results.length === 0) {
+      console.log("Nearby search failed or no results, trying text search...");
+      const textSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + " restaurant")}&key=${apiKey}`;
+      response = await fetch(textSearchUrl);
+      data = await response.json();
+    }
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Google Places API error:", response.status, data);
+    if (data.status !== 'OK') {
+      console.error("Google Places API error:", data.status, data.error_message);
       return [];
     }
 
-    if (!data.places || data.places.length === 0) {
+    if (!data.results || data.results.length === 0) {
       console.log("No places found for query:", query);
       return [];
     }
 
-    const results = data.places.map((place: any) => {
+    const results = data.results.slice(0, 10).map((place: any) => {
       // Get photo URL if available
       let photo = null;
       if (place.photos && place.photos.length > 0) {
-        const photoName = place.photos[0].name;
-        photo = `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=400&key=${apiKey}`;
+        const photoReference = place.photos[0].photo_reference;
+        photo = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${apiKey}`;
       }
 
       return {
-        name: place.displayName?.text || "Unknown",
-        address: place.formattedAddress || "Address not available",
+        name: place.name,
+        address: place.formatted_address || place.vicinity,
         category: "restaurant",
-        phone: place.nationalPhoneNumber || null,
+        phone: null, // Will need Place Details API for phone
         rating: place.rating || null,
         photo: photo,
-        latitude: place.location?.latitude || null,
-        longitude: place.location?.longitude || null,
-        place_id: place.id,
-        price_level: place.priceLevel || null,
-        user_ratings_total: place.userRatingCount || null
+        latitude: place.geometry?.location?.lat || null,
+        longitude: place.geometry?.location?.lng || null,
+        place_id: place.place_id,
+        price_level: place.price_level || null,
+        user_ratings_total: place.user_ratings_total || null
       };
     });
 
-    console.log(`Found ${results.length} places from Google Places (New API)`);
+    console.log(`Found ${results.length} places from Google Places API`);
     return results;
 
   } catch (error) {
