@@ -258,15 +258,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
 
-      // Simulate business search results (in production, integrate with Google Places API or similar)
-      const mockResults = generateMockBusinessResults(query);
+      // Use Google Places API for real business search
+      const googleResults = await searchGooglePlaces(query);
       
-      console.log("Generated mock results:", mockResults.length);
+      console.log("Google Places results:", googleResults.length);
       
       const response = { 
         query,
-        results: mockResults,
-        count: mockResults.length
+        results: googleResults,
+        count: googleResults.length
       };
       
       console.log("Sending response:", response);
@@ -506,6 +506,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+async function searchGooglePlaces(query: string): Promise<any[]> {
+  try {
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+    if (!apiKey) {
+      console.error("Google Places API key not found");
+      return [];
+    }
+
+    // Use Google Places Text Search API
+    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + " restaurant")}&key=${apiKey}`;
+    
+    console.log("Searching Google Places for:", query);
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+
+    if (data.status !== 'OK') {
+      console.error("Google Places API error:", data.status, data.error_message);
+      return [];
+    }
+
+    const results = data.results.slice(0, 10).map((place: any) => {
+      // Get photo URL if available
+      let photo = null;
+      if (place.photos && place.photos.length > 0) {
+        const photoReference = place.photos[0].photo_reference;
+        photo = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${apiKey}`;
+      }
+
+      return {
+        name: place.name,
+        address: place.formatted_address,
+        category: "restaurant",
+        phone: place.formatted_phone_number || null,
+        rating: place.rating || null,
+        photo: photo,
+        latitude: place.geometry.location.lat,
+        longitude: place.geometry.location.lng,
+        place_id: place.place_id,
+        price_level: place.price_level || null,
+        user_ratings_total: place.user_ratings_total || null
+      };
+    });
+
+    console.log(`Found ${results.length} places from Google`);
+    return results;
+
+  } catch (error) {
+    console.error("Error searching Google Places:", error);
+    return [];
+  }
 }
 
 function generateMockBusinessResults(query: string): any[] {
