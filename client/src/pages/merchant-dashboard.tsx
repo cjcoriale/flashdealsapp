@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail, MoreVertical, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,8 @@ export default function MerchantDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [editingMerchant, setEditingMerchant] = useState<any>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
@@ -158,6 +160,7 @@ export default function MerchantDashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
       setShowMerchantForm(false);
+      setEditingMerchant(null);
       merchantForm.reset();
     },
     onError: (error) => {
@@ -175,6 +178,75 @@ export default function MerchantDashboard() {
       toast({
         title: "Error",
         description: "Failed to create merchant profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMerchantMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("PUT", `/api/merchants/${data.id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Business Updated",
+        description: "Your business has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
+      setEditingMerchant(null);
+      setShowMerchantForm(false);
+      merchantForm.reset();
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update business",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMerchantMutation = useMutation({
+    mutationFn: async (merchantId: number) => {
+      return await apiRequest("DELETE", `/api/merchants/${merchantId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Business Deleted",
+        description: "Business has been deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
+      setShowDeleteConfirm(null);
+      if (selectedMerchant === showDeleteConfirm) {
+        setSelectedMerchant(null);
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete business",
         variant: "destructive",
       });
     },
@@ -390,8 +462,36 @@ export default function MerchantDashboard() {
   };
 
   const onCreateMerchant = (data: any) => {
-    const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
-    createMerchantMutation.mutate(data);
+    if (editingMerchant) {
+      updateMerchantMutation.mutate({ ...data, id: editingMerchant.id });
+    } else {
+      createMerchantMutation.mutate(data);
+    }
+  };
+
+  const handleEditMerchant = (merchant: any) => {
+    setEditingMerchant(merchant);
+    merchantForm.reset({
+      name: merchant.name,
+      description: merchant.description,
+      category: merchant.category,
+      address: merchant.address,
+      latitude: merchant.latitude,
+      longitude: merchant.longitude,
+      phone: merchant.phone,
+      imageUrl: merchant.imageUrl,
+    });
+    setShowMerchantForm(true);
+  };
+
+  const handleDeleteMerchant = (merchantId: number) => {
+    setShowDeleteConfirm(merchantId);
+  };
+
+  const confirmDelete = () => {
+    if (showDeleteConfirm) {
+      deleteMerchantMutation.mutate(showDeleteConfirm);
+    }
   };
 
   const onCreateDeal = (data: any) => {
@@ -636,9 +736,12 @@ export default function MerchantDashboard() {
         {showMerchantForm && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Create a Location</CardTitle>
+              <CardTitle>{editingMerchant ? 'Edit Business' : 'Create a Location'}</CardTitle>
               <CardDescription>
-                Set up your business profile to start offering flash deals to local customers. Add your business name, image, and address below.
+                {editingMerchant 
+                  ? 'Update your business information' 
+                  : 'Set up your business profile to start offering flash deals to local customers. Add your business name, image, and address below.'
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -741,12 +844,19 @@ export default function MerchantDashboard() {
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={() => setShowMerchantForm(false)}
+                    onClick={() => {
+                      setShowMerchantForm(false);
+                      setEditingMerchant(null);
+                      merchantForm.reset();
+                    }}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMerchantMutation.isPending}>
-                    {createMerchantMutation.isPending ? "Creating..." : "Create Business"}
+                  <Button type="submit" disabled={createMerchantMutation.isPending || updateMerchantMutation.isPending}>
+                    {editingMerchant 
+                      ? (updateMerchantMutation.isPending ? "Updating..." : "Update Business")
+                      : (createMerchantMutation.isPending ? "Creating..." : "Create Business")
+                    }
                   </Button>
                 </div>
               </form>
@@ -789,9 +899,39 @@ export default function MerchantDashboard() {
                   onClick={() => setSelectedMerchant(merchant.id)}
                 >
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Store className="w-5 h-5" />
-                      {merchant.name}
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Store className="w-5 h-5" />
+                        {merchant.name}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditMerchant(merchant);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Business
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteMerchant(merchant.id);
+                            }}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Business
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </CardTitle>
                     <CardDescription>
                       {merchant.category}
@@ -1079,7 +1219,7 @@ export default function MerchantDashboard() {
                         <SelectContent>
                           {/* Categories will be populated based on business types */}
                           {Array.isArray(merchants) && merchants.length > 0 && 
-                            [...new Set(merchants.map((m: any) => m.category))].map((category: string) => (
+                            Array.from(new Set(merchants.map((m: any) => m.category))).map((category: string) => (
                               <SelectItem key={category} value={category}>
                                 {category.charAt(0).toUpperCase() + category.slice(1)}
                               </SelectItem>
@@ -1503,6 +1643,32 @@ export default function MerchantDashboard() {
                   </Button>
                 </div>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm !== null} onOpenChange={() => setShowDeleteConfirm(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Business</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600">
+                Are you sure you want to delete this business? This action cannot be undone and will also delete all associated deals.
+              </p>
+            </div>
+            <div className="flex gap-4 justify-end">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={confirmDelete}
+                disabled={deleteMerchantMutation.isPending}
+              >
+                {deleteMerchantMutation.isPending ? "Deleting..." : "Delete Business"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

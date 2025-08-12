@@ -199,6 +199,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/merchants/:id", isAuthenticated, auditMiddleware("Update Merchant"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      
+      // Verify user owns this merchant or is super merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      const currentUser = await storage.getUser(userId);
+      
+      if (!existingMerchant || (existingMerchant.userId !== userId && currentUser?.role !== 'super_merchant')) {
+        return res.status(403).json({ message: "Unauthorized to update this merchant" });
+      }
+
+      const merchantData = insertMerchantSchema.parse({ ...req.body, userId: existingMerchant.userId });
+      const updatedMerchant = await storage.updateMerchant(merchantId, merchantData);
+      res.json(updatedMerchant);
+    } catch (error) {
+      auditError(req, error as Error, "Update Merchant");
+      res.status(500).json({ message: "Failed to update merchant" });
+    }
+  });
+
+  app.delete("/api/merchants/:id", isAuthenticated, auditMiddleware("Delete Merchant"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      
+      // Verify user owns this merchant or is super merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      const currentUser = await storage.getUser(userId);
+      
+      if (!existingMerchant || (existingMerchant.userId !== userId && currentUser?.role !== 'super_merchant')) {
+        return res.status(403).json({ message: "Unauthorized to delete this merchant" });
+      }
+
+      await storage.deleteMerchant(merchantId);
+      res.json({ message: "Merchant deleted successfully" });
+    } catch (error) {
+      auditError(req, error as Error, "Delete Merchant");
+      res.status(500).json({ message: "Failed to delete merchant" });
+    }
+  });
+
   // Super merchant bulk business creation
   app.post("/api/super-merchant/bulk-businesses", isAuthenticated, auditMiddleware("Bulk Create Businesses"), async (req: AuditRequest, res) => {
     try {
