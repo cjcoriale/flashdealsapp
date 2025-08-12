@@ -510,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 async function searchGooglePlaces(query: string): Promise<any[]> {
   try {
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY_UNRESTRICTED || process.env.GOOGLE_PLACES_API_KEY;
     if (!apiKey) {
       console.error("Google Places API key not found");
       return [];
