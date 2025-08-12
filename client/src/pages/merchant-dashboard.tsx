@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail, MoreVertical, Trash2 } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail, MoreVertical, Trash2, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1085,6 +1085,20 @@ export default function MerchantDashboard() {
             Change Locations
           </h2>
           
+          {/* Location Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search locations..."
+                value={locationSearchQuery}
+                onChange={(e) => setLocationSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+          
           {merchantsLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -1164,110 +1178,7 @@ export default function MerchantDashboard() {
           )}
         </div>
 
-        {/* My Deals Section */}
-        {!showMerchantForm && selectedMerchant && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                My Deals
-              </h2>
-              <Button onClick={handleCreateDealClick}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Deal
-              </Button>
-            </div>
-            
-            {(() => {
-              // Get recent active deals (created in last 24 hours) - these are reposted deals
-              const recentActiveDeals = Array.isArray(allMerchantDeals) 
-                ? allMerchantDeals.filter((deal: any) => {
-                    const isActive = new Date(deal.endTime) > new Date();
-                    const isRecent = new Date(deal.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000);
-                    return isActive && isRecent;
-                  })
-                : [];
-              
-              // Get titles of reposted deals to filter out their expired counterparts
-              const repostedDealTitles = new Set(recentActiveDeals.map((deal: any) => deal.title));
-              
-              // Filter expired deals to exclude ones that have been reposted
-              const filteredExpiredDeals = Array.isArray(expiredDeals) 
-                ? expiredDeals.filter((deal: any) => !repostedDealTitles.has(deal.title))
-                : [];
-              
-              const combinedDeals = [...filteredExpiredDeals, ...recentActiveDeals]
-                .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-              
-              if (combinedDeals.length === 0) {
-                return (
-                  <Card>
-                    <CardContent className="text-center py-8">
-                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No previous deals</h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-4">
-                        Create your first deal and it will appear here when it expires
-                      </p>
-                      <Button onClick={handleCreateDealClick}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Deal
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              }
-              
-              return (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {combinedDeals.map((deal: any) => {
-                    const isActive = new Date(deal.endTime) > new Date();
-                    return (
-                      <Card key={deal.id}>
-                        <CardHeader>
-                          <CardTitle>{deal.title}</CardTitle>
-                          <CardDescription>
-                            ${deal.discountedPrice} (was ${deal.originalPrice})
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                            {deal.description}
-                          </p>
-                          <div className="flex items-center justify-between text-sm mb-4">
-                            <span className="text-gray-500">
-                              {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {deal.discountPercentage}%
-                              </Badge>
-                              {deal.isRecurring && (
-                                <Badge variant="outline" className="text-xs">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Recurring
-                                </Badge>
-                              )}
-                              <Badge variant={isActive ? "default" : "destructive"}>
-                                {isActive ? "Active" : "Expired"}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Button 
-                            onClick={() => handleRepostDeal(deal)}
-                            className={`w-full ${isActive ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-                            size="sm"
-                            disabled={isActive}
-                          >
-                            {isActive ? "Active Deal" : "Repost Deal"}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </div>
-        )}
+
 
         {/* Create Deal Modal */}
         <Dialog open={showDealForm} onOpenChange={(open) => {
