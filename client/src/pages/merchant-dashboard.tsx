@@ -987,14 +987,11 @@ export default function MerchantDashboard() {
                         </div>
                         
                         <div className="pr-16">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-2">
                             <h4 className="font-semibold text-sm">{deal.title}</h4>
                             <span className="text-xs text-gray-500">• {merchantName}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              ${deal.discountedPrice} (was ${deal.originalPrice})
-                            </p>
                             <div className="flex items-center gap-2">
                               {deal.isRecurring && (
                                 <Badge variant="outline" className="text-xs">
