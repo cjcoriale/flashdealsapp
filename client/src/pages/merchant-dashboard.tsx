@@ -940,7 +940,7 @@ export default function MerchantDashboard() {
                   <>
                     <DropdownMenuItem onClick={() => setShowPasswordPrompt(true)}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Super Merchant Tools
+                      Super Merchant
                     </DropdownMenuItem>
                     <Badge variant="secondary" className="mx-2 mb-2 text-xs">
                       Super Merchant
