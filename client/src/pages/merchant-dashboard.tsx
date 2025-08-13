@@ -84,19 +84,19 @@ export default function MerchantDashboard() {
   const [addedBusinessIds, setAddedBusinessIds] = useState<Set<string>>(new Set());
   
   // Deal creation UI states
-  const [selectedDealColor, setSelectedDealColor] = useState("bg-green-500");
+  const [selectedDealColor, setSelectedDealColor] = useState("bg-gradient-to-br from-green-400 to-green-600");
   const [selectedDealEmoji, setSelectedDealEmoji] = useState("🏷️");
 
-  // Color options for deal covers
+  // Gradient color options for deal covers
   const colorOptions = [
-    { name: "Blue", value: "bg-blue-500" },
-    { name: "Red", value: "bg-red-500" },
-    { name: "Green", value: "bg-green-500" },
-    { name: "Purple", value: "bg-purple-500" },
-    { name: "Orange", value: "bg-orange-500" },
-    { name: "Pink", value: "bg-pink-500" },
-    { name: "Indigo", value: "bg-indigo-500" },
-    { name: "Teal", value: "bg-teal-500" },
+    { name: "Ocean", value: "bg-gradient-to-br from-blue-400 to-blue-600" },
+    { name: "Sunset", value: "bg-gradient-to-br from-orange-400 to-red-500" },
+    { name: "Forest", value: "bg-gradient-to-br from-green-400 to-green-600" },
+    { name: "Purple", value: "bg-gradient-to-br from-purple-400 to-purple-600" },
+    { name: "Gold", value: "bg-gradient-to-br from-yellow-400 to-orange-500" },
+    { name: "Rose", value: "bg-gradient-to-br from-pink-400 to-rose-500" },
+    { name: "Indigo", value: "bg-gradient-to-br from-indigo-400 to-indigo-600" },
+    { name: "Teal", value: "bg-gradient-to-br from-teal-400 to-cyan-500" },
   ];
 
   // Emoji options for deals
@@ -124,21 +124,21 @@ export default function MerchantDashboard() {
     return categoryEmojis[category?.toLowerCase()] || '🏷️';
   };
 
-  // Auto-assign color based on category (default green)
+  // Auto-assign gradient color based on category (default forest gradient)
   const getDefaultColor = (category: string) => {
     const categoryColors: { [key: string]: string } = {
-      'food': 'bg-green-500',
-      'restaurant': 'bg-green-500',
-      'coffee': 'bg-green-500',
-      'clothing': 'bg-green-500',
-      'retail': 'bg-green-500',
-      'wellness': 'bg-green-500',
-      'entertainment': 'bg-green-500',
-      'fitness': 'bg-green-500',
-      'automotive': 'bg-green-500',
-      'services': 'bg-green-500'
+      'food': 'bg-gradient-to-br from-green-400 to-green-600',
+      'restaurant': 'bg-gradient-to-br from-green-400 to-green-600',
+      'coffee': 'bg-gradient-to-br from-green-400 to-green-600',
+      'clothing': 'bg-gradient-to-br from-green-400 to-green-600',
+      'retail': 'bg-gradient-to-br from-green-400 to-green-600',
+      'wellness': 'bg-gradient-to-br from-green-400 to-green-600',
+      'entertainment': 'bg-gradient-to-br from-green-400 to-green-600',
+      'fitness': 'bg-gradient-to-br from-green-400 to-green-600',
+      'automotive': 'bg-gradient-to-br from-green-400 to-green-600',
+      'services': 'bg-gradient-to-br from-green-400 to-green-600'
     };
-    return categoryColors[category?.toLowerCase()] || 'bg-green-500';
+    return categoryColors[category?.toLowerCase()] || 'bg-gradient-to-br from-green-400 to-green-600';
   };
   
   // States data
@@ -742,8 +742,8 @@ export default function MerchantDashboard() {
     
     const businessCategory = currentMerchant?.category || "restaurant";
     
-    // Set default color and emoji based on business category
-    setSelectedDealColor("bg-green-500"); // Always default to green
+    // Set default gradient color and emoji based on business category
+    setSelectedDealColor("bg-gradient-to-br from-green-400 to-green-600"); // Always default to forest gradient
     setSelectedDealEmoji(getDefaultEmoji(businessCategory));
     
     // Clear any previous deal data and reset form
