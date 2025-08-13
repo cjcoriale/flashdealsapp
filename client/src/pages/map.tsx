@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DealWithMerchant } from "@shared/schema";
+import { queryClient } from "@/lib/queryClient";
 import InteractiveMap from "@/components/map/InteractiveMap";
 import TopNavigation from "@/components/layout/TopNavigation";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -48,13 +49,23 @@ export default function MapPage() {
 
   const {
     data: searchResults = [],
-    isLoading: searchLoading
+    isLoading: searchLoading,
+    refetch: refetchSearch
   } = useQuery<DealWithMerchant[]>({
-    queryKey: ["/api/search", searchQuery],
-    enabled: !!searchQuery,
-    staleTime: 0, // Don't cache search results
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    queryKey: ["search-deals", searchQuery, Date.now()], // Add timestamp to prevent caching
+    queryFn: async () => {
+      if (!searchQuery || searchQuery.length === 0) return [];
+      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        }
+      });
+      if (!response.ok) throw new Error('Search failed');
+      return response.json();
+    },
+    enabled: !!searchQuery && searchQuery.length > 0,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Get enabled states
@@ -134,10 +145,12 @@ export default function MapPage() {
     console.log('Search state:', {
       searchQuery,
       searchResultsLength: searchResults.length,
+      searchResultsData: searchResults,
       nearbyDealsLength: nearbyDeals.length,
       displayedDealsLength: displayedDeals.length,
       isSearching: !!searchQuery,
-      searchLoading
+      searchLoading,
+      searchEnabled: !!searchQuery && searchQuery.length > 0
     });
   }, [searchQuery, searchResults, nearbyDeals, displayedDeals, searchLoading]);
 
@@ -174,6 +187,8 @@ export default function MapPage() {
     setSearchQuery(query);
     if (query) {
       logAction("Search Query", `Query: "${query}"`);
+      // Trigger a fresh search
+      setTimeout(() => refetchSearch(), 100);
     }
   };
 
