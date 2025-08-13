@@ -1119,7 +1119,18 @@ export default function MerchantDashboard() {
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(merchants as any[]).map((merchant: any) => (
+              {(merchants as any[])
+                .filter((merchant: any) => {
+                  if (!locationSearchQuery) return true;
+                  const searchLower = locationSearchQuery.toLowerCase();
+                  return (
+                    merchant.name.toLowerCase().includes(searchLower) ||
+                    merchant.address.toLowerCase().includes(searchLower) ||
+                    merchant.category.toLowerCase().includes(searchLower) ||
+                    (merchant.description && merchant.description.toLowerCase().includes(searchLower))
+                  );
+                })
+                .map((merchant: any) => (
                 <Card 
                   key={merchant.id} 
                   className={`cursor-pointer transition-all ${
