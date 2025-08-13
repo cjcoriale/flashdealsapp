@@ -14,14 +14,14 @@ export default function DealMarker({ deal, onClick }: DealMarkerProps) {
 
   const customIcon = new Icon({
     iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r="18" fill="${color}" stroke="white" stroke-width="3"/>
-        <text x="20" y="26" text-anchor="middle" font-size="14" fill="white">${icon}</text>
+      <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
+        <circle cx="23" cy="23" r="20" fill="${color}" stroke="white" stroke-width="3"/>
+        <text x="23" y="29" text-anchor="middle" font-size="16" fill="white">${icon}</text>
       </svg>
     `),
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -20],
+    iconSize: [46, 46],
+    iconAnchor: [23, 23],
+    popupAnchor: [0, -23],
   });
 
   const timeLeft = Math.max(0, Math.floor((new Date(deal.endTime).getTime() - Date.now()) / (1000 * 60 * 60)));
