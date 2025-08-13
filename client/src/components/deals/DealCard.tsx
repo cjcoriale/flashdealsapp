@@ -8,44 +8,13 @@ interface DealCardProps {
 }
 
 export default function DealCard({ deal, onClick, userLocation }: DealCardProps) {
-  const getCategoryIcon = (category: string) => {
-    const iconMap: { [key: string]: string } = {
-      'food': '🍕',
-      'Food': '🍕',
-      'italian': '🍝',
-      'Italian': '🍝',
-      'coffee': '☕',
-      'Coffee': '☕',
-      'clothing': '👕',
-      'Clothing': '👕',
-      'wellness': '🧘',
-      'Wellness': '🧘',
-      'entertainment': '🎬',
-      'Entertainment': '🎬',
-      'shopping': '🛍️',
-      'Shopping': '🛍️',
-    };
-    return iconMap[category] || '🏪';
+  // Use the custom deal icon and color from the deal creation process
+  const getDealIcon = () => {
+    return deal.dealEmoji || '🏪';
   };
 
-  const getCategoryColor = (category: string) => {
-    const colorMap: { [key: string]: string } = {
-      'food': 'bg-red-500',
-      'Food': 'bg-red-500',
-      'italian': 'bg-green-500',
-      'Italian': 'bg-green-500', 
-      'coffee': 'bg-amber-600',
-      'Coffee': 'bg-amber-600',
-      'clothing': 'bg-blue-500',
-      'Clothing': 'bg-blue-500',
-      'wellness': 'bg-purple-500',
-      'Wellness': 'bg-purple-500',
-      'entertainment': 'bg-pink-500',
-      'Entertainment': 'bg-pink-500',
-      'shopping': 'bg-indigo-500',
-      'Shopping': 'bg-indigo-500',
-    };
-    return colorMap[category] || 'bg-gray-500';
+  const getDealColor = () => {
+    return deal.coverColor || 'bg-blue-500';
   };
 
   // Calculate distance using Haversine formula
@@ -75,8 +44,8 @@ export default function DealCard({ deal, onClick, userLocation }: DealCardProps)
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center">
-          <div className={`${getCategoryColor(deal.category)} p-2 rounded-xl mr-3`}>
-            <span className="text-white text-xl">{getCategoryIcon(deal.category)}</span>
+          <div className={`${getDealColor()} p-2 rounded-xl mr-3`}>
+            <span className="text-white text-xl">{getDealIcon()}</span>
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 dark:text-white">{deal.merchant.name}</h3>
@@ -96,7 +65,7 @@ export default function DealCard({ deal, onClick, userLocation }: DealCardProps)
           <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">${deal.originalPrice}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`${getCategoryColor(deal.category)} text-white px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
+          <div className={`${getDealColor()} text-white px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
             {deal.discountPercentage}%
           </div>
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
