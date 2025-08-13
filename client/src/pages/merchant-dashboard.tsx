@@ -93,6 +93,39 @@ export default function MerchantDashboard() {
   const [statusCollapsed, setStatusCollapsed] = useState(true);
   const [timingCollapsed, setTimingCollapsed] = useState(true);
 
+  // Validation helpers for form sections
+  const getSectionValidationState = () => {
+    const values = dealForm.getValues();
+    const errors = dealForm.formState.errors;
+    
+    return {
+      details: {
+        hasError: !values.title || !!errors.title,
+        isRequired: true
+      },
+      pricing: {
+        hasError: !values.originalPrice || !values.discountedPrice || !!errors.originalPrice || !!errors.discountedPrice,
+        isRequired: true
+      },
+      status: {
+        hasError: !values.merchantId || !!errors.merchantId,
+        isRequired: true
+      },
+      timing: {
+        hasError: !values.startTime || !values.endTime || !!errors.startTime || !!errors.endTime,
+        isRequired: true
+      }
+    };
+  };
+
+  const isFormValid = () => {
+    const validation = getSectionValidationState();
+    return !validation.details.hasError && 
+           !validation.pricing.hasError && 
+           !validation.status.hasError && 
+           !validation.timing.hasError;
+  };
+
   // Gradient color options for deal covers
   const colorOptions = [
     { name: "Ocean", value: "bg-gradient-to-br from-blue-400 to-blue-600" },
@@ -341,6 +374,7 @@ export default function MerchantDashboard() {
 
   const dealForm = useForm({
     resolver: zodResolver(dealFormSchema),
+    mode: "onChange", // Enable real-time validation for red border indicators
     defaultValues: {
       title: "",
       description: "",
@@ -1516,7 +1550,9 @@ export default function MerchantDashboard() {
               
               <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-3">
                 {/* Details Section - Collapsible */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${
+                  getSectionValidationState().details.hasError ? 'border-l-4 border-l-red-500' : ''
+                }`}>
                   <div 
                     className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                     onClick={() => setDetailsCollapsed(!detailsCollapsed)}
@@ -1592,7 +1628,9 @@ export default function MerchantDashboard() {
                 </div>
 
                 {/* Pricing Section - Collapsible */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${
+                  getSectionValidationState().pricing.hasError ? 'border-l-4 border-l-red-500' : ''
+                }`}>
                   <div 
                     className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                     onClick={() => setPricingCollapsed(!pricingCollapsed)}
@@ -1632,7 +1670,9 @@ export default function MerchantDashboard() {
                 </div>
 
                 {/* Status and Activity Section - Collapsible */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${
+                  getSectionValidationState().status.hasError ? 'border-l-4 border-l-red-500' : ''
+                }`}>
                   <div 
                     className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                     onClick={() => setStatusCollapsed(!statusCollapsed)}
@@ -1692,7 +1732,9 @@ export default function MerchantDashboard() {
                 </div>
 
                 {/* Timing Section - Collapsible */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${
+                  getSectionValidationState().timing.hasError ? 'border-l-4 border-l-red-500' : ''
+                }`}>
                   <div 
                     className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                     onClick={() => setTimingCollapsed(!timingCollapsed)}
@@ -1730,10 +1772,20 @@ export default function MerchantDashboard() {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full text-sm"
-                  disabled={createDealMutation.isPending}
+                  className={`w-full text-sm ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={createDealMutation.isPending || !isFormValid()}
+                  onClick={(e) => {
+                    if (!isFormValid()) {
+                      e.preventDefault();
+                      toast({
+                        title: "Incomplete Form",
+                        description: "Please complete all required sections before submitting.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
                 >
-                  {createDealMutation.isPending ? "Creating..." : "Create Deal"}
+                  {createDealMutation.isPending ? "Creating..." : !isFormValid() ? "Complete Required Fields" : "Create Deal"}
                 </Button>
               </form>
             </div>
