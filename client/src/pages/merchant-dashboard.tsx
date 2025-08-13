@@ -126,16 +126,11 @@ export default function MerchantDashboard() {
   const updateEnabledStatesMutation = useMutation({
     mutationFn: async (newEnabledStates: { [key: string]: boolean }) => {
       try {
-        const response = await apiRequest('/api/enabled-states', {
-          method: 'POST',
-          body: JSON.stringify({ enabledStates: newEnabledStates }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await apiRequest('POST', '/api/enabled-states', { enabledStates: newEnabledStates });
         return response;
       } catch (error) {
         console.error('Failed to update enabled states:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
     },
@@ -148,6 +143,10 @@ export default function MerchantDashboard() {
     },
     onError: (error) => {
       console.error('Mutation error:', error);
+      console.error('Mutation error type:', typeof error);
+      console.error('Mutation error message:', error?.message);
+      console.error('Mutation error stack:', error?.stack);
+      
       if (isUnauthorizedError(error as Error)) {
         toast({
           title: "Unauthorized",
@@ -161,7 +160,7 @@ export default function MerchantDashboard() {
       }
       toast({
         title: "Update Failed",
-        description: "Failed to update service areas. Please try again.",
+        description: `Failed to update service areas: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },
