@@ -86,6 +86,12 @@ export default function MerchantDashboard() {
   // Deal creation UI states
   const [selectedDealColor, setSelectedDealColor] = useState("bg-gradient-to-br from-green-400 to-green-600");
   const [selectedDealEmoji, setSelectedDealEmoji] = useState("🏷️");
+  
+  // Deal creation form collapsible states
+  const [detailsCollapsed, setDetailsCollapsed] = useState(true);
+  const [pricingCollapsed, setPricingCollapsed] = useState(true);
+  const [statusCollapsed, setStatusCollapsed] = useState(true);
+  const [timingCollapsed, setTimingCollapsed] = useState(true);
 
   // Gradient color options for deal covers
   const colorOptions = [
@@ -1482,6 +1488,11 @@ export default function MerchantDashboard() {
           if (!open) {
             setDealFormStep(1);
             dealForm.reset();
+            // Reset collapsible sections to collapsed state
+            setDetailsCollapsed(true);
+            setPricingCollapsed(true);
+            setStatusCollapsed(true);
+            setTimingCollapsed(true);
           }
         }}>
           <DialogContent className="max-w-sm w-[90vw] max-h-[90vh] overflow-y-auto p-0">
@@ -1505,147 +1516,155 @@ export default function MerchantDashboard() {
               
               <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-3">
                 {/* Details Section - Collapsible */}
-                <Collapsible defaultOpen>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between text-sm p-2 font-medium">
-                      <span>📝 Details</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 pt-2">
-                    {/* Deal Title */}
-                    <div>
-                      <Label htmlFor="deal-title" className="text-sm">Deal Title *</Label>
-                      <Input
-                        id="deal-title"
-                        {...dealForm.register("title")}
-                        placeholder="Enter your deal title"
-                        className="mt-1 text-sm"
-                      />
-                      {dealForm.formState.errors.title && (
-                        <p className="text-xs text-red-600 mt-1">
-                          {dealForm.formState.errors.title.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                      <Label htmlFor="deal-description" className="text-sm">Description</Label>
-                      <Textarea
-                        id="deal-description"
-                        {...dealForm.register("description")}
-                        placeholder="Describe your deal"
-                        rows={2}
-                        className="mt-1 text-sm"
-                      />
-                    </div>
-
-                    {/* Color and Emoji Row */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Color Selection */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => setDetailsCollapsed(!detailsCollapsed)}
+                  >
+                    <h4 className="font-semibold text-gray-900 dark:text-white">📝 Details</h4>
+                    {detailsCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </div>
+                  {!detailsCollapsed && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      {/* Deal Title */}
                       <div>
-                        <Label className="text-sm">Cover Color</Label>
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {colorOptions.map((color) => (
-                            <button
-                              key={color.value}
-                              type="button"
-                              onClick={() => setSelectedDealColor(color.value)}
-                              className={`w-6 h-6 rounded-full ${color.value} border-2 ${
-                                selectedDealColor === color.value ? 'border-gray-800' : 'border-gray-300'
-                              }`}
-                              title={color.name}
-                            />
-                          ))}
+                        <Label htmlFor="deal-title" className="text-sm">Deal Title *</Label>
+                        <Input
+                          id="deal-title"
+                          {...dealForm.register("title")}
+                          placeholder="Enter your deal title"
+                          className="mt-1 text-sm"
+                        />
+                        {dealForm.formState.errors.title && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {dealForm.formState.errors.title.message}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <Label htmlFor="deal-description" className="text-sm">Description</Label>
+                        <Textarea
+                          id="deal-description"
+                          {...dealForm.register("description")}
+                          placeholder="Describe your deal"
+                          rows={2}
+                          className="mt-1 text-sm"
+                        />
+                      </div>
+
+                      {/* Color and Emoji Row */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Color Selection */}
+                        <div>
+                          <Label className="text-sm">Cover Color</Label>
+                          <div className="flex gap-1 mt-1 flex-wrap">
+                            {colorOptions.map((color) => (
+                              <button
+                                key={color.value}
+                                type="button"
+                                onClick={() => setSelectedDealColor(color.value)}
+                                className={`w-6 h-6 rounded-full ${color.value} border-2 ${
+                                  selectedDealColor === color.value ? 'border-gray-800' : 'border-gray-300'
+                                }`}
+                                title={color.name}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Emoji Input */}
+                        <div>
+                          <Label htmlFor="deal-emoji" className="text-sm">Deal Emoji</Label>
+                          <Input
+                            id="deal-emoji"
+                            value={selectedDealEmoji}
+                            onChange={(e) => setSelectedDealEmoji(e.target.value)}
+                            placeholder="🏷️"
+                            className="mt-1 text-sm text-center text-lg w-full"
+                            maxLength={2}
+                          />
                         </div>
                       </div>
-
-                      {/* Emoji Input */}
-                      <div>
-                        <Label htmlFor="deal-emoji" className="text-sm">Deal Emoji</Label>
-                        <Input
-                          id="deal-emoji"
-                          value={selectedDealEmoji}
-                          onChange={(e) => setSelectedDealEmoji(e.target.value)}
-                          placeholder="🏷️"
-                          className="mt-1 text-sm text-center text-lg w-full"
-                          maxLength={2}
-                        />
-                      </div>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  )}
+                </div>
 
                 {/* Pricing Section - Collapsible */}
-                <Collapsible defaultOpen>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between text-sm p-2 font-medium">
-                      <span>💰 Pricing</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 pt-2">
-                    {/* Deal Value */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="original-price" className="text-sm">Original Price *</Label>
-                        <Input
-                          id="original-price"
-                          type="number"
-                          step="0.01"
-                          {...dealForm.register("originalPrice", { valueAsNumber: true })}
-                          placeholder="0.00"
-                          className="mt-1 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="discounted-price" className="text-sm">Sale Price *</Label>
-                        <Input
-                          id="discounted-price"
-                          type="number"
-                          step="0.01"
-                          {...dealForm.register("discountedPrice", { valueAsNumber: true })}
-                          placeholder="0.00"
-                          className="mt-1 text-sm"
-                        />
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => setPricingCollapsed(!pricingCollapsed)}
+                  >
+                    <h4 className="font-semibold text-gray-900 dark:text-white">💰 Pricing</h4>
+                    {pricingCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </div>
+                  {!pricingCollapsed && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      {/* Deal Value */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor="original-price" className="text-sm">Original Price *</Label>
+                          <Input
+                            id="original-price"
+                            type="number"
+                            step="0.01"
+                            {...dealForm.register("originalPrice", { valueAsNumber: true })}
+                            placeholder="0.00"
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="discounted-price" className="text-sm">Sale Price *</Label>
+                          <Input
+                            id="discounted-price"
+                            type="number"
+                            step="0.01"
+                            {...dealForm.register("discountedPrice", { valueAsNumber: true })}
+                            placeholder="0.00"
+                            className="mt-1 text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  )}
+                </div>
 
                 {/* Status and Activity Section - Collapsible */}
-                <Collapsible>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between text-sm p-2 font-medium">
-                      <span>📍 Status & Activity</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 pt-2">
-                    {/* Business Location (hidden, pre-filled) */}
-                    <input type="hidden" {...dealForm.register("merchantId")} />
-                    <input type="hidden" {...dealForm.register("category")} />
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => setStatusCollapsed(!statusCollapsed)}
+                  >
+                    <h4 className="font-semibold text-gray-900 dark:text-white">📍 Status & Activity</h4>
+                    {statusCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </div>
+                  {!statusCollapsed && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      {/* Business Location (hidden, pre-filled) */}
+                      <input type="hidden" {...dealForm.register("merchantId")} />
+                      <input type="hidden" {...dealForm.register("category")} />
 
-                    {/* Recurring Deal Options */}
-                    <div className="border rounded-lg p-3 bg-gray-50">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <input
-                          type="checkbox"
-                          id="recurring-checkbox"
-                          checked={dealForm.watch("isRecurring") || false}
-                          onChange={(e) => {
-                            dealForm.setValue("isRecurring", e.target.checked);
-                            if (!e.target.checked) {
-                              dealForm.setValue("recurringInterval", "");
-                            }
-                          }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <Label htmlFor="recurring-checkbox" className="text-sm font-medium">
-                          Make this a recurring deal
-                        </Label>
-                      </div>
+                      {/* Recurring Deal Options */}
+                      <div className="border rounded-lg p-3 bg-gray-50">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <input
+                            type="checkbox"
+                            id="recurring-checkbox"
+                            checked={dealForm.watch("isRecurring") || false}
+                            onChange={(e) => {
+                              dealForm.setValue("isRecurring", e.target.checked);
+                              if (!e.target.checked) {
+                                dealForm.setValue("recurringInterval", "");
+                              }
+                            }}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <Label htmlFor="recurring-checkbox" className="text-sm font-medium">
+                            Make this a recurring deal
+                          </Label>
+                        </div>
                       
                       {dealForm.watch("isRecurring") && (
                         <div className="space-y-2">
@@ -1667,42 +1686,46 @@ export default function MerchantDashboard() {
                           </div>
                         </div>
                       )}
+                      </div>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  )}
+                </div>
 
                 {/* Timing Section - Collapsible */}
-                <Collapsible defaultOpen>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between text-sm p-2 font-medium">
-                      <span>⏰ Timing</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 pt-2">
-                    {/* Deal Duration */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="start-date" className="text-xs">Start Date *</Label>
-                        <Input
-                          id="start-date"
-                          type="datetime-local"
-                          {...dealForm.register("startTime")}
-                          className="mt-1 text-xs h-8"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="end-date" className="text-xs">End Date *</Label>
-                        <Input
-                          id="end-date"
-                          type="datetime-local"
-                          {...dealForm.register("endTime")}
-                          className="mt-1 text-xs h-8"
-                        />
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => setTimingCollapsed(!timingCollapsed)}
+                  >
+                    <h4 className="font-semibold text-gray-900 dark:text-white">⏰ Timing</h4>
+                    {timingCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </div>
+                  {!timingCollapsed && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      {/* Deal Duration */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor="start-date" className="text-xs">Start Date *</Label>
+                          <Input
+                            id="start-date"
+                            type="datetime-local"
+                            {...dealForm.register("startTime")}
+                            className="mt-1 text-xs h-8"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="end-date" className="text-xs">End Date *</Label>
+                          <Input
+                            id="end-date"
+                            type="datetime-local"
+                            {...dealForm.register("endTime")}
+                            className="mt-1 text-xs h-8"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  )}
+                </div>
 
                 {/* Submit Button */}
                 <Button 
