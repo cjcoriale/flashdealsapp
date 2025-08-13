@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Database Provider**: Neon Database (serverless PostgreSQL).
 - **Session Management**: PostgreSQL session store for persistent sessions.
 - **API Design**: RESTful endpoints with JSON responses, including role-based authentication endpoints.
-- **Core Functionality**: Location-based deal searching, deal claiming, recurring deals system, comprehensive audit logging, merchant portal for deal and business management, role-based authentication (customer vs. merchant).
+- **Core Functionality**: Location-based deal searching, deal claiming, recurring deals system, comprehensive audit logging, merchant portal for deal and business management, role-based authentication (customer vs. merchant), persistent location storage for merchants across sessions.
 - **Database Schema**: Includes tables for Users, Merchants, Deals, Audit Logs, Saved Deals, and Deal Claims, with structured fields for business information, deal specifics, and activity tracking.
 
 ## External Dependencies
