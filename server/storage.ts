@@ -78,6 +78,10 @@ export interface IStorage {
   getAuthSession(token: string): Promise<AuthSession | undefined>;
   deleteAuthSession(token: string): Promise<void>;
   cleanupExpiredSessions(): Promise<void>;
+
+  // State management operations (for super merchants)
+  getEnabledStates(): { [key: string]: boolean };
+  setEnabledStates(states: { [key: string]: boolean }): void;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -442,6 +446,26 @@ export class DatabaseStorage implements IStorage {
 
   async cleanupExpiredSessions(): Promise<void> {
     await db.delete(authSessions).where(lte(authSessions.expiresAt, new Date()));
+  }
+
+  // State management operations (for super merchants)
+  private enabledStates = {
+    Arizona: true,
+    California: false,
+    Texas: false,
+    Florida: false,
+    NewYork: false,
+    Washington: false,
+    Illinois: false,
+    Colorado: false
+  };
+
+  getEnabledStates(): { [key: string]: boolean } {
+    return { ...this.enabledStates } as { [key: string]: boolean };
+  }
+
+  setEnabledStates(states: { [key: string]: boolean }): void {
+    this.enabledStates = { ...states };
   }
 }
 

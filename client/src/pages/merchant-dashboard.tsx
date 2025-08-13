@@ -96,7 +96,14 @@ export default function MerchantDashboard() {
     Colorado: { displayName: "Colorado" }
   };
 
-  // State toggle management
+  // Fetch enabled states from backend
+  const { data: backendEnabledStates = {} } = useQuery({
+    queryKey: ['/api/enabled-states'],
+    enabled: isAuthenticated && showSuperMerchantTools,
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Local state for enabled states (synced with backend)
   const [enabledStates, setEnabledStates] = useState({
     Arizona: true,
     California: false,
@@ -107,10 +114,46 @@ export default function MerchantDashboard() {
     Illinois: false,
     Colorado: false
   });
+
+  // Sync local state with backend when data changes
+  useEffect(() => {
+    if (backendEnabledStates && Object.keys(backendEnabledStates).length > 0) {
+      setEnabledStates(backendEnabledStates);
+    }
+  }, [backendEnabledStates]);
   
+  // Mutation to update enabled states on the server
+  const updateEnabledStatesMutation = useMutation({
+    mutationFn: async (newEnabledStates: { [key: string]: boolean }) => {
+      await apiRequest('/api/enabled-states', {
+        method: 'POST',
+        body: JSON.stringify({ enabledStates: newEnabledStates }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/enabled-states'] });
+      toast({
+        title: "Service Areas Updated",
+        description: "State availability has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update service areas. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // State toggle function
   const toggleState = (stateName: string) => {
-    setEnabledStates(prev => ({ ...prev, [stateName]: !prev[stateName] }));
+    const newEnabledStates = { ...enabledStates, [stateName]: !enabledStates[stateName] };
+    setEnabledStates(newEnabledStates);
+    updateEnabledStatesMutation.mutate(newEnabledStates);
   };
 
   // Debug logging for search state (can be removed in production)

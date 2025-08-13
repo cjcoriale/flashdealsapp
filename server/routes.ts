@@ -477,22 +477,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // State management (for super merchants)
   app.get("/api/enabled-states", auditMiddleware("Get Enabled States"), async (req: AuditRequest, res) => {
     try {
-      // For now, hardcode Arizona as the only enabled state
-      // In production, this would be stored in database
-      const enabledStates = {
-        Arizona: true,
-        California: false,
-        Texas: false,
-        Florida: false,
-        NewYork: false,
-        Washington: false,
-        Illinois: false,
-        Colorado: false
-      };
+      const enabledStates = storage.getEnabledStates();
       res.json(enabledStates);
     } catch (error) {
       auditError(req, error as Error, "Get Enabled States");
       res.status(500).json({ message: "Failed to fetch enabled states" });
+    }
+  });
+
+  app.post("/api/enabled-states", isAuthenticated, auditMiddleware("Update Enabled States"), async (req: AuditRequest, res) => {
+    try {
+      const { enabledStates } = req.body;
+      storage.setEnabledStates(enabledStates);
+      res.json({ message: "Enabled states updated successfully", enabledStates });
+    } catch (error) {
+      auditError(req, error as Error, "Update Enabled States");
+      res.status(500).json({ message: "Failed to update enabled states" });
     }
   });
 
