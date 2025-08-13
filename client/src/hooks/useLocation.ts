@@ -12,7 +12,7 @@ export function useLocation() {
     localStorage.setItem('merchant_location', JSON.stringify(newLocation));
   }, []);
 
-  // Load saved location on mount and check permission silently
+  // Load saved location on mount and check permission silently after delay
   useEffect(() => {
     const savedLocation = localStorage.getItem('merchant_location');
     if (savedLocation) {
@@ -26,33 +26,44 @@ export function useLocation() {
       }
     }
 
-    // Check permission status silently without triggering UI
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-        setPermissionState(result.state);
-        
-        // If already granted and no saved location, get it silently
-        if (result.state === 'granted' && !savedLocation && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              updateLocation({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              });
-            },
-            () => {}, // Silent error handling
-            {
-              enableHighAccuracy: false,
-              timeout: 5000,
-              maximumAge: 300000,
+    // Delay permission check by 8 seconds to allow location to load first
+    const permissionCheckTimeout = setTimeout(() => {
+      // Only check permission if we don't already have location
+      const currentLocation = localStorage.getItem('merchant_location');
+      if (!currentLocation && !savedLocation) {
+        if (navigator.permissions && navigator.permissions.query) {
+          navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+            setPermissionState(result.state);
+            
+            // If already granted, get it silently
+            if (result.state === 'granted' && navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  updateLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                  });
+                },
+                () => setPermissionState('denied'), // Set denied on error
+                {
+                  enableHighAccuracy: false,
+                  timeout: 5000,
+                  maximumAge: 300000,
+                }
+              );
             }
-          );
+          }).catch(() => {
+            // Fallback for browsers that don't support permissions API
+            setPermissionState('unknown');
+          });
+        } else {
+          // For browsers without permissions API, set unknown
+          setPermissionState('unknown');
         }
-      }).catch(() => {
-        // Fallback for browsers that don't support permissions API
-        setPermissionState('unknown');
-      });
-    }
+      }
+    }, 8000); // 8 second delay
+
+    return () => clearTimeout(permissionCheckTimeout);
   }, [updateLocation]);
 
   const requestLocation = useCallback(() => {
