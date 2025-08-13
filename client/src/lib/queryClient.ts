@@ -51,7 +51,19 @@ export const getQueryFn: <T>(options: {
       console.log('getQueryFn: Added Authorization header:', headers['Authorization']);
     }
     
-    const res = await fetch(queryKey[0] as string, {
+    // Handle query parameters for search endpoint
+    let url = queryKey[0] as string;
+    if (queryKey[1] && typeof queryKey[1] === 'object') {
+      const params = new URLSearchParams();
+      Object.entries(queryKey[1] as Record<string, string>).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+      });
+      url += '?' + params.toString();
+    }
+    
+    console.log('getQueryFn: Fetching URL:', url);
+    
+    const res = await fetch(url, {
       headers,
       credentials: "include",
     });

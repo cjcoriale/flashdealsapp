@@ -49,23 +49,15 @@ export default function MapPage() {
 
   const {
     data: searchResults = [],
-    isLoading: searchLoading,
-    refetch: refetchSearch
+    isLoading: searchLoading
   } = useQuery<DealWithMerchant[]>({
-    queryKey: ["search-deals", searchQuery, Date.now()], // Add timestamp to prevent caching
-    queryFn: async () => {
-      if (!searchQuery || searchQuery.length === 0) return [];
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-        }
-      });
-      if (!response.ok) throw new Error('Search failed');
-      return response.json();
-    },
-    enabled: !!searchQuery && searchQuery.length > 0,
+    queryKey: ["/api/search", { q: searchQuery }], // Use object for query params
+    enabled: !!searchQuery && searchQuery.trim().length > 0,
     staleTime: 0,
     gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   // Get enabled states
@@ -187,8 +179,6 @@ export default function MapPage() {
     setSearchQuery(query);
     if (query) {
       logAction("Search Query", `Query: "${query}"`);
-      // Trigger a fresh search
-      setTimeout(() => refetchSearch(), 100);
     }
   };
 
