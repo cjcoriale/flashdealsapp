@@ -105,11 +105,11 @@ export default function MerchantDashboard() {
         isRequired: true
       },
       pricing: {
-        hasError: (!values.originalPrice || !values.discountedPrice || !!errors.originalPrice || !!errors.discountedPrice) && hasAttemptedSubmit,
+        hasError: (values.originalPrice <= 0 || values.discountedPrice <= 0 || !!errors.originalPrice || !!errors.discountedPrice) && hasAttemptedSubmit,
         isRequired: true
       },
       status: {
-        hasError: (!values.merchantId || !!errors.merchantId) && hasAttemptedSubmit,
+        hasError: (values.merchantId <= 0 || !!errors.merchantId) && hasAttemptedSubmit,
         isRequired: true
       },
       timing: {
@@ -122,9 +122,9 @@ export default function MerchantDashboard() {
   const isFormValid = () => {
     const values = dealForm.getValues();
     return values.title && 
-           values.originalPrice && 
-           values.discountedPrice && 
-           values.merchantId && 
+           values.originalPrice > 0 && 
+           values.discountedPrice > 0 && 
+           values.merchantId > 0 && 
            values.startTime && 
            values.endTime;
   };
