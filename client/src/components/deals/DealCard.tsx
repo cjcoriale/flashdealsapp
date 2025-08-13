@@ -1,5 +1,6 @@
 import { DealWithMerchant } from "@shared/schema";
 import { Clock, MapPin } from "lucide-react";
+import { getDealColorClass } from "@/lib/dealColors";
 
 interface DealCardProps {
   deal: DealWithMerchant;
@@ -8,13 +9,12 @@ interface DealCardProps {
 }
 
 export default function DealCard({ deal, onClick, userLocation }: DealCardProps) {
-  // Use the custom deal icon and color from the deal creation process
   const getDealIcon = () => {
     return deal.dealEmoji || '🏪';
   };
 
   const getDealColor = () => {
-    return deal.coverColor || 'bg-blue-500';
+    return getDealColorClass(deal.coverColor);
   };
 
   // Calculate distance using Haversine formula

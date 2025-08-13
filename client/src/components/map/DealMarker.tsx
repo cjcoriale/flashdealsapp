@@ -1,6 +1,7 @@
 import { Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
 import { DealWithMerchant } from "@shared/schema";
+import { getDealColorHex } from "@/lib/dealColors";
 
 interface DealMarkerProps {
   deal: DealWithMerchant;
@@ -8,32 +9,8 @@ interface DealMarkerProps {
 }
 
 export default function DealMarker({ deal, onClick }: DealMarkerProps) {
-  // Use custom deal icon and color from deal creation
-  const getDealIcon = () => {
-    return deal.dealEmoji || '🏪';
-  };
-
-  const getDealColor = () => {
-    // Convert Tailwind class to hex color
-    const colorMap: { [key: string]: string } = {
-      'bg-red-500': '#EF4444',
-      'bg-green-500': '#10B981',
-      'bg-blue-500': '#3B82F6',
-      'bg-yellow-500': '#EAB308',
-      'bg-purple-500': '#8B5CF6',
-      'bg-pink-500': '#EC4899',
-      'bg-indigo-500': '#6366F1',
-      'bg-orange-500': '#F97316',
-      'bg-teal-500': '#14B8A6',
-      'bg-cyan-500': '#06B6D4',
-      'bg-gray-500': '#6B7280',
-      'bg-gradient-to-br from-blue-500 to-purple-600': '#3B82F6',
-    };
-    return colorMap[deal.coverColor || 'bg-blue-500'] || '#3B82F6';
-  };
-
-  const icon = getDealIcon();
-  const color = getDealColor();
+  const icon = deal.dealEmoji || '🏪';
+  const color = getDealColorHex(deal.coverColor);
 
   const customIcon = new Icon({
     iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`

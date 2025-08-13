@@ -2,6 +2,7 @@ import { Clock, MapPin, X, Star, Users, Phone, Navigation } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getDealColorClass } from "@/lib/dealColors";
 
 interface DealModalProps {
   deal: DealWithMerchant;
@@ -60,7 +61,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
         </div>
         
         {/* Deal Cover */}
-        <div className={`relative h-24 ${deal.coverColor || 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center mb-4`}>
+        <div className={`relative h-24 ${getDealColorClass(deal.coverColor)} flex items-center justify-center mb-4`}>
           <div className="text-4xl">{deal.dealEmoji || '🏪'}</div>
           <div className="absolute top-2 right-3">
             <span className="bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold">
