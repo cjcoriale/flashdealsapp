@@ -72,6 +72,7 @@ export default function MerchantDashboard() {
   const [editingMerchant, setEditingMerchant] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [dealsSearchQuery, setDealsSearchQuery] = useState("");
   const [currentlyManaging, setCurrentlyManaging] = useState<any>(null);
   
   // Debug logging for search state (can be removed in production)
@@ -922,6 +923,20 @@ export default function MerchantDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Search bar for deals */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by restaurant or deal name..."
+                  value={dealsSearchQuery}
+                  onChange={(e) => setDealsSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
             {Array.isArray(allUserDeals) && allUserDeals.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-4xl mb-4">🎯</div>
@@ -940,37 +955,70 @@ export default function MerchantDashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {Array.isArray(allUserDeals) && allUserDeals.slice(0, 5).map((deal: any) => (
-                  <div
-                    key={deal.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <div className="flex-1">
-                      <h4 className="font-semibold mb-2">{deal.title}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                        ${deal.discountedPrice} (was ${deal.originalPrice})
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed</span>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {deal.discountPercentage}%
-                          </Badge>
-                          {deal.isRecurring && (
-                            <Badge variant="outline" className="text-xs">
-                              <Clock className="w-3 h-3 mr-1" />
-                              Recurring
-                            </Badge>
-                          )}
-                          <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"}>
-                            {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
-                          </Badge>
+              <div className="space-y-3">
+                {Array.isArray(allUserDeals) && allUserDeals
+                  .filter((deal: any) => {
+                    if (!dealsSearchQuery) return true;
+                    const searchLower = dealsSearchQuery.toLowerCase();
+                    const merchantName = Array.isArray(merchants) 
+                      ? merchants.find((m: any) => m.id === deal.merchantId)?.name || ""
+                      : "";
+                    return (
+                      deal.title.toLowerCase().includes(searchLower) ||
+                      merchantName.toLowerCase().includes(searchLower)
+                    );
+                  })
+                  .slice(0, 2)
+                  .map((deal: any) => {
+                    const merchantName = Array.isArray(merchants) 
+                      ? merchants.find((m: any) => m.id === deal.merchantId)?.name || "Unknown Restaurant"
+                      : "Unknown Restaurant";
+                    
+                    return (
+                      <div
+                        key={deal.id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-sm">{deal.title}</h4>
+                            <span className="text-xs text-gray-500">• {merchantName}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              ${deal.discountedPrice} (was ${deal.originalPrice})
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {deal.discountPercentage}%
+                              </Badge>
+                              {deal.isRecurring && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Recurring
+                                </Badge>
+                              )}
+                              <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"} className="text-xs">
+                                {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    );
+                  })}
+                
+                {/* See more link */}
+                {Array.isArray(allUserDeals) && allUserDeals.length > 2 && (
+                  <div className="text-center pt-2">
+                    <Button variant="link" className="text-blue-600 hover:text-blue-800 text-sm">
+                      See more deals ({allUserDeals.length - 2} remaining)
+                    </Button>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </CardContent>
