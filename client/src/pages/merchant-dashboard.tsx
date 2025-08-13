@@ -767,7 +767,7 @@ export default function MerchantDashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Currently Managing Box */}
         {currentlyManaging && (
-          <Card className="mb-6 bg-white dark:bg-white/5 cursor-pointer hover:shadow-md transition-shadow">
+          <Card className="mb-6 bg-white dark:bg-white/5 cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-600">
             <CardContent 
               className="p-4"
               onClick={() => handleEditMerchant(currentlyManaging)}
