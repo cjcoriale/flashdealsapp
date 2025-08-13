@@ -15,6 +15,11 @@ export const getDealColorHex = (coverColor: string | null): string => {
     'bg-cyan-500': '#06B6D4',
     'bg-gray-500': '#6B7280',
     'bg-gradient-to-br from-blue-500 to-purple-600': '#3B82F6',
+    'bg-gradient-to-br from-pink-400 to-rose-500': '#F472B6',
+    'bg-gradient-to-br from-red-400 to-orange-500': '#F87171',
+    'bg-gradient-to-br from-green-400 to-teal-500': '#4ADE80',
+    'bg-gradient-to-br from-yellow-400 to-orange-500': '#FACC15',
+    'bg-gradient-to-br from-purple-400 to-indigo-500': '#A78BFA',
   };
   return colorMap[coverColor || 'bg-blue-500'] || '#3B82F6';
 };
