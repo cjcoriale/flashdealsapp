@@ -81,6 +81,7 @@ export default function MerchantDashboard() {
     status: true,
     timing: true
   });
+  const [isEditingInModal, setIsEditingInModal] = useState(false);
   
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
@@ -549,13 +550,26 @@ export default function MerchantDashboard() {
       return;
     }
     
-    // Set the merchant ID in the form to the selected merchant
-    if (selectedMerchant) {
-      dealForm.setValue("merchantId", selectedMerchant);
-    }
+    // Clear any previous deal data and reset form
+    dealForm.reset({
+      title: "",
+      description: "",
+      originalPrice: 0,
+      discountedPrice: 0,
+      category: "restaurant",
+      merchantId: selectedMerchant || (Array.isArray(merchants) && merchants.length > 0 ? merchants[0].id : 0),
+      startTime: new Date().toISOString().slice(0, 16),
+      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      maxRedemptions: 100,
+      isRecurring: false,
+      recurringInterval: ""
+    });
     
-    setDealFormStep(1);
-    setShowDealForm(true);
+    // Set modal state for creating new deal
+    setSelectedDealForEdit(null);
+    setIsEditingInModal(true);
+    setShowDealDetails(true);
+    setDealDetailsCollapsed({ pricing: false, status: false, timing: false });
   };
 
   const verifyPassword = () => {
@@ -987,7 +1001,9 @@ export default function MerchantDashboard() {
                         className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                         onClick={() => {
                           setSelectedDealForEdit(deal);
+                          setIsEditingInModal(false);
                           setShowDealDetails(true);
+                          setDealDetailsCollapsed({ pricing: true, status: true, timing: true });
                         }}
                       >
                         {/* Percentage off in top right corner */}
@@ -1723,11 +1739,13 @@ export default function MerchantDashboard() {
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-2xl font-bold text-white">
-                      Deal Details
+                      {selectedDealForEdit ? 'Deal Details' : 'Create New Deal'}
                     </h2>
-                    <Badge variant={selectedDealForEdit.discountPercentage >= 50 ? "default" : "secondary"} className="text-lg px-3 py-1">
-                      {selectedDealForEdit.discountPercentage}% OFF
-                    </Badge>
+                    {selectedDealForEdit && (
+                      <Badge variant={selectedDealForEdit.discountPercentage >= 50 ? "default" : "secondary"} className="text-lg px-3 py-1">
+                        {selectedDealForEdit.discountPercentage}% OFF
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1736,22 +1754,107 @@ export default function MerchantDashboard() {
                 <div className="space-y-4">
                   {/* Deal Header */}
                   <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <h3 className="text-xl font-semibold mb-2">{selectedDealForEdit.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-3">
-                      {selectedDealForEdit.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Store className="w-4 h-4" />
-                        {Array.isArray(merchants) 
-                          ? merchants.find((m: any) => m.id === selectedDealForEdit.merchantId)?.name || "Unknown Restaurant"
-                          : "Unknown Restaurant"
-                        }
-                      </span>
-                      <Badge variant={selectedDealForEdit.category === 'restaurant' ? 'default' : 'secondary'}>
-                        {selectedDealForEdit.category}
-                      </Badge>
-                    </div>
+                    {selectedDealForEdit && !isEditingInModal ? (
+                      <>
+                        <h3 className="text-xl font-semibold mb-2">{selectedDealForEdit.title}</h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-3">
+                          {selectedDealForEdit.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="flex items-center gap-1">
+                            <Store className="w-4 h-4" />
+                            {Array.isArray(merchants) 
+                              ? merchants.find((m: any) => m.id === selectedDealForEdit.merchantId)?.name || "Unknown Restaurant"
+                              : "Unknown Restaurant"
+                            }
+                          </span>
+                          <Badge variant={selectedDealForEdit.category === 'restaurant' ? 'default' : 'secondary'}>
+                            {selectedDealForEdit.category}
+                          </Badge>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="modal-deal-title">Deal Title *</Label>
+                          <Input
+                            id="modal-deal-title"
+                            {...dealForm.register("title")}
+                            placeholder="Enter your deal title"
+                            className="mt-1"
+                          />
+                          {dealForm.formState.errors.title && (
+                            <p className="text-sm text-red-600 mt-1">
+                              {dealForm.formState.errors.title.message}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="modal-deal-description">Description</Label>
+                          <Textarea
+                            id="modal-deal-description"
+                            {...dealForm.register("description")}
+                            placeholder="Describe your deal"
+                            className="mt-1"
+                            rows={3}
+                          />
+                          {dealForm.formState.errors.description && (
+                            <p className="text-sm text-red-600 mt-1">
+                              {dealForm.formState.errors.description.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="modal-category">Category *</Label>
+                            <Select onValueChange={(value) => dealForm.setValue("category", value)}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="restaurant">Restaurant</SelectItem>
+                                <SelectItem value="retail">Retail</SelectItem>
+                                <SelectItem value="service">Service</SelectItem>
+                                <SelectItem value="entertainment">Entertainment</SelectItem>
+                                <SelectItem value="fitness">Fitness</SelectItem>
+                                <SelectItem value="beauty">Beauty & Wellness</SelectItem>
+                                <SelectItem value="automotive">Automotive</SelectItem>
+                                <SelectItem value="education">Education</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {dealForm.formState.errors.category && (
+                              <p className="text-sm text-red-600 mt-1">
+                                {dealForm.formState.errors.category.message}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="modal-business-select">Business Location *</Label>
+                            <Select onValueChange={(value) => dealForm.setValue("merchantId", parseInt(value))}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select business" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.isArray(merchants) && merchants.map((merchant: any) => (
+                                  <SelectItem key={merchant.id} value={merchant.id.toString()}>
+                                    {merchant.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {dealForm.formState.errors.merchantId && (
+                              <p className="text-sm text-red-600 mt-1">
+                                {dealForm.formState.errors.merchantId.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Pricing Section */}
@@ -1762,26 +1865,86 @@ export default function MerchantDashboard() {
                     >
                       <h4 className="font-semibold text-gray-900 dark:text-white">Pricing</h4>
                       <div className="flex items-center gap-4">
-                        <span className="text-green-600 font-bold">${selectedDealForEdit.discountedPrice}</span>
+                        <span className="text-green-600 font-bold">
+                          ${(selectedDealForEdit?.discountedPrice || dealForm.watch("discountedPrice") || 0)}
+                        </span>
                         {dealDetailsCollapsed.pricing ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
                     {!dealDetailsCollapsed.pricing && (
                       <div className="px-4 pb-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-between pt-2">
-                          <span className="text-gray-600 dark:text-gray-300">Original Price:</span>
-                          <span className="font-medium">${selectedDealForEdit.originalPrice}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-300">Discounted Price:</span>
-                          <span className="font-medium text-green-600">${selectedDealForEdit.discountedPrice}</span>
-                        </div>
-                        <div className="flex justify-between border-t pt-2">
-                          <span className="text-gray-600 dark:text-gray-300">You Save:</span>
-                          <span className="font-bold text-green-600">
-                            ${selectedDealForEdit.originalPrice - selectedDealForEdit.discountedPrice}
-                          </span>
-                        </div>
+                        {selectedDealForEdit && !isEditingInModal ? (
+                          <>
+                            <div className="flex justify-between pt-2">
+                              <span className="text-gray-600 dark:text-gray-300">Original Price:</span>
+                              <span className="font-medium">${selectedDealForEdit.originalPrice}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-300">Discounted Price:</span>
+                              <span className="font-medium text-green-600">${selectedDealForEdit.discountedPrice}</span>
+                            </div>
+                            <div className="flex justify-between border-t pt-2">
+                              <span className="text-gray-600 dark:text-gray-300">You Save:</span>
+                              <span className="font-bold text-green-600">
+                                ${selectedDealForEdit.originalPrice - selectedDealForEdit.discountedPrice}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="pt-2 space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="modal-original-price">Original Price *</Label>
+                                <Input
+                                  id="modal-original-price"
+                                  type="number"
+                                  step="0.01"
+                                  {...dealForm.register("originalPrice", { valueAsNumber: true })}
+                                  placeholder="0.00"
+                                  className="mt-1"
+                                />
+                                {dealForm.formState.errors.originalPrice && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    {dealForm.formState.errors.originalPrice.message}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="modal-discounted-price">Discounted Price *</Label>
+                                <Input
+                                  id="modal-discounted-price"
+                                  type="number"
+                                  step="0.01"
+                                  {...dealForm.register("discountedPrice", { valueAsNumber: true })}
+                                  placeholder="0.00"
+                                  className="mt-1"
+                                />
+                                {dealForm.formState.errors.discountedPrice && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    {dealForm.formState.errors.discountedPrice.message}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="modal-max-redemptions">Max Redemptions *</Label>
+                              <Input
+                                id="modal-max-redemptions"
+                                type="number"
+                                {...dealForm.register("maxRedemptions", { valueAsNumber: true })}
+                                placeholder="100"
+                                className="mt-1"
+                              />
+                              {dealForm.formState.errors.maxRedemptions && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {dealForm.formState.errors.maxRedemptions.message}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1795,32 +1958,87 @@ export default function MerchantDashboard() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Status & Activity</h4>
                       <div className="flex items-center gap-4">
                         <span className="text-gray-600 dark:text-gray-300 font-medium">
-                          {selectedDealForEdit.currentRedemptions || 0}/{selectedDealForEdit.maxRedemptions}
+                          {selectedDealForEdit ? 
+                            `${selectedDealForEdit.currentRedemptions || 0}/${selectedDealForEdit.maxRedemptions}` :
+                            `0/${dealForm.watch("maxRedemptions") || 100}`
+                          }
                         </span>
                         {dealDetailsCollapsed.status ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
                     {!dealDetailsCollapsed.status && (
                       <div className="px-4 pb-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-between pt-2">
-                          <span className="text-gray-600 dark:text-gray-300">Status:</span>
-                          <Badge variant={new Date(selectedDealForEdit.endTime) > new Date() ? "default" : "destructive"}>
-                            {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-300">Redemptions:</span>
-                          <span className="font-medium">
-                            {selectedDealForEdit.currentRedemptions || 0} / {selectedDealForEdit.maxRedemptions}
-                          </span>
-                        </div>
-                        {selectedDealForEdit.isRecurring && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-300">Recurring:</span>
-                            <Badge variant="outline" className="text-xs">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {selectedDealForEdit.recurringInterval}
-                            </Badge>
+                        {selectedDealForEdit && !isEditingInModal ? (
+                          <>
+                            <div className="flex justify-between pt-2">
+                              <span className="text-gray-600 dark:text-gray-300">Status:</span>
+                              <Badge variant={new Date(selectedDealForEdit.endTime) > new Date() ? "default" : "destructive"}>
+                                {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-300">Redemptions:</span>
+                              <span className="font-medium">
+                                {selectedDealForEdit.currentRedemptions || 0} / {selectedDealForEdit.maxRedemptions}
+                              </span>
+                            </div>
+                            {selectedDealForEdit.isRecurring && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600 dark:text-gray-300">Recurring:</span>
+                                <Badge variant="outline" className="text-xs">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  {selectedDealForEdit.recurringInterval}
+                                </Badge>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="pt-2 space-y-4">
+                            <div className="border rounded-lg p-4">
+                              <div className="flex items-center space-x-2 mb-3">
+                                <input
+                                  type="checkbox"
+                                  id="modal-recurring-checkbox"
+                                  checked={dealForm.watch("isRecurring") || false}
+                                  onChange={(e) => {
+                                    dealForm.setValue("isRecurring", e.target.checked);
+                                    if (!e.target.checked) {
+                                      dealForm.setValue("recurringInterval", "");
+                                    }
+                                  }}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <Label htmlFor="modal-recurring-checkbox" className="text-sm font-medium">
+                                  Make this a recurring deal
+                                </Label>
+                              </div>
+                              
+                              {dealForm.watch("isRecurring") && (
+                                <div className="ml-6 space-y-2">
+                                  <p className="text-sm text-gray-600">
+                                    This deal will automatically repost when it expires
+                                  </p>
+                                  <div>
+                                    <Label htmlFor="modal-recurring-interval" className="text-sm">Repeat every:</Label>
+                                    <Select onValueChange={(value) => dealForm.setValue("recurringInterval", value)}>
+                                      <SelectTrigger className="mt-1 w-48">
+                                        <SelectValue placeholder="Select interval" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="daily">Daily</SelectItem>
+                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    {dealForm.formState.errors.recurringInterval && (
+                                      <p className="text-sm text-red-600 mt-1">
+                                        {dealForm.formState.errors.recurringInterval.message}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1836,66 +2054,142 @@ export default function MerchantDashboard() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Timing</h4>
                       <div className="flex items-center gap-4">
                         <span className="text-gray-600 dark:text-gray-300 font-medium">
-                          {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
+                          {selectedDealForEdit ? 
+                            (new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired") :
+                            "New Deal"
+                          }
                         </span>
                         {dealDetailsCollapsed.timing ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
                     {!dealDetailsCollapsed.timing && (
                       <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="pt-2">
-                          <span className="text-gray-600 dark:text-gray-300 text-sm">Start Time:</span>
-                          <p className="font-medium">
-                            {new Date(selectedDealForEdit.startTime).toLocaleString()}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-300 text-sm">End Time:</span>
-                          <p className="font-medium">
-                            {new Date(selectedDealForEdit.endTime).toLocaleString()}
-                          </p>
-                        </div>
+                        {selectedDealForEdit && !isEditingInModal ? (
+                          <>
+                            <div className="pt-2">
+                              <span className="text-gray-600 dark:text-gray-300 text-sm">Start Time:</span>
+                              <p className="font-medium">
+                                {new Date(selectedDealForEdit.startTime).toLocaleString()}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-300 text-sm">End Time:</span>
+                              <p className="font-medium">
+                                {new Date(selectedDealForEdit.endTime).toLocaleString()}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="pt-2 space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="modal-start-time">Start Time *</Label>
+                                <Input
+                                  id="modal-start-time"
+                                  type="datetime-local"
+                                  {...dealForm.register("startTime")}
+                                  className="mt-1"
+                                />
+                                {dealForm.formState.errors.startTime && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    {dealForm.formState.errors.startTime.message}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="modal-end-time">End Time *</Label>
+                                <Input
+                                  id="modal-end-time"
+                                  type="datetime-local"
+                                  {...dealForm.register("endTime")}
+                                  className="mt-1"
+                                />
+                                {dealForm.formState.errors.endTime && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    {dealForm.formState.errors.endTime.message}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <Button
-                      onClick={() => {
-                        // Pre-populate deal form with current deal data
-                        dealForm.reset({
-                          title: selectedDealForEdit.title,
-                          description: selectedDealForEdit.description,
-                          originalPrice: selectedDealForEdit.originalPrice,
-                          discountedPrice: selectedDealForEdit.discountedPrice,
-                          category: selectedDealForEdit.category,
-                          startTime: new Date(selectedDealForEdit.startTime).toISOString().slice(0, 16),
-                          endTime: new Date(selectedDealForEdit.endTime).toISOString().slice(0, 16),
-                          maxRedemptions: selectedDealForEdit.maxRedemptions,
-                          merchantId: selectedDealForEdit.merchantId,
-                          isRecurring: selectedDealForEdit.isRecurring,
-                          recurringInterval: selectedDealForEdit.recurringInterval,
-                        });
-                        setShowDealDetails(false);
-                        setShowDealForm(true);
-                        setDealFormStep(1);
-                      }}
-                      className="flex-1"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Deal
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowDealDetails(false);
-                        setSelectedDealForEdit(null);
-                      }}
-                      className="flex-1"
-                    >
-                      Close
-                    </Button>
+                    {selectedDealForEdit && !isEditingInModal ? (
+                      <>
+                        <Button
+                          onClick={() => {
+                            // Pre-populate deal form with current deal data
+                            dealForm.reset({
+                              title: selectedDealForEdit.title,
+                              description: selectedDealForEdit.description,
+                              originalPrice: selectedDealForEdit.originalPrice,
+                              discountedPrice: selectedDealForEdit.discountedPrice,
+                              category: selectedDealForEdit.category,
+                              startTime: new Date(selectedDealForEdit.startTime).toISOString().slice(0, 16),
+                              endTime: new Date(selectedDealForEdit.endTime).toISOString().slice(0, 16),
+                              maxRedemptions: selectedDealForEdit.maxRedemptions,
+                              merchantId: selectedDealForEdit.merchantId,
+                              isRecurring: selectedDealForEdit.isRecurring,
+                              recurringInterval: selectedDealForEdit.recurringInterval,
+                            });
+                            setIsEditingInModal(true);
+                            setDealDetailsCollapsed({ pricing: false, status: false, timing: false });
+                          }}
+                          className="flex-1"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Deal
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowDealDetails(false);
+                            setSelectedDealForEdit(null);
+                            setIsEditingInModal(false);
+                          }}
+                          className="flex-1"
+                        >
+                          Close
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowDealDetails(false);
+                            setSelectedDealForEdit(null);
+                            setIsEditingInModal(false);
+                          }}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={dealForm.handleSubmit(onCreateDeal, (errors) => {
+                            console.log("Form validation errors:", errors);
+                            toast({
+                              title: "Form Error",
+                              description: "Please check all required fields",
+                              variant: "destructive",
+                            });
+                          })}
+                          disabled={createDealMutation.isPending}
+                          className="flex-1"
+                        >
+                          {createDealMutation.isPending ? 
+                            "Saving..." : 
+                            (selectedDealForEdit ? "Update Deal" : "Create Deal")
+                          }
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1903,6 +2197,15 @@ export default function MerchantDashboard() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button for Quick Deal Creation */}
+      <Button
+        onClick={handleCreateDealClick}
+        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 shadow-lg z-50"
+        size="sm"
+      >
+        <Plus className="w-6 h-6" />
+      </Button>
 
       {/* Bottom Navigation */}
       <BottomNavigation 
