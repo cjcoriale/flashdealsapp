@@ -101,12 +101,6 @@ export default function MapPage() {
   // Check if user is in an enabled state
   const userState = location ? getUserState(location.lat, location.lng) : null;
   const isInEnabledState = userState && enabledStates[userState];
-  
-  // Debug logging
-  console.log("Location:", location);
-  console.log("User state:", userState);
-  console.log("Enabled states:", enabledStates);
-  console.log("Is in enabled state:", isInEnabledState);
 
   // Filter deals by location if user location is available
   const getNearbyDeals = (allDeals: DealWithMerchant[], userLat?: number, userLng?: number, radiusKm = 50) => {

@@ -113,6 +113,13 @@ export const auditLogs = pgTable("audit_logs", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+export const enabledStates = pgTable("enabled_states", {
+  id: serial("id").primaryKey(),
+  stateName: varchar("state_name").notNull().unique(),
+  isEnabled: boolean("is_enabled").default(false),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   merchants: many(merchants),
@@ -167,6 +174,7 @@ export const insertDealSchema = createInsertSchema(deals).omit({ id: true, creat
 export const insertSavedDealSchema = createInsertSchema(savedDeals).omit({ id: true, savedAt: true });
 export const insertDealClaimSchema = createInsertSchema(dealClaims).omit({ id: true, claimedAt: true });
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, timestamp: true });
+export const insertEnabledStateSchema = createInsertSchema(enabledStates).omit({ id: true, updatedAt: true });
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -180,6 +188,8 @@ export type InsertDealClaim = z.infer<typeof insertDealClaimSchema>;
 export type DealClaim = typeof dealClaims.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertEnabledState = z.infer<typeof insertEnabledStateSchema>;
+export type EnabledState = typeof enabledStates.$inferSelect;
 
 export type DealWithMerchant = Deal & {
   merchant: Merchant;

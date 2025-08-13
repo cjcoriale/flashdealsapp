@@ -6,6 +6,7 @@ import {
   dealClaims,
   auditLogs,
   authSessions,
+  enabledStates,
   type User,
   type UpsertUser,
   type Merchant,
@@ -23,6 +24,8 @@ import {
   type InsertAuditLog,
   type AuthSession,
   type InsertAuthSession,
+  type EnabledState,
+  type InsertEnabledState,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, lt, sql } from "drizzle-orm";
@@ -81,8 +84,8 @@ export interface IStorage {
   cleanupExpiredSessions(): Promise<void>;
 
   // State management operations (for super merchants)
-  getEnabledStates(): { [key: string]: boolean };
-  setEnabledStates(states: { [key: string]: boolean }): void;
+  getEnabledStates(): Promise<{ [key: string]: boolean }>;
+  setEnabledStates(states: { [key: string]: boolean }): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -454,23 +457,64 @@ export class DatabaseStorage implements IStorage {
   }
 
   // State management operations (for super merchants)
-  private enabledStates = {
-    Arizona: true,
-    California: false,
-    Texas: false,
-    Florida: false,
-    NewYork: false,
-    Washington: false,
-    Illinois: false,
-    Colorado: false
-  };
-
-  getEnabledStates(): { [key: string]: boolean } {
-    return { ...this.enabledStates } as { [key: string]: boolean };
+  async getEnabledStates(): Promise<{ [key: string]: boolean }> {
+    const states = await db.select().from(enabledStates);
+    
+    // If no states in database, initialize with defaults
+    if (states.length === 0) {
+      await this.initializeDefaultStates();
+      return await this.getEnabledStates();
+    }
+    
+    const statesMap: { [key: string]: boolean } = {};
+    states.forEach(state => {
+      statesMap[state.stateName] = state.isEnabled;
+    });
+    
+    return statesMap;
   }
 
-  setEnabledStates(states: { [key: string]: boolean }): void {
-    this.enabledStates = { ...states };
+  async setEnabledStates(states: { [key: string]: boolean }): Promise<void> {
+    // Update or insert each state
+    for (const [stateName, isEnabled] of Object.entries(states)) {
+      await db
+        .insert(enabledStates)
+        .values({
+          stateName,
+          isEnabled,
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: enabledStates.stateName,
+          set: {
+            isEnabled,
+            updatedAt: new Date(),
+          },
+        });
+    }
+  }
+
+  private async initializeDefaultStates(): Promise<void> {
+    const defaultStates = {
+      Arizona: true,
+      California: false,
+      Texas: false,
+      Florida: false,
+      NewYork: false,
+      Washington: false,
+      Illinois: false,
+      Colorado: false
+    };
+
+    for (const [stateName, isEnabled] of Object.entries(defaultStates)) {
+      await db
+        .insert(enabledStates)
+        .values({
+          stateName,
+          isEnabled,
+        })
+        .onConflictDoNothing();
+    }
   }
 }
 

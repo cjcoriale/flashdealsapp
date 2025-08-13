@@ -506,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // State management (for super merchants)
   app.get("/api/enabled-states", auditMiddleware("Get Enabled States"), async (req: AuditRequest, res) => {
     try {
-      const enabledStates = storage.getEnabledStates();
+      const enabledStates = await storage.getEnabledStates();
       res.json(enabledStates);
     } catch (error) {
       auditError(req, error as Error, "Get Enabled States");
@@ -517,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/enabled-states", isAuthenticated, auditMiddleware("Update Enabled States"), async (req: AuditRequest, res) => {
     try {
       const { enabledStates } = req.body;
-      storage.setEnabledStates(enabledStates);
+      await storage.setEnabledStates(enabledStates);
       res.json({ message: "Enabled states updated successfully", enabledStates });
     } catch (error) {
       auditError(req, error as Error, "Update Enabled States");
