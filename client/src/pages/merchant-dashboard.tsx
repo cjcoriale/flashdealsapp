@@ -38,19 +38,17 @@ const dealFormSchema = insertDealSchema.extend({
   title: z.string().min(3, "Title must be at least 3 characters"),
   originalPrice: z.number().min(0.01, "Price must be greater than 0"),
   discountedPrice: z.number().min(0.01, "Price must be greater than 0"),
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().min(1, "End time is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
   merchantId: z.number().min(1, "Please select a business location"),
-  isRecurring: z.boolean().optional(),
-  recurringInterval: z.string().optional(),
+  dealType: z.string().min(1, "Deal type is required"),
+  description: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
 }).refine((data) => {
-  if (data.isRecurring && !data.recurringInterval) {
-    return false;
-  }
-  return true;
+  return data.discountedPrice < data.originalPrice;
 }, {
-  message: "Recurring interval is required when deal is set to recurring",
-  path: ["recurringInterval"],
+  message: "Sale price must be less than original price",
+  path: ["discountedPrice"],
 });
 
 export default function MerchantDashboard() {
@@ -84,6 +82,64 @@ export default function MerchantDashboard() {
   });
   const [isEditingInModal, setIsEditingInModal] = useState(false);
   const [addedBusinessIds, setAddedBusinessIds] = useState<Set<string>>(new Set());
+  
+  // Deal creation UI states
+  const [selectedDealColor, setSelectedDealColor] = useState("bg-blue-500");
+  const [selectedDealEmoji, setSelectedDealEmoji] = useState("🏷️");
+
+  // Color options for deal covers
+  const colorOptions = [
+    { name: "Blue", value: "bg-blue-500" },
+    { name: "Red", value: "bg-red-500" },
+    { name: "Green", value: "bg-green-500" },
+    { name: "Purple", value: "bg-purple-500" },
+    { name: "Orange", value: "bg-orange-500" },
+    { name: "Pink", value: "bg-pink-500" },
+    { name: "Indigo", value: "bg-indigo-500" },
+    { name: "Teal", value: "bg-teal-500" },
+  ];
+
+  // Emoji options for deals
+  const emojiOptions = [
+    "🏷️", "🎯", "⚡", "🔥", "🎁", "💎", "🌟", "🎉",
+    "🍕", "☕", "🍔", "🍰", "🥗", "🍜", "🍦", "🥤",
+    "👕", "👗", "👟", "💄", "💍", "🎒", "👓", "⌚",
+    "🎬", "🎮", "🎸", "📚", "🏋️", "🧘", "🎨", "🔧"
+  ];
+
+  // Auto-assign emoji based on category
+  const getDefaultEmoji = (category: string) => {
+    const categoryEmojis: { [key: string]: string } = {
+      'food': '🍕',
+      'restaurant': '🍕',
+      'coffee': '☕',
+      'clothing': '👕',
+      'retail': '🛍️',
+      'wellness': '🧘',
+      'entertainment': '🎬',
+      'fitness': '🏋️',
+      'automotive': '🔧',
+      'services': '🔧'
+    };
+    return categoryEmojis[category?.toLowerCase()] || '🏷️';
+  };
+
+  // Auto-assign color based on category
+  const getDefaultColor = (category: string) => {
+    const categoryColors: { [key: string]: string } = {
+      'food': 'bg-red-500',
+      'restaurant': 'bg-red-500',
+      'coffee': 'bg-orange-500',
+      'clothing': 'bg-blue-500',
+      'retail': 'bg-purple-500',
+      'wellness': 'bg-green-500',
+      'entertainment': 'bg-pink-500',
+      'fitness': 'bg-indigo-500',
+      'automotive': 'bg-teal-500',
+      'services': 'bg-teal-500'
+    };
+    return categoryColors[category?.toLowerCase()] || 'bg-blue-500';
+  };
   
   // States data
   const STATES = {
@@ -651,23 +707,16 @@ export default function MerchantDashboard() {
   };
 
   const onCreateDeal = (data: any) => {
-    if (!selectedMerchant) {
-      toast({
-        title: "Error",
-        description: "Please select a business first",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
     
     const dealData = {
       ...data,
-      merchantId: selectedMerchant,
       discountPercentage,
-      startTime: new Date(data.startTime).toISOString(),
-      endTime: new Date(data.endTime).toISOString(),
+      startTime: new Date(data.startDate).toISOString(),
+      endTime: new Date(data.endDate).toISOString(),
+      // Add the selected color and emoji to the deal data
+      coverColor: selectedDealColor,
+      dealEmoji: selectedDealEmoji,
     };
     
     createDealMutation.mutate(dealData);
@@ -958,6 +1007,11 @@ export default function MerchantDashboard() {
                     e.stopPropagation();
                     dealForm.setValue("merchantId", currentlyManaging.id);
                     dealForm.setValue("category", currentlyManaging.category);
+                    // Auto-assign color and emoji based on business category
+                    const defaultColor = getDefaultColor(currentlyManaging.category);
+                    const defaultEmoji = getDefaultEmoji(currentlyManaging.category);
+                    setSelectedDealColor(defaultColor);
+                    setSelectedDealEmoji(defaultEmoji);
                     setShowDealForm(true);
                   }}
                   className="w-full"
@@ -1403,323 +1457,172 @@ export default function MerchantDashboard() {
         {/* Create Deal Modal */}
         <Dialog open={showDealForm} onOpenChange={(open) => {
           setShowDealForm(open);
-          if (!open) setDealFormStep(1);
+          if (!open) {
+            setDealFormStep(1);
+            dealForm.reset();
+          }
         }}>
-          <DialogContent className="sm:max-w-2xl w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-0">
-            <DialogHeader className="px-4 pt-6 pb-2">
-              <DialogTitle>Create New Deal - Step {dealFormStep} of 3</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 px-4 pb-6">
-              {renderStepIndicator()}
+          <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+            {/* Deal Cover Preview */}
+            <div className={`relative h-32 ${selectedDealColor} flex items-center justify-center`}>
+              <div className="text-4xl">{selectedDealEmoji}</div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDealForm(false)}
+                className="absolute top-2 right-2 text-white hover:bg-white/20"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <DialogHeader>
+                <DialogTitle>Create New Deal</DialogTitle>
+              </DialogHeader>
               
-              <form onSubmit={dealForm.handleSubmit(onCreateDeal, (errors) => {
-                console.log("Form validation errors:", errors);
-                toast({
-                  title: "Form Error",
-                  description: "Please check all required fields",
-                  variant: "destructive",
-                });
-              })} className="space-y-6">
-                {/* Step 1: Basic Information */}
-                {dealFormStep === 1 && (
-                  <div className="space-y-4">
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-semibold">Basic Information</h3>
-                      <p className="text-gray-600 text-sm">Tell us about your deal</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="deal-title">Deal Title *</Label>
-                      <Input
-                        id="deal-title"
-                        {...dealForm.register("title")}
-                        placeholder="Enter your deal title"
-                        className="mt-1"
-                      />
-                      {dealForm.formState.errors.title && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {dealForm.formState.errors.title.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="deal-description">Description</Label>
-                      <Textarea
-                        id="deal-description"
-                        {...dealForm.register("description")}
-                        placeholder="Provide details about your deal"
-                        rows={3}
-                        className="mt-1"
-                      />
-                      {dealForm.formState.errors.description && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {dealForm.formState.errors.description.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="deal-category">Category *</Label>
-                      <Select onValueChange={(value) => dealForm.setValue("category", value)}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {/* Categories will be populated based on business types */}
-                          {Array.isArray(merchants) && merchants.length > 0 && 
-                            Array.from(new Set(merchants.map((m: any) => m.category))).map((category: string) => (
-                              <SelectItem key={category} value={category}>
-                                {category.charAt(0).toUpperCase() + category.slice(1)}
-                              </SelectItem>
-                            ))
-                          }
-                        </SelectContent>
-                      </Select>
-                      {dealForm.formState.errors.category && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {dealForm.formState.errors.category.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="deal-merchant">Business Location *</Label>
-                      <Select 
-                        onValueChange={(value) => dealForm.setValue("merchantId", parseInt(value))}
-                        defaultValue={selectedMerchant ? selectedMerchant.toString() : undefined}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select business location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.isArray(merchants) && merchants.map((merchant: any) => (
-                            <SelectItem key={merchant.id} value={merchant.id.toString()}>
-                              {merchant.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {dealForm.formState.errors.merchantId && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {dealForm.formState.errors.merchantId.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
+              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-4">
+                {/* Deal Title */}
+                <div>
+                  <Label htmlFor="deal-title">Deal Title *</Label>
+                  <Input
+                    id="deal-title"
+                    {...dealForm.register("title")}
+                    placeholder="Enter your deal title"
+                    className="mt-1"
+                  />
+                  {dealForm.formState.errors.title && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {dealForm.formState.errors.title.message}
+                    </p>
+                  )}
+                </div>
 
-                {/* Step 2: Pricing */}
-                {dealFormStep === 2 && (
-                  <div className="space-y-4">
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-semibold">Pricing Details</h3>
-                      <p className="text-gray-600 text-sm">Set your original and discounted prices</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="deal-original-price">Original Price *</Label>
-                        <Input
-                          id="deal-original-price"
-                          type="number"
-                          step="0.01"
-                          {...dealForm.register("originalPrice", { valueAsNumber: true })}
-                          placeholder="0.00"
-                          className="mt-1"
-                        />
-                        {dealForm.formState.errors.originalPrice && (
-                          <p className="text-sm text-red-600 mt-1">
-                            {dealForm.formState.errors.originalPrice.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="deal-discounted-price">Sale Price *</Label>
-                        <Input
-                          id="deal-discounted-price"
-                          type="number"
-                          step="0.01"
-                          {...dealForm.register("discountedPrice", { valueAsNumber: true })}
-                          placeholder="0.00"
-                          className="mt-1"
-                        />
-                        {dealForm.formState.errors.discountedPrice && (
-                          <p className="text-sm text-red-600 mt-1">
-                            {dealForm.formState.errors.discountedPrice.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Discount Preview */}
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Discount Preview</h4>
-                      <div className="text-sm text-blue-800">
-                        <div>Original Price: ${dealForm.watch("originalPrice") || 0}</div>
-                        <div>Sale Price: ${dealForm.watch("discountedPrice") || 0}</div>
-                        <div className="font-semibold">
-                          Savings: ${Math.max(0, (dealForm.watch("originalPrice") || 0) - (dealForm.watch("discountedPrice") || 0))} 
-                          ({dealForm.watch("originalPrice") > 0 ? Math.round(((dealForm.watch("originalPrice") - dealForm.watch("discountedPrice")) / dealForm.watch("originalPrice")) * 100) : 0}% off)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Timing */}
-                {dealFormStep === 3 && (
-                  <div className="space-y-4">
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-semibold">Deal Timing</h3>
-                      <p className="text-gray-600 text-sm">When will this deal be available?</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="deal-start-time">Start Time *</Label>
-                        <Input
-                          id="deal-start-time"
-                          type="datetime-local"
-                          {...dealForm.register("startTime")}
-                          className="mt-1"
-                        />
-                        {dealForm.formState.errors.startTime && (
-                          <p className="text-sm text-red-600 mt-1">
-                            {dealForm.formState.errors.startTime.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="deal-end-time">End Time *</Label>
-                        <Input
-                          id="deal-end-time"
-                          type="datetime-local"
-                          {...dealForm.register("endTime")}
-                          className="mt-1"
-                        />
-                        {dealForm.formState.errors.endTime && (
-                          <p className="text-sm text-red-600 mt-1">
-                            {dealForm.formState.errors.endTime.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Recurring Options */}
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <input
-                          type="checkbox"
-                          id="recurring-checkbox"
-                          checked={dealForm.watch("isRecurring") || false}
-                          onChange={(e) => {
-                            dealForm.setValue("isRecurring", e.target.checked);
-                            if (!e.target.checked) {
-                              dealForm.setValue("recurringInterval", "");
-                            }
-                          }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <Label htmlFor="recurring-checkbox" className="text-sm font-medium">
-                          Make this a recurring deal
-                        </Label>
-                      </div>
-                      
-                      {dealForm.watch("isRecurring") && (
-                        <div className="ml-6 space-y-2">
-                          <p className="text-sm text-gray-600">
-                            This deal will automatically repost when it expires
-                          </p>
-                          <div>
-                            <Label htmlFor="recurring-interval" className="text-sm">Repeat every:</Label>
-                            <Select onValueChange={(value) => dealForm.setValue("recurringInterval", value)}>
-                              <SelectTrigger className="mt-1 w-48">
-                                <SelectValue placeholder="Select interval" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            {dealForm.formState.errors.recurringInterval && (
-                              <p className="text-sm text-red-600 mt-1">
-                                {dealForm.formState.errors.recurringInterval.message}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Deal Summary */}
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-green-900 mb-2">Deal Summary</h4>
-                      <div className="text-sm text-green-800 space-y-1">
-                        <div><strong>Title:</strong> {dealForm.watch("title") || "Not set"}</div>
-                        <div><strong>Category:</strong> {dealForm.watch("category") || "Not set"}</div>
-                        <div><strong>Price:</strong> ${dealForm.watch("discountedPrice") || 0} (was ${dealForm.watch("originalPrice") || 0})</div>
-                        <div><strong>Business:</strong> {
-                          Array.isArray(merchants) && merchants.find((m: any) => m.id === dealForm.watch("merchantId"))?.name || "Not selected"
-                        }</div>
-                        {dealForm.watch("isRecurring") && (
-                          <div><strong>Recurring:</strong> {dealForm.watch("recurringInterval") || "Not set"}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Navigation Buttons */}
-                <div className="flex justify-between items-center pt-6 border-t">
-                  <div>
-                    {dealFormStep > 1 && (
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => setDealFormStep(dealFormStep - 1)}
-                      >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Previous
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setShowDealForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                    
-                    {dealFormStep < 3 ? (
-                      <Button 
-                        type="button" 
-                        onClick={() => setDealFormStep(dealFormStep + 1)}
-                        className="min-w-[120px]"
-                      >
-                        Next Step
-                      </Button>
-                    ) : (
-                      <Button 
-                        type="submit" 
-                        disabled={createDealMutation.isPending}
-                        className="min-w-[120px]"
-                        onClick={(e) => {
-                          console.log("Create Deal button clicked");
-                          console.log("Form errors:", dealForm.formState.errors);
-                          console.log("Form values:", dealForm.getValues());
-                          console.log("Form is valid:", dealForm.formState.isValid);
-                        }}
-                      >
-                        {createDealMutation.isPending ? "Creating..." : "Create Deal"}
-                      </Button>
-                    )}
+                {/* Color Selection */}
+                <div>
+                  <Label>Cover Color</Label>
+                  <div className="flex gap-2 mt-2">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => setSelectedDealColor(color.value)}
+                        className={`w-8 h-8 rounded-full ${color.value} border-2 ${
+                          selectedDealColor === color.value ? 'border-gray-800' : 'border-gray-300'
+                        }`}
+                        title={color.name}
+                      />
+                    ))}
                   </div>
                 </div>
+
+                {/* Emoji Selection */}
+                <div>
+                  <Label>Deal Emoji</Label>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {emojiOptions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setSelectedDealEmoji(emoji)}
+                        className={`w-10 h-10 rounded border text-xl ${
+                          selectedDealEmoji === emoji ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <Label htmlFor="deal-description">Description</Label>
+                  <Textarea
+                    id="deal-description"
+                    {...dealForm.register("description")}
+                    placeholder="Describe your deal"
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Business Location (hidden, pre-filled) */}
+                <input type="hidden" {...dealForm.register("merchantId")} />
+                <input type="hidden" {...dealForm.register("category")} />
+
+                {/* Deal Type */}
+                <div>
+                  <Label>Deal Type *</Label>
+                  <Select onValueChange={(value) => dealForm.setValue("dealType", value)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select deal type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage Off</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount Off</SelectItem>
+                      <SelectItem value="bogo">Buy One Get One</SelectItem>
+                      <SelectItem value="special">Special Offer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Deal Value */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="original-price">Original Price *</Label>
+                    <Input
+                      id="original-price"
+                      type="number"
+                      step="0.01"
+                      {...dealForm.register("originalPrice", { valueAsNumber: true })}
+                      placeholder="0.00"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="discounted-price">Sale Price *</Label>
+                    <Input
+                      id="discounted-price"
+                      type="number"
+                      step="0.01"
+                      {...dealForm.register("discountedPrice", { valueAsNumber: true })}
+                      placeholder="0.00"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Deal Duration */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="start-date">Start Date *</Label>
+                    <Input
+                      id="start-date"
+                      type="datetime-local"
+                      {...dealForm.register("startDate")}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="end-date">End Date *</Label>
+                    <Input
+                      id="end-date"
+                      type="datetime-local"
+                      {...dealForm.register("endDate")}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={createDealMutation.isPending}
+                >
+                  {createDealMutation.isPending ? "Creating..." : "Create Deal"}
+                </Button>
               </form>
             </div>
           </DialogContent>

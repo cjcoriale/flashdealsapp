@@ -80,6 +80,8 @@ export const deals = pgTable("deals", {
   isRecurring: boolean("is_recurring").default(false),
   recurringInterval: text("recurring_interval"), // daily, weekly, monthly
   lastRecurredAt: timestamp("last_recurred_at"),
+  coverColor: text("cover_color").default("bg-blue-500"),
+  dealEmoji: text("deal_emoji").default("🏷️"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
