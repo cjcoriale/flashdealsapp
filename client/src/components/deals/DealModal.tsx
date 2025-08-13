@@ -33,7 +33,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center p-4"
+      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -41,7 +41,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
       }}
     >
       <div 
-        className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 max-h-[85vh] overflow-hidden"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle Bar */}
@@ -124,27 +124,26 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
               {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim'}
             </button>
             
-            <div className="grid grid-cols-2 gap-3">
-              {deal.merchant.phone && (
-                <button 
-                  onClick={() => window.open(`tel:${deal.merchant.phone}`, '_self')}
-                  className="flex items-center justify-center border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                >
-                  <Phone className="w-4 h-4 mr-1" />
-                  <span className="text-sm">Call</span>
-                </button>
-              )}
+            <button 
+              onClick={() => {
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deal.merchant.address)}`;
+                window.open(mapUrl, '_blank');
+              }}
+              className="w-full flex items-center justify-center border border-gray-300 text-gray-700 py-3.5 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors"
+            >
+              <Navigation className="w-4 h-4 mr-2" />
+              <span>Get Directions</span>
+            </button>
+            
+            {deal.merchant.phone && (
               <button 
-                onClick={() => {
-                  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deal.merchant.address)}`;
-                  window.open(mapUrl, '_blank');
-                }}
-                className="flex items-center justify-center border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                onClick={() => window.open(`tel:${deal.merchant.phone}`, '_self')}
+                className="w-full flex items-center justify-center border border-gray-300 text-gray-700 py-3.5 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors"
               >
-                <Navigation className="w-4 h-4 mr-1" />
-                <span className="text-sm">Directions</span>
+                <Phone className="w-4 h-4 mr-2" />
+                <span>Call Business</span>
               </button>
-            </div>
+            )}
           </div>
         </div>
       </div>
