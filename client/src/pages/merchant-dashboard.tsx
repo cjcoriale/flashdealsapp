@@ -920,13 +920,13 @@ export default function MerchantDashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Currently Managing Box */}
         {currentlyManaging && (
-          <Card className="mb-6 bg-white dark:bg-white/5 cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-600">
-            <CardContent 
-              className="p-4"
-              onClick={() => handleEditMerchant(currentlyManaging)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+          <Card className="mb-6 bg-white dark:bg-white/5 hover:shadow-md transition-shadow border-l-4 border-l-blue-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div 
+                  className="flex items-center gap-3 cursor-pointer flex-1"
+                  onClick={() => handleEditMerchant(currentlyManaging)}
+                >
                   <div className="w-12 h-12 rounded-lg overflow-hidden">
                     {currentlyManaging.imageUrl ? (
                       <img 
@@ -949,6 +949,23 @@ export default function MerchantDashboard() {
                 <Badge variant="default" className="bg-blue-600 hover:bg-blue-700 text-white">
                   Active
                 </Badge>
+              </div>
+              
+              {/* Create Deal Button */}
+              <div className="flex justify-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dealForm.setValue("merchantId", currentlyManaging.id);
+                    dealForm.setValue("category", currentlyManaging.category);
+                    setShowDealForm(true);
+                  }}
+                  className="w-full"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Deal
+                </Button>
               </div>
             </CardContent>
           </Card>
