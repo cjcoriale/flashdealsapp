@@ -120,6 +120,30 @@ export const enabledStates = pgTable("enabled_states", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Application configuration settings
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  category: varchar("category").default("general"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+});
+
+// User preferences and merchant settings
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  preferenceKey: varchar("preference_key").notNull(),
+  preferenceValue: text("preference_value"),
+  category: varchar("category").default("general"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Composite unique index for user + preference key
+  index("user_preference_idx").on(table.userId, table.preferenceKey),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   merchants: many(merchants),
@@ -175,6 +199,8 @@ export const insertSavedDealSchema = createInsertSchema(savedDeals).omit({ id: t
 export const insertDealClaimSchema = createInsertSchema(dealClaims).omit({ id: true, claimedAt: true });
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, timestamp: true });
 export const insertEnabledStateSchema = createInsertSchema(enabledStates).omit({ id: true, updatedAt: true });
+export const insertAppSettingSchema = createInsertSchema(appSettings).omit({ id: true, updatedAt: true });
+export const insertUserPreferenceSchema = createInsertSchema(userPreferences).omit({ id: true, updatedAt: true });
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -190,6 +216,10 @@ export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertEnabledState = z.infer<typeof insertEnabledStateSchema>;
 export type EnabledState = typeof enabledStates.$inferSelect;
+export type InsertAppSetting = z.infer<typeof insertAppSettingSchema>;
+export type AppSetting = typeof appSettings.$inferSelect;
+export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
+export type UserPreference = typeof userPreferences.$inferSelect;
 
 export type DealWithMerchant = Deal & {
   merchant: Merchant;

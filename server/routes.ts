@@ -525,6 +525,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // App settings management
+  app.get("/api/app-settings", isAuthenticated, auditMiddleware("Get App Settings"), async (req: AuditRequest, res) => {
+    try {
+      const settings = await storage.getAllAppSettings();
+      res.json(settings);
+    } catch (error) {
+      auditError(req, error as Error, "Get App Settings");
+      res.status(500).json({ message: "Failed to fetch app settings" });
+    }
+  });
+
+  app.get("/api/app-settings/:key", isAuthenticated, auditMiddleware("Get App Setting"), async (req: AuditRequest, res) => {
+    try {
+      const { key } = req.params;
+      const setting = await storage.getAppSetting(key);
+      if (!setting) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      auditError(req, error as Error, "Get App Setting");
+      res.status(500).json({ message: "Failed to fetch app setting" });
+    }
+  });
+
+  app.post("/api/app-settings", isAuthenticated, auditMiddleware("Set App Setting"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.role !== 'super_merchant') {
+        return res.status(403).json({ message: "Super merchant access required" });
+      }
+
+      const { key, value, description, category } = req.body;
+      const setting = await storage.setAppSetting(key, value, description, category, currentUserId);
+      res.json({ message: "App setting updated successfully", setting });
+    } catch (error) {
+      auditError(req, error as Error, "Set App Setting");
+      res.status(500).json({ message: "Failed to update app setting" });
+    }
+  });
+
+  // User preferences management
+  app.get("/api/user-preferences", isAuthenticated, auditMiddleware("Get User Preferences"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const { category } = req.query;
+      const preferences = await storage.getUserPreferences(currentUserId, category as string);
+      res.json(preferences);
+    } catch (error) {
+      auditError(req, error as Error, "Get User Preferences");
+      res.status(500).json({ message: "Failed to fetch user preferences" });
+    }
+  });
+
+  app.get("/api/user-preferences/:key", isAuthenticated, auditMiddleware("Get User Preference"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const { key } = req.params;
+      const preference = await storage.getUserPreference(currentUserId, key);
+      if (!preference) {
+        return res.status(404).json({ message: "Preference not found" });
+      }
+      res.json(preference);
+    } catch (error) {
+      auditError(req, error as Error, "Get User Preference");
+      res.status(500).json({ message: "Failed to fetch user preference" });
+    }
+  });
+
+  app.post("/api/user-preferences", isAuthenticated, auditMiddleware("Set User Preference"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const { key, value, category } = req.body;
+      const preference = await storage.setUserPreference(currentUserId, key, value, category);
+      res.json({ message: "User preference updated successfully", preference });
+    } catch (error) {
+      auditError(req, error as Error, "Set User Preference");
+      res.status(500).json({ message: "Failed to update user preference" });
+    }
+  });
+
+  app.delete("/api/user-preferences/:key", isAuthenticated, auditMiddleware("Delete User Preference"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const { key } = req.params;
+      await storage.deleteUserPreference(currentUserId, key);
+      res.json({ message: "User preference deleted successfully" });
+    } catch (error) {
+      auditError(req, error as Error, "Delete User Preference");
+      res.status(500).json({ message: "Failed to delete user preference" });
+    }
+  });
+
   // Background task to process recurring deals
   const processRecurringDeals = async () => {
     try {

@@ -34,10 +34,13 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
-  // Use memory store for development to avoid session persistence issues
-  const createMemoryStore = MemoryStore(session);
-  const sessionStore = new createMemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
+  // Use PostgreSQL session store for persistent sessions
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true, // Auto-create sessions table
+    ttl: sessionTtl / 1000, // TTL in seconds
+    tableName: "user_sessions", // Custom table name to avoid conflicts
   });
   
   return session({

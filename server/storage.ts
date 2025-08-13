@@ -7,6 +7,8 @@ import {
   auditLogs,
   authSessions,
   enabledStates,
+  appSettings,
+  userPreferences,
   type User,
   type UpsertUser,
   type Merchant,
@@ -26,6 +28,10 @@ import {
   type InsertAuthSession,
   type EnabledState,
   type InsertEnabledState,
+  type AppSetting,
+  type InsertAppSetting,
+  type UserPreference,
+  type InsertUserPreference,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, lt, sql } from "drizzle-orm";
@@ -86,6 +92,17 @@ export interface IStorage {
   // State management operations (for super merchants)
   getEnabledStates(): Promise<{ [key: string]: boolean }>;
   setEnabledStates(states: { [key: string]: boolean }): Promise<void>;
+  
+  // App settings operations
+  getAppSetting(key: string): Promise<AppSetting | undefined>;
+  setAppSetting(key: string, value: string, description?: string, category?: string, updatedBy?: string): Promise<AppSetting>;
+  getAllAppSettings(): Promise<AppSetting[]>;
+  
+  // User preferences operations
+  getUserPreference(userId: string, key: string): Promise<UserPreference | undefined>;
+  setUserPreference(userId: string, key: string, value: string, category?: string): Promise<UserPreference>;
+  getUserPreferences(userId: string, category?: string): Promise<UserPreference[]>;
+  deleteUserPreference(userId: string, key: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -515,6 +532,101 @@ export class DatabaseStorage implements IStorage {
         })
         .onConflictDoNothing();
     }
+  }
+
+  // App settings operations
+  async getAppSetting(key: string): Promise<AppSetting | undefined> {
+    const [setting] = await db
+      .select()
+      .from(appSettings)
+      .where(eq(appSettings.key, key));
+    return setting;
+  }
+
+  async setAppSetting(key: string, value: string, description?: string, category: string = "general", updatedBy?: string): Promise<AppSetting> {
+    const [setting] = await db
+      .insert(appSettings)
+      .values({
+        key,
+        value,
+        description,
+        category,
+        updatedBy,
+      })
+      .onConflictDoUpdate({
+        target: appSettings.key,
+        set: {
+          value,
+          description,
+          category,
+          updatedBy,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return setting;
+  }
+
+  async getAllAppSettings(): Promise<AppSetting[]> {
+    return await db.select().from(appSettings);
+  }
+
+  // User preferences operations
+  async getUserPreference(userId: string, key: string): Promise<UserPreference | undefined> {
+    const [preference] = await db
+      .select()
+      .from(userPreferences)
+      .where(and(
+        eq(userPreferences.userId, userId),
+        eq(userPreferences.preferenceKey, key)
+      ));
+    return preference;
+  }
+
+  async setUserPreference(userId: string, key: string, value: string, category: string = "general"): Promise<UserPreference> {
+    const [preference] = await db
+      .insert(userPreferences)
+      .values({
+        userId,
+        preferenceKey: key,
+        preferenceValue: value,
+        category,
+      })
+      .onConflictDoUpdate({
+        target: [userPreferences.userId, userPreferences.preferenceKey],
+        set: {
+          preferenceValue: value,
+          category,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return preference;
+  }
+
+  async getUserPreferences(userId: string, category?: string): Promise<UserPreference[]> {
+    if (category) {
+      return await db
+        .select()
+        .from(userPreferences)
+        .where(and(
+          eq(userPreferences.userId, userId),
+          eq(userPreferences.category, category)
+        ));
+    }
+    return await db
+      .select()
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId));
+  }
+
+  async deleteUserPreference(userId: string, key: string): Promise<void> {
+    await db
+      .delete(userPreferences)
+      .where(and(
+        eq(userPreferences.userId, userId),
+        eq(userPreferences.preferenceKey, key)
+      ));
   }
 }
 
