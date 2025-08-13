@@ -83,6 +83,7 @@ export default function MerchantDashboard() {
     timing: true
   });
   const [isEditingInModal, setIsEditingInModal] = useState(false);
+  const [addedBusinessIds, setAddedBusinessIds] = useState<Set<string>>(new Set());
   
   // States data
   const STATES = {
@@ -235,6 +236,20 @@ export default function MerchantDashboard() {
       setCurrentlyManaging(merchant);
     }
   }, [selectedMerchant, merchants]);
+
+  // Populate addedBusinessIds when merchants are loaded
+  useEffect(() => {
+    if (Array.isArray(merchants) && merchants.length > 0) {
+      const existingIdentifiers = new Set();
+      merchants.forEach((merchant: any) => {
+        if (merchant.address) {
+          existingIdentifiers.add(merchant.address.toLowerCase().trim());
+        }
+        // If we stored place_id in the future, we could add it here too
+      });
+      setAddedBusinessIds(existingIdentifiers);
+    }
+  }, [merchants]);
 
   const merchantForm = useForm({
     resolver: zodResolver(merchantFormSchema),
@@ -536,9 +551,31 @@ export default function MerchantDashboard() {
   // Create business from search result mutation
   const createFromSearchMutation = useMutation({
     mutationFn: async (businessData: any) => {
+      // Check for duplicate addresses in existing merchants
+      const existingMerchants = merchants || [];
+      const isDuplicate = existingMerchants.some((merchant: any) => 
+        merchant.address?.toLowerCase().trim() === businessData.address?.toLowerCase().trim()
+      );
+      
+      if (isDuplicate) {
+        throw new Error("A business with this address already exists");
+      }
+      
       return await apiRequest("POST", "/api/merchants", businessData);
     },
-    onSuccess: () => {
+    onSuccess: (newMerchant, businessData) => {
+      // Track the added business using both place_id and address as identifiers
+      setAddedBusinessIds(prev => {
+        const newSet = new Set(prev);
+        if (businessData.place_id) {
+          newSet.add(businessData.place_id);
+        }
+        if (businessData.address) {
+          newSet.add(businessData.address.toLowerCase().trim());
+        }
+        return newSet;
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/my-merchants"] });
       toast({
         title: "Business Created",
@@ -559,7 +596,7 @@ export default function MerchantDashboard() {
       }
       toast({
         title: "Error",
-        description: "Failed to create business",
+        description: error.message || "Failed to create business",
         variant: "destructive",
       });
     },
@@ -704,8 +741,25 @@ export default function MerchantDashboard() {
       longitude: result.longitude || -74.0060,
       phone: result.phone || "",
       imageUrl: result.imageUrl || result.photo || "",
+      place_id: result.place_id, // Include place_id for tracking
     };
     createFromSearchMutation.mutate(businessData);
+  };
+
+  // Check if a business is already added or exists
+  const isBusinessAdded = (result: any) => {
+    const resultAddress = result.address?.toLowerCase().trim();
+    
+    // Check if this address was recently added via the interface
+    const isRecentlyAdded = addedBusinessIds.has(result.place_id) || addedBusinessIds.has(resultAddress);
+    
+    // Also check if it exists in current merchants
+    const existingMerchants = merchants || [];
+    const existsInMerchants = existingMerchants.some((merchant: any) => 
+      merchant.address?.toLowerCase().trim() === resultAddress
+    );
+    
+    return isRecentlyAdded || existsInMerchants;
   };
 
   const renderStepIndicator = () => {
@@ -1746,10 +1800,16 @@ export default function MerchantDashboard() {
                               )}
                               <Button
                                 size="sm"
-                                onClick={() => createBusinessFromResult(result)}
-                                disabled={createFromSearchMutation.isPending}
+                                onClick={() => !isBusinessAdded(result) && createBusinessFromResult(result)}
+                                disabled={createFromSearchMutation.isPending || isBusinessAdded(result)}
+                                variant={isBusinessAdded(result) ? "secondary" : "default"}
                               >
-                                {createFromSearchMutation.isPending ? "Adding..." : "Add Business"}
+                                {createFromSearchMutation.isPending 
+                                  ? "Adding..." 
+                                  : isBusinessAdded(result) 
+                                    ? "Added" 
+                                    : "Add Business"
+                                }
                               </Button>
                             </div>
                           </div>
