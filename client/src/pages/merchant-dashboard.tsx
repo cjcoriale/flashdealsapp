@@ -26,6 +26,7 @@ import { insertMerchantSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import PageHeader from "@/components/layout/PageHeader";
+import ProfileMenu from "@/components/ui/ProfileMenu";
 
 const merchantFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
@@ -924,55 +925,41 @@ export default function MerchantDashboard() {
                 ) : 'Create Deal'}
               </h1>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {user?.role !== 'super_merchant' && (
-                  <DropdownMenuItem onClick={() => promoteSuperMerchantMutation.mutate()}>
-                    <TrendingUp className="w-4 h-4 mr-2" />
-                    Become Super Merchant
-                  </DropdownMenuItem>
-                )}
-                {user?.role === 'super_merchant' && (
-                  <>
-                    <DropdownMenuItem onClick={() => setShowPasswordPrompt(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Super Merchant Tools
-                    </DropdownMenuItem>
-                    <Badge variant="secondary" className="mx-2 mb-2 text-xs">
-                      Super Merchant
-                    </Badge>
-                  </>
-                )}
-                <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Bell className="w-4 h-4 mr-2" />
-                  Notifications
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Shield className="w-4 h-4 mr-2" />
-                  Privacy Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email Preferences
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => window.location.href = '/api/auth/logout'}
-                  className="text-red-600 dark:text-red-400"
+            <div className="flex items-center gap-2">
+              {/* Super Merchant Badge */}
+              {user?.role === 'super_merchant' && (
+                <Badge variant="secondary" className="text-xs">
+                  Super Merchant
+                </Badge>
+              )}
+              
+              {/* Super Merchant Tools Button */}
+              {user?.role === 'super_merchant' && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowPasswordPrompt(true)}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tools
+                </Button>
+              )}
+              
+              {/* Become Super Merchant Button */}
+              {user?.role !== 'super_merchant' && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => promoteSuperMerchantMutation.mutate()}
+                >
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Upgrade
+                </Button>
+              )}
+              
+              {/* Profile Menu */}
+              <ProfileMenu />
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import ProfileMenu from "@/components/ui/ProfileMenu";
 
 interface TopNavigationProps {
   onSearch: (query: string) => void;
@@ -33,16 +33,8 @@ export default function TopNavigation({ onSearch, searchQuery }: TopNavigationPr
           </div>
         </div>
 
-        {/* Filter Button */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 mr-2"
-        >
-          <Filter className="w-5 h-5 text-gray-600" />
-        </Button>
-
-
+        {/* Profile Menu */}
+        <ProfileMenu />
       </div>
     </div>
   );

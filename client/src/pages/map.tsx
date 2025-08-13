@@ -5,7 +5,7 @@ import InteractiveMap from "@/components/map/InteractiveMap";
 import TopNavigation from "@/components/layout/TopNavigation";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import FloatingButtons from "@/components/layout/FloatingButtons";
-import SideMenu from "@/components/layout/SideMenu";
+
 import DealModal from "@/components/deals/DealModal";
 import AuditModal from "@/components/audit/AuditModal";
 import AuthModal from "@/components/auth/AuthModal";
@@ -20,7 +20,6 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 
 export default function MapPage() {
   const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
-  const [showSideMenu, setShowSideMenu] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -184,10 +183,7 @@ export default function MapPage() {
     }, 3000);
   };
 
-  const handleMenuToggle = () => {
-    setShowSideMenu(!showSideMenu);
-    logAction("Menu Toggled", showSideMenu ? "Menu closed" : "Menu opened");
-  };
+
 
   const handleAuditModalToggle = () => {
     setShowAuditModal(!showAuditModal);
@@ -289,13 +285,7 @@ export default function MapPage() {
         onAuditClick={handleAuditModalToggle}
       />
 
-      {/* Side Menu */}
-      <SideMenu
-        isOpen={showSideMenu}
-        onClose={() => setShowSideMenu(false)}
-        onAuditClick={handleAuditModalToggle}
-        onMerchantClick={() => {}}
-      />
+
 
       {/* Deal Details Modal */}
       {selectedDeal && (
