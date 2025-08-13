@@ -1669,6 +1669,19 @@ export default function MerchantDashboard() {
                           />
                         </div>
                       </div>
+                      
+                      {/* Availability */}
+                      <div>
+                        <Label htmlFor="max-redemptions" className="text-sm">Available Quantity</Label>
+                        <Input
+                          id="max-redemptions"
+                          type="number"
+                          {...dealForm.register("maxRedemptions", { valueAsNumber: true })}
+                          placeholder="100"
+                          className="mt-1 text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">How many customers can claim this deal</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1690,8 +1703,43 @@ export default function MerchantDashboard() {
                       <input type="hidden" {...dealForm.register("merchantId")} />
                       <input type="hidden" {...dealForm.register("category")} />
 
+                      {/* Deal Type Selection */}
+                      <div>
+                        <Label className="text-sm font-medium">Deal Type</Label>
+                        <Select onValueChange={(value) => dealForm.setValue("category", value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select deal type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="flash-sale">⚡ Flash Sale</SelectItem>
+                            <SelectItem value="discount">🏷️ Discount</SelectItem>
+                            <SelectItem value="bogo">🎁 Buy One Get One</SelectItem>
+                            <SelectItem value="happy-hour">🍻 Happy Hour</SelectItem>
+                            <SelectItem value="student-discount">🎓 Student Discount</SelectItem>
+                            <SelectItem value="early-bird">🌅 Early Bird Special</SelectItem>
+                            <SelectItem value="bundle">📦 Bundle Deal</SelectItem>
+                            <SelectItem value="seasonal">🍂 Seasonal Special</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Deal Status */}
+                      <div>
+                        <Label className="text-sm font-medium">Deal Status</Label>
+                        <Select onValueChange={(value) => dealForm.setValue("isActive", value === "active")}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Active" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">✅ Active</SelectItem>
+                            <SelectItem value="draft">📝 Draft</SelectItem>
+                            <SelectItem value="scheduled">⏰ Scheduled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       {/* Recurring Deal Options */}
-                      <div className="border rounded-lg p-3 bg-gray-50">
+                      <div className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
                         <div className="flex items-center space-x-2 mb-3">
                           <input
                             type="checkbox"
@@ -2195,37 +2243,58 @@ export default function MerchantDashboard() {
                           </>
                         ) : (
                           <div className="pt-2 space-y-4">
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="modal-original-price">Original Price *</Label>
-                                <Input
-                                  id="modal-original-price"
-                                  type="number"
-                                  step="0.01"
-                                  {...dealForm.register("originalPrice", { valueAsNumber: true })}
-                                  placeholder="0.00"
-                                  className="mt-1"
-                                />
-                                {dealForm.formState.errors.originalPrice && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {dealForm.formState.errors.originalPrice.message}
-                                  </p>
-                                )}
+                            <div className="space-y-4">
+                              {/* Price Row */}
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="modal-original-price">Original Price *</Label>
+                                  <Input
+                                    id="modal-original-price"
+                                    type="number"
+                                    step="0.01"
+                                    {...dealForm.register("originalPrice", { valueAsNumber: true })}
+                                    placeholder="0.00"
+                                    className="mt-1"
+                                  />
+                                  {dealForm.formState.errors.originalPrice && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                      {dealForm.formState.errors.originalPrice.message}
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                <div>
+                                  <Label htmlFor="modal-discounted-price">Discounted Price *</Label>
+                                  <Input
+                                    id="modal-discounted-price"
+                                    type="number"
+                                    step="0.01"
+                                    {...dealForm.register("discountedPrice", { valueAsNumber: true })}
+                                    placeholder="0.00"
+                                    className="mt-1"
+                                  />
+                                  {dealForm.formState.errors.discountedPrice && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                      {dealForm.formState.errors.discountedPrice.message}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                              
+
+                              {/* Availability Row */}
                               <div>
-                                <Label htmlFor="modal-discounted-price">Discounted Price *</Label>
+                                <Label htmlFor="modal-max-redemptions">Available Quantity</Label>
                                 <Input
-                                  id="modal-discounted-price"
+                                  id="modal-max-redemptions"
                                   type="number"
-                                  step="0.01"
-                                  {...dealForm.register("discountedPrice", { valueAsNumber: true })}
-                                  placeholder="0.00"
+                                  {...dealForm.register("maxRedemptions", { valueAsNumber: true })}
+                                  placeholder="100"
                                   className="mt-1"
                                 />
-                                {dealForm.formState.errors.discountedPrice && (
+                                <p className="text-xs text-gray-500 mt-1">How many customers can claim this deal (leave empty for unlimited)</p>
+                                {dealForm.formState.errors.maxRedemptions && (
                                   <p className="text-sm text-red-600 mt-1">
-                                    {dealForm.formState.errors.discountedPrice.message}
+                                    {dealForm.formState.errors.maxRedemptions.message}
                                   </p>
                                 )}
                               </div>
