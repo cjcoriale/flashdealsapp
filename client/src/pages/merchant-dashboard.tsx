@@ -1002,7 +1002,7 @@ export default function MerchantDashboard() {
                               <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"} className="text-xs">
                                 {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
                               </Badge>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-500 whitespace-nowrap">
                                 {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
                               </span>
                             </div>
