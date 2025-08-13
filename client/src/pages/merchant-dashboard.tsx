@@ -387,7 +387,7 @@ export default function MerchantDashboard() {
       discountPercentage: 0,
       startTime: "",
       endTime: "",
-      maxRedemptions: 100,
+      maxRedemptions: 25,
       merchantId: 0,
       isRecurring: false,
       recurringInterval: "",
@@ -859,7 +859,7 @@ export default function MerchantDashboard() {
       merchantId: selectedMerchant || (Array.isArray(merchants) && merchants.length > 0 ? merchants[0].id : 0),
       startTime: new Date().toISOString().slice(0, 16),
       endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-      maxRedemptions: 100,
+      maxRedemptions: 25,
       isRecurring: false,
       recurringInterval: ""
     });
