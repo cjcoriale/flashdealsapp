@@ -1692,7 +1692,20 @@ export default function MerchantDashboard() {
 
 
 
-                {/* State Management */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold mb-2">Manual Business Creation</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Need to create a specific business manually? Use the regular business creation form.
+                  </p>
+                  <Button variant="outline" onClick={() => {
+                    setShowBulkBusinessForm(false);
+                    setShowMerchantForm(true);
+                  }}>
+                    Create Custom Business
+                  </Button>
+                </div>
+
+                {/* Service Areas */}
                 <div className="border-t pt-4">
                   <h4 className="font-semibold mb-3">Service Areas</h4>
                   <div className="space-y-4">
@@ -1749,19 +1762,6 @@ export default function MerchantDashboard() {
                         })}
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold mb-2">Manual Business Creation</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Need to create a specific business manually? Use the regular business creation form.
-                  </p>
-                  <Button variant="outline" onClick={() => {
-                    setShowBulkBusinessForm(false);
-                    setShowMerchantForm(true);
-                  }}>
-                    Create Custom Business
-                  </Button>
                 </div>
               </div>
             </div>
