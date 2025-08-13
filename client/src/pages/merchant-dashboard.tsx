@@ -1048,15 +1048,10 @@ export default function MerchantDashboard() {
                   </DropdownMenuItem>
                 )}
                 {user?.role === 'super_merchant' && (
-                  <>
-                    <DropdownMenuItem onClick={() => setShowPasswordPrompt(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Super Merchant
-                    </DropdownMenuItem>
-                    <Badge variant="secondary" className="mx-2 mb-2 text-xs">
-                      Super Merchant
-                    </Badge>
-                  </>
+                  <DropdownMenuItem onClick={() => setShowPasswordPrompt(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Super Merchant
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuItem>
                   <User className="w-4 h-4 mr-2" />
