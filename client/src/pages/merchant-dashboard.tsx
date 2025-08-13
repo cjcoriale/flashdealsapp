@@ -74,6 +74,8 @@ export default function MerchantDashboard() {
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
   const [dealsSearchQuery, setDealsSearchQuery] = useState("");
   const [currentlyManaging, setCurrentlyManaging] = useState<any>(null);
+  const [selectedDealForEdit, setSelectedDealForEdit] = useState<any>(null);
+  const [showDealDetails, setShowDealDetails] = useState(false);
   
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
@@ -977,7 +979,11 @@ export default function MerchantDashboard() {
                     return (
                       <div
                         key={deal.id}
-                        className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSelectedDealForEdit(deal);
+                          setShowDealDetails(true);
+                        }}
                       >
                         {/* Percentage off in top right corner */}
                         <div className="absolute top-2 right-2">
@@ -1687,6 +1693,166 @@ export default function MerchantDashboard() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Deal Details Modal */}
+        {showDealDetails && selectedDealForEdit && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Deal Details
+                    </h2>
+                    <Badge variant={selectedDealForEdit.discountPercentage >= 50 ? "default" : "secondary"} className="text-lg px-3 py-1">
+                      {selectedDealForEdit.discountPercentage}% OFF
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowDealDetails(false);
+                      setSelectedDealForEdit(null);
+                    }}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Deal Header */}
+                  <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                    <h3 className="text-xl font-semibold mb-2">{selectedDealForEdit.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-3">
+                      {selectedDealForEdit.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="flex items-center gap-1">
+                        <Store className="w-4 h-4" />
+                        {Array.isArray(merchants) 
+                          ? merchants.find((m: any) => m.id === selectedDealForEdit.merchantId)?.name || "Unknown Restaurant"
+                          : "Unknown Restaurant"
+                        }
+                      </span>
+                      <Badge variant={selectedDealForEdit.category === 'restaurant' ? 'default' : 'secondary'}>
+                        {selectedDealForEdit.category}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Pricing & Status */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Pricing</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-300">Original Price:</span>
+                          <span className="font-medium">${selectedDealForEdit.originalPrice}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-300">Discounted Price:</span>
+                          <span className="font-medium text-green-600">${selectedDealForEdit.discountedPrice}</span>
+                        </div>
+                        <div className="flex justify-between border-t pt-2">
+                          <span className="text-gray-600 dark:text-gray-300">You Save:</span>
+                          <span className="font-bold text-green-600">
+                            ${selectedDealForEdit.originalPrice - selectedDealForEdit.discountedPrice}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Status & Activity</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-300">Status:</span>
+                          <Badge variant={new Date(selectedDealForEdit.endTime) > new Date() ? "default" : "destructive"}>
+                            {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-300">Redemptions:</span>
+                          <span className="font-medium">
+                            {selectedDealForEdit.currentRedemptions || 0} / {selectedDealForEdit.maxRedemptions}
+                          </span>
+                        </div>
+                        {selectedDealForEdit.isRecurring && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Recurring:</span>
+                            <Badge variant="outline" className="text-xs">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {selectedDealForEdit.recurringInterval}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Timing */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Timing</h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">Start Time:</span>
+                        <p className="font-medium">
+                          {new Date(selectedDealForEdit.startTime).toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">End Time:</span>
+                        <p className="font-medium">
+                          {new Date(selectedDealForEdit.endTime).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                      onClick={() => {
+                        // Pre-populate deal form with current deal data
+                        dealForm.reset({
+                          title: selectedDealForEdit.title,
+                          description: selectedDealForEdit.description,
+                          originalPrice: selectedDealForEdit.originalPrice,
+                          discountedPrice: selectedDealForEdit.discountedPrice,
+                          category: selectedDealForEdit.category,
+                          startTime: new Date(selectedDealForEdit.startTime).toISOString().slice(0, 16),
+                          endTime: new Date(selectedDealForEdit.endTime).toISOString().slice(0, 16),
+                          maxRedemptions: selectedDealForEdit.maxRedemptions,
+                          merchantId: selectedDealForEdit.merchantId,
+                          isRecurring: selectedDealForEdit.isRecurring,
+                          recurringInterval: selectedDealForEdit.recurringInterval,
+                        });
+                        setShowDealDetails(false);
+                        setShowDealForm(true);
+                        setDealFormStep(1);
+                      }}
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Deal
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowDealDetails(false);
+                        setSelectedDealForEdit(null);
+                      }}
+                      className="flex-1"
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}
