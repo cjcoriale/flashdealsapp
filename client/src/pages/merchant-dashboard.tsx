@@ -92,6 +92,7 @@ export default function MerchantDashboard() {
   const [pricingCollapsed, setPricingCollapsed] = useState(true);
   const [statusCollapsed, setStatusCollapsed] = useState(true);
   const [timingCollapsed, setTimingCollapsed] = useState(true);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   // Validation helpers for form sections
   const getSectionValidationState = () => {
@@ -100,30 +101,32 @@ export default function MerchantDashboard() {
     
     return {
       details: {
-        hasError: !values.title || !!errors.title,
+        hasError: (!values.title || !!errors.title) && hasAttemptedSubmit,
         isRequired: true
       },
       pricing: {
-        hasError: !values.originalPrice || !values.discountedPrice || !!errors.originalPrice || !!errors.discountedPrice,
+        hasError: (!values.originalPrice || !values.discountedPrice || !!errors.originalPrice || !!errors.discountedPrice) && hasAttemptedSubmit,
         isRequired: true
       },
       status: {
-        hasError: !values.merchantId || !!errors.merchantId,
+        hasError: (!values.merchantId || !!errors.merchantId) && hasAttemptedSubmit,
         isRequired: true
       },
       timing: {
-        hasError: !values.startTime || !values.endTime || !!errors.startTime || !!errors.endTime,
+        hasError: (!values.startTime || !values.endTime || !!errors.startTime || !!errors.endTime) && hasAttemptedSubmit,
         isRequired: true
       }
     };
   };
 
   const isFormValid = () => {
-    const validation = getSectionValidationState();
-    return !validation.details.hasError && 
-           !validation.pricing.hasError && 
-           !validation.status.hasError && 
-           !validation.timing.hasError;
+    const values = dealForm.getValues();
+    return values.title && 
+           values.originalPrice && 
+           values.discountedPrice && 
+           values.merchantId && 
+           values.startTime && 
+           values.endTime;
   };
 
   // Gradient color options for deal covers
@@ -1522,6 +1525,7 @@ export default function MerchantDashboard() {
           if (!open) {
             setDealFormStep(1);
             dealForm.reset();
+            setHasAttemptedSubmit(false); // Reset validation state
             // Reset collapsible sections to collapsed state
             setDetailsCollapsed(true);
             setPricingCollapsed(true);
@@ -1744,24 +1748,26 @@ export default function MerchantDashboard() {
                   </div>
                   {!timingCollapsed && (
                     <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
-                      {/* Deal Duration */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Deal Duration - Stacked for Better Mobile Layout */}
+                      <div className="space-y-3">
                         <div>
-                          <Label htmlFor="start-date" className="text-xs">Start Date *</Label>
+                          <Label htmlFor="start-date" className="text-xs font-medium text-gray-700 dark:text-gray-300">Start Date & Time *</Label>
                           <Input
                             id="start-date"
                             type="datetime-local"
                             {...dealForm.register("startTime")}
-                            className="mt-1 text-xs h-8"
+                            className="mt-1 text-xs h-9 w-full"
+                            placeholder="Select start date and time"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="end-date" className="text-xs">End Date *</Label>
+                          <Label htmlFor="end-date" className="text-xs font-medium text-gray-700 dark:text-gray-300">End Date & Time *</Label>
                           <Input
                             id="end-date"
                             type="datetime-local"
                             {...dealForm.register("endTime")}
-                            className="mt-1 text-xs h-8"
+                            className="mt-1 text-xs h-9 w-full"
+                            placeholder="Select end date and time"
                           />
                         </div>
                       </div>
@@ -1775,6 +1781,7 @@ export default function MerchantDashboard() {
                   className={`w-full text-sm ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={createDealMutation.isPending || !isFormValid()}
                   onClick={(e) => {
+                    setHasAttemptedSubmit(true);
                     if (!isFormValid()) {
                       e.preventDefault();
                       toast({
