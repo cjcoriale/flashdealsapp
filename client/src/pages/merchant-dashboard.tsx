@@ -110,13 +110,7 @@ export default function MerchantDashboard() {
   
   // State toggle function
   const toggleState = (stateName: string) => {
-    console.log('Toggle state called for:', stateName);
-    console.log('Current state before toggle:', enabledStates[stateName]);
-    setEnabledStates(prev => {
-      const newState = { ...prev, [stateName]: !prev[stateName] };
-      console.log('New state after toggle:', newState[stateName]);
-      return newState;
-    });
+    setEnabledStates(prev => ({ ...prev, [stateName]: !prev[stateName] }));
   };
 
   // Debug logging for search state (can be removed in production)
@@ -1631,9 +1625,9 @@ export default function MerchantDashboard() {
               <DialogTitle>Super Merchant</DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
-              {/* Super Search Interface */}
+              {/* Business Search Interface */}
               <div className="space-y-4">
-                <h4 className="font-semibold text-lg">Super Search</h4>
+                <h4 className="font-semibold text-lg">Business Search</h4>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search for businesses (e.g., 'pizza Phoenix', 'coffee shops Scottsdale')"
