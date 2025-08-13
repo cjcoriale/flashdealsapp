@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +25,7 @@ export default function TopNavigation({ onSearch, searchQuery }: TopNavigationPr
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
-              placeholder="Search deals, restaurants..."
+              placeholder="Search deals, restaurants, locations..."
               value={localSearch}
               onChange={handleSearchChange}
               className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-lg"
@@ -33,14 +33,7 @@ export default function TopNavigation({ onSearch, searchQuery }: TopNavigationPr
           </div>
         </div>
 
-        {/* Filter Button */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 mr-2"
-        >
-          <Filter className="w-5 h-5 text-gray-600" />
-        </Button>
+
 
 
       </div>

@@ -460,7 +460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deal.title.toLowerCase().includes(searchTerm) ||
         deal.description?.toLowerCase().includes(searchTerm) ||
         deal.merchant.name.toLowerCase().includes(searchTerm) ||
-        deal.category.toLowerCase().includes(searchTerm)
+        deal.category.toLowerCase().includes(searchTerm) ||
+        deal.merchant.address.toLowerCase().includes(searchTerm) ||
+        deal.merchant.city?.toLowerCase().includes(searchTerm) ||
+        deal.merchant.state?.toLowerCase().includes(searchTerm)
       );
       
       res.json(filteredDeals);

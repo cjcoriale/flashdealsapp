@@ -1,19 +1,32 @@
-import { Clock, MapPin, X, Star, Users, Phone, Navigation } from "lucide-react";
-import { DealWithMerchant } from "@shared/schema";
+import { Clock, MapPin, X, Star, Users, Phone, Navigation, Edit } from "lucide-react";
+import { DealWithMerchant, Merchant } from "@shared/schema";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { getDealColorClass } from "@/lib/dealColors";
 
 interface DealModalProps {
   deal: DealWithMerchant;
   onClose: () => void;
   onClaim: () => void;
+  onEdit?: () => void;
   onAuthRequired?: () => void;
 }
 
-export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: DealModalProps) {
+export default function DealModal({ deal, onClose, onClaim, onEdit, onAuthRequired }: DealModalProps) {
   const [timeLeft, setTimeLeft] = useState(0);
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  
+  // Get user's merchants to check ownership
+  const { data: userMerchants = [] } = useQuery<Merchant[]>({
+    queryKey: ["/api/my-merchants"],
+    enabled: !!user && user.role === 'merchant',
+  });
+  
+  // Check if current user owns this deal's merchant
+  const userOwnsMerchant = userMerchants.some(merchant => merchant.id === deal.merchantId);
+  const isMerchant = user?.role === 'merchant';
+  const canEditDeal = isMerchant && userOwnsMerchant;
 
   useEffect(() => {
     const updateTimeLeft = () => {
@@ -111,19 +124,39 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <button 
-              onClick={() => {
-                if (isAuthenticated) {
-                  onClaim();
+            {canEditDeal ? (
+              <button 
+                onClick={() => {
+                  onEdit?.();
                   onClose();
-                } else {
-                  onAuthRequired?.();
-                }
-              }}
-              className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-semibold text-base hover:bg-blue-700 transition-colors shadow-lg"
-            >
-              {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim'}
-            </button>
+                }}
+                className="w-full bg-green-600 text-white py-3.5 rounded-xl font-semibold text-base hover:bg-green-700 transition-colors shadow-lg flex items-center justify-center"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Deal
+              </button>
+            ) : isMerchant ? (
+              <button 
+                disabled
+                className="w-full bg-gray-400 text-white py-3.5 rounded-xl font-semibold text-base cursor-not-allowed shadow-lg"
+              >
+                View Only (Not Your Deal)
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  if (isAuthenticated) {
+                    onClaim();
+                    onClose();
+                  } else {
+                    onAuthRequired?.();
+                  }
+                }}
+                className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-semibold text-base hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim'}
+              </button>
+            )}
             
             <button 
               onClick={() => {

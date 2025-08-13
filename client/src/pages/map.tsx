@@ -175,6 +175,12 @@ export default function MapPage() {
     }, 3000);
   };
 
+  const handleEditDeal = (deal: DealWithMerchant) => {
+    // Navigate to merchant dashboard for editing
+    window.location.href = `/merchant-dashboard?edit=${deal.id}`;
+    logAction("Deal Edit Initiated", `Deal ID: ${deal.id}, Title: ${deal.title}`);
+  };
+
   const handleMenuToggle = () => {
     setShowSideMenu(!showSideMenu);
     logAction("Menu Toggled", showSideMenu ? "Menu closed" : "Menu opened");
@@ -315,6 +321,7 @@ export default function MapPage() {
             logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
             handleNotification("Deal claimed successfully!");
           }}
+          onEdit={() => handleEditDeal(selectedDeal)}
           onAuthRequired={() => authModal.openModal(`/deals/${selectedDeal.id}`)}
         />
       )}
