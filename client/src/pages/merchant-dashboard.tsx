@@ -84,7 +84,7 @@ export default function MerchantDashboard() {
   const [addedBusinessIds, setAddedBusinessIds] = useState<Set<string>>(new Set());
   
   // Deal creation UI states
-  const [selectedDealColor, setSelectedDealColor] = useState("bg-blue-500");
+  const [selectedDealColor, setSelectedDealColor] = useState("bg-green-500");
   const [selectedDealEmoji, setSelectedDealEmoji] = useState("🏷️");
 
   // Color options for deal covers
@@ -124,21 +124,21 @@ export default function MerchantDashboard() {
     return categoryEmojis[category?.toLowerCase()] || '🏷️';
   };
 
-  // Auto-assign color based on category
+  // Auto-assign color based on category (default green)
   const getDefaultColor = (category: string) => {
     const categoryColors: { [key: string]: string } = {
-      'food': 'bg-red-500',
-      'restaurant': 'bg-red-500',
-      'coffee': 'bg-orange-500',
-      'clothing': 'bg-blue-500',
-      'retail': 'bg-purple-500',
+      'food': 'bg-green-500',
+      'restaurant': 'bg-green-500',
+      'coffee': 'bg-green-500',
+      'clothing': 'bg-green-500',
+      'retail': 'bg-green-500',
       'wellness': 'bg-green-500',
-      'entertainment': 'bg-pink-500',
-      'fitness': 'bg-indigo-500',
-      'automotive': 'bg-teal-500',
-      'services': 'bg-teal-500'
+      'entertainment': 'bg-green-500',
+      'fitness': 'bg-green-500',
+      'automotive': 'bg-green-500',
+      'services': 'bg-green-500'
     };
-    return categoryColors[category?.toLowerCase()] || 'bg-blue-500';
+    return categoryColors[category?.toLowerCase()] || 'bg-green-500';
   };
   
   // States data
@@ -734,6 +734,17 @@ export default function MerchantDashboard() {
       setShowMerchantForm(true);
       return;
     }
+
+    // Get the current business being managed
+    const currentMerchant = selectedMerchant 
+      ? (merchants as any[]).find(m => m.id === selectedMerchant)
+      : (merchants as any[])[0];
+    
+    const businessCategory = currentMerchant?.category || "restaurant";
+    
+    // Set default color and emoji based on business category
+    setSelectedDealColor("bg-green-500"); // Always default to green
+    setSelectedDealEmoji(getDefaultEmoji(businessCategory));
     
     // Clear any previous deal data and reset form
     dealForm.reset({
@@ -741,10 +752,10 @@ export default function MerchantDashboard() {
       description: "",
       originalPrice: 0,
       discountedPrice: 0,
-      category: "restaurant",
+      category: businessCategory,
       merchantId: selectedMerchant || (Array.isArray(merchants) && merchants.length > 0 ? merchants[0].id : 0),
-      startTime: new Date().toISOString().slice(0, 16),
-      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      startDate: new Date().toISOString().slice(0, 16),
+      endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       maxRedemptions: 100,
       isRecurring: false,
       recurringInterval: ""
@@ -1462,7 +1473,7 @@ export default function MerchantDashboard() {
             dealForm.reset();
           }
         }}>
-          <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+          <DialogContent className="max-w-sm w-[90vw] max-h-[90vh] overflow-y-auto p-0">
             {/* Deal Cover Preview */}
             <div className={`relative h-32 ${selectedDealColor} flex items-center justify-center`}>
               <div className="text-4xl">{selectedDealEmoji}</div>
@@ -1476,74 +1487,71 @@ export default function MerchantDashboard() {
               </Button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 space-y-3">
               <DialogHeader>
                 <DialogTitle>Create New Deal</DialogTitle>
               </DialogHeader>
               
-              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-4">
+              <form onSubmit={dealForm.handleSubmit(onCreateDeal)} className="space-y-3">
                 {/* Deal Title */}
                 <div>
-                  <Label htmlFor="deal-title">Deal Title *</Label>
+                  <Label htmlFor="deal-title" className="text-sm">Deal Title *</Label>
                   <Input
                     id="deal-title"
                     {...dealForm.register("title")}
                     placeholder="Enter your deal title"
-                    className="mt-1"
+                    className="mt-1 text-sm"
                   />
                   {dealForm.formState.errors.title && (
-                    <p className="text-sm text-red-600 mt-1">
+                    <p className="text-xs text-red-600 mt-1">
                       {dealForm.formState.errors.title.message}
                     </p>
                   )}
                 </div>
 
-                {/* Color Selection */}
-                <div>
-                  <Label>Cover Color</Label>
-                  <div className="flex gap-2 mt-2">
-                    {colorOptions.map((color) => (
-                      <button
-                        key={color.value}
-                        type="button"
-                        onClick={() => setSelectedDealColor(color.value)}
-                        className={`w-8 h-8 rounded-full ${color.value} border-2 ${
-                          selectedDealColor === color.value ? 'border-gray-800' : 'border-gray-300'
-                        }`}
-                        title={color.name}
-                      />
-                    ))}
+                {/* Color and Emoji Row */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Color Selection */}
+                  <div>
+                    <Label className="text-sm">Cover Color</Label>
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      {colorOptions.map((color) => (
+                        <button
+                          key={color.value}
+                          type="button"
+                          onClick={() => setSelectedDealColor(color.value)}
+                          className={`w-6 h-6 rounded-full ${color.value} border-2 ${
+                            selectedDealColor === color.value ? 'border-gray-800' : 'border-gray-300'
+                          }`}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Emoji Selection */}
-                <div>
-                  <Label>Deal Emoji</Label>
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {emojiOptions.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => setSelectedDealEmoji(emoji)}
-                        className={`w-10 h-10 rounded border text-xl ${
-                          selectedDealEmoji === emoji ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                        }`}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+                  {/* Emoji Input */}
+                  <div>
+                    <Label htmlFor="deal-emoji" className="text-sm">Deal Emoji</Label>
+                    <Input
+                      id="deal-emoji"
+                      value={selectedDealEmoji}
+                      onChange={(e) => setSelectedDealEmoji(e.target.value)}
+                      placeholder="🏷️"
+                      className="mt-1 text-sm text-center text-lg w-full"
+                      maxLength={2}
+                    />
                   </div>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <Label htmlFor="deal-description">Description</Label>
+                  <Label htmlFor="deal-description" className="text-sm">Description</Label>
                   <Textarea
                     id="deal-description"
                     {...dealForm.register("description")}
                     placeholder="Describe your deal"
-                    rows={3}
-                    className="mt-1"
+                    rows={2}
+                    className="mt-1 text-sm"
                   />
                 </div>
 
@@ -1553,9 +1561,9 @@ export default function MerchantDashboard() {
 
                 {/* Deal Type */}
                 <div>
-                  <Label>Deal Type *</Label>
+                  <Label className="text-sm">Deal Type *</Label>
                   <Select onValueChange={(value) => dealForm.setValue("dealType", value)}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 text-sm">
                       <SelectValue placeholder="Select deal type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1570,25 +1578,25 @@ export default function MerchantDashboard() {
                 {/* Deal Value */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label htmlFor="original-price">Original Price *</Label>
+                    <Label htmlFor="original-price" className="text-sm">Original Price *</Label>
                     <Input
                       id="original-price"
                       type="number"
                       step="0.01"
                       {...dealForm.register("originalPrice", { valueAsNumber: true })}
                       placeholder="0.00"
-                      className="mt-1"
+                      className="mt-1 text-sm"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="discounted-price">Sale Price *</Label>
+                    <Label htmlFor="discounted-price" className="text-sm">Sale Price *</Label>
                     <Input
                       id="discounted-price"
                       type="number"
                       step="0.01"
                       {...dealForm.register("discountedPrice", { valueAsNumber: true })}
                       placeholder="0.00"
-                      className="mt-1"
+                      className="mt-1 text-sm"
                     />
                   </div>
                 </div>
@@ -1596,21 +1604,21 @@ export default function MerchantDashboard() {
                 {/* Deal Duration */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label htmlFor="start-date">Start Date *</Label>
+                    <Label htmlFor="start-date" className="text-sm">Start Date *</Label>
                     <Input
                       id="start-date"
                       type="datetime-local"
                       {...dealForm.register("startDate")}
-                      className="mt-1"
+                      className="mt-1 text-sm"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="end-date">End Date *</Label>
+                    <Label htmlFor="end-date" className="text-sm">End Date *</Label>
                     <Input
                       id="end-date"
                       type="datetime-local"
                       {...dealForm.register("endDate")}
-                      className="mt-1"
+                      className="mt-1 text-sm"
                     />
                   </div>
                 </div>
@@ -1618,7 +1626,7 @@ export default function MerchantDashboard() {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full text-sm"
                   disabled={createDealMutation.isPending}
                 >
                   {createDealMutation.isPending ? "Creating..." : "Create Deal"}
