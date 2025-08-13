@@ -991,7 +991,7 @@ export default function MerchantDashboard() {
                             <h4 className="font-semibold text-sm">{deal.title}</h4>
                             <span className="text-xs text-gray-500">• {merchantName}</span>
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
                               {deal.isRecurring && (
                                 <Badge variant="outline" className="text-xs">
@@ -1002,10 +1002,10 @@ export default function MerchantDashboard() {
                               <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"} className="text-xs">
                                 {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
                               </Badge>
+                              <span className="text-xs text-gray-500">
+                                {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
+                              </span>
                             </div>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
                           </div>
                         </div>
                       </div>
