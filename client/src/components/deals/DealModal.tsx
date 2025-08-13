@@ -62,7 +62,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
         
         <div className="px-5 pb-5">
           {/* Business Name - Main Header */}
-          <div className="flex items-center mb-2">
+          <div className="flex items-center mb-4">
             <span className="text-2xl mr-3">{deal.dealEmoji || '🏪'}</span>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
@@ -73,48 +73,98 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
             </div>
           </div>
 
-          {/* Deal Title */}
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">{deal.title}</h2>
+          {/* Deal Information Section */}
+          <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <div className="mb-3">
+              <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Deal Title</label>
+              <div className="text-lg font-semibold text-gray-900 mt-1">{deal.title}</div>
+            </div>
+            
             {deal.description && (
-              <p className="text-sm text-gray-600 mt-1 leading-relaxed">{deal.description}</p>
+              <div className="mb-3">
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Description</label>
+                <div className="text-sm text-gray-700 mt-1 leading-relaxed">{deal.description}</div>
+              </div>
             )}
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Category</label>
+                <div className="text-sm text-gray-900 mt-1 font-medium">{deal.category}</div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Deal Status</label>
+                <div className="text-sm mt-1">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Active
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Price & Stats */}
+          {/* Pricing Section */}
           <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 mb-4 border border-green-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-baseline">
-                <span className="text-3xl font-bold text-gray-900">${deal.discountedPrice}</span>
-                <span className="text-lg text-gray-500 line-through ml-3">${deal.originalPrice}</span>
+            <div className="grid grid-cols-3 gap-4 mb-3">
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Original Price</label>
+                <div className="text-lg font-bold text-gray-500 line-through mt-1">${deal.originalPrice}</div>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-green-600">
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Deal Price</label>
+                <div className="text-lg font-bold text-gray-900 mt-1">${deal.discountedPrice}</div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">You Save</label>
+                <div className="text-lg font-bold text-green-600 mt-1">
                   ${(deal.originalPrice - deal.discountedPrice).toFixed(2)}
                 </div>
-                <div className="text-xs text-green-600 font-medium">SAVED</div>
               </div>
             </div>
             
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-white/60 rounded-lg py-2">
-                <div className="flex items-center justify-center text-gray-600 mb-1">
-                  <Users className="w-4 h-4 mr-1" />
-                </div>
-                <div className="text-sm font-semibold text-gray-800">
-                  {(deal.maxRedemptions || 0) - (deal.currentRedemptions || 0)} Left
-                </div>
-                <div className="text-xs text-gray-500">of {deal.maxRedemptions}</div>
+            <div className="text-center py-2 bg-white/60 rounded-lg">
+              <span className="text-2xl font-bold text-green-600">{deal.discountPercentage}% OFF</span>
+            </div>
+          </div>
+
+          {/* Analytics Section */}
+          <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Deal Analytics</h3>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-white rounded-lg p-3">
+                <div className="text-lg font-bold text-gray-900">{deal.currentRedemptions || 0}</div>
+                <div className="text-xs text-gray-600">Claimed</div>
               </div>
-              <div className="bg-white/60 rounded-lg py-2">
-                <div className="flex items-center justify-center text-orange-600 mb-1">
-                  <Clock className="w-4 h-4 mr-1" />
+              <div className="bg-white rounded-lg p-3">
+                <div className="text-lg font-bold text-gray-900">
+                  {(deal.maxRedemptions || 0) - (deal.currentRedemptions || 0)}
                 </div>
-                <div className="text-sm font-semibold text-gray-800">
+                <div className="text-xs text-gray-600">Available</div>
+              </div>
+              <div className="bg-white rounded-lg p-3">
+                <div className="text-lg font-bold text-orange-600">
                   {hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`}
                 </div>
-                <div className="text-xs text-gray-500">remaining</div>
+                <div className="text-xs text-gray-600">Remaining</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Time Details */}
+          <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Timing</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">Start Time</label>
+                <div className="text-sm text-gray-900 mt-1">
+                  {new Date(deal.startTime).toLocaleString()}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 uppercase tracking-wide font-semibold">End Time</label>
+                <div className="text-sm text-gray-900 mt-1">
+                  {new Date(deal.endTime).toLocaleString()}
+                </div>
               </div>
             </div>
           </div>
