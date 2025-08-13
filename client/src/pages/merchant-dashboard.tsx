@@ -712,8 +712,8 @@ export default function MerchantDashboard() {
     const dealData = {
       ...data,
       discountPercentage,
-      startTime: new Date(data.startDate).toISOString(),
-      endTime: new Date(data.endDate).toISOString(),
+      startTime: new Date(data.startTime).toISOString(),
+      endTime: new Date(data.endTime).toISOString(),
       // Add the selected color and emoji to the deal data
       coverColor: selectedDealColor,
       dealEmoji: selectedDealEmoji,
@@ -754,8 +754,8 @@ export default function MerchantDashboard() {
       discountedPrice: 0,
       category: businessCategory,
       merchantId: selectedMerchant || (Array.isArray(merchants) && merchants.length > 0 ? merchants[0].id : 0),
-      startDate: new Date().toISOString().slice(0, 16),
-      endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      startTime: new Date().toISOString().slice(0, 16),
+      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       maxRedemptions: 100,
       isRecurring: false,
       recurringInterval: ""
@@ -1558,21 +1558,7 @@ export default function MerchantDashboard() {
                 <input type="hidden" {...dealForm.register("merchantId")} />
                 <input type="hidden" {...dealForm.register("category")} />
 
-                {/* Deal Type */}
-                <div>
-                  <Label className="text-sm">Deal Type *</Label>
-                  <Select onValueChange={(value) => dealForm.setValue("dealType", value)}>
-                    <SelectTrigger className="mt-1 text-sm">
-                      <SelectValue placeholder="Select deal type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">Percentage Off</SelectItem>
-                      <SelectItem value="fixed">Fixed Amount Off</SelectItem>
-                      <SelectItem value="bogo">Buy One Get One</SelectItem>
-                      <SelectItem value="special">Special Offer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+
 
                 {/* Deal Value */}
                 <div className="grid grid-cols-2 gap-2">
@@ -1603,21 +1589,21 @@ export default function MerchantDashboard() {
                 {/* Deal Duration */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label htmlFor="start-date" className="text-sm">Start Date *</Label>
+                    <Label htmlFor="start-date" className="text-xs">Start Date *</Label>
                     <Input
                       id="start-date"
                       type="datetime-local"
-                      {...dealForm.register("startDate")}
-                      className="mt-1 text-sm"
+                      {...dealForm.register("startTime")}
+                      className="mt-1 text-xs h-8"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="end-date" className="text-sm">End Date *</Label>
+                    <Label htmlFor="end-date" className="text-xs">End Date *</Label>
                     <Input
                       id="end-date"
                       type="datetime-local"
-                      {...dealForm.register("endDate")}
-                      className="mt-1 text-sm"
+                      {...dealForm.register("endTime")}
+                      className="mt-1 text-xs h-8"
                     />
                   </div>
                 </div>
