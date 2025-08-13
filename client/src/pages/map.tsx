@@ -55,6 +55,53 @@ export default function MapPage() {
     staleTime: 10000,
   });
 
+  // Get enabled states
+  const { data: enabledStates = {} } = useQuery({
+    queryKey: ["/api/enabled-states"],
+    staleTime: 60000, // Cache for 1 minute
+  });
+
+  // Function to determine user's state based on coordinates
+  const getUserState = (lat: number, lng: number): string => {
+    // Arizona coordinates roughly: 31.3-37.0 N, 109.0-114.8 W
+    if (lat >= 31.3 && lat <= 37.0 && lng >= -114.8 && lng <= -109.0) {
+      return 'Arizona';
+    }
+    // California coordinates roughly: 32.5-42.0 N, 114.1-124.4 W  
+    if (lat >= 32.5 && lat <= 42.0 && lng >= -124.4 && lng <= -114.1) {
+      return 'California';
+    }
+    // Texas coordinates roughly: 25.8-36.5 N, 93.5-106.6 W
+    if (lat >= 25.8 && lat <= 36.5 && lng >= -106.6 && lng <= -93.5) {
+      return 'Texas';
+    }
+    // New York coordinates roughly: 40.5-45.0 N, 71.8-79.8 W
+    if (lat >= 40.5 && lat <= 45.0 && lng >= -79.8 && lng <= -71.8) {
+      return 'NewYork';
+    }
+    // Florida coordinates roughly: 24.4-31.0 N, 80.0-87.6 W
+    if (lat >= 24.4 && lat <= 31.0 && lng >= -87.6 && lng <= -80.0) {
+      return 'Florida';
+    }
+    // Washington coordinates roughly: 45.5-49.0 N, 116.9-124.8 W
+    if (lat >= 45.5 && lat <= 49.0 && lng >= -124.8 && lng <= -116.9) {
+      return 'Washington';
+    }
+    // Illinois coordinates roughly: 36.9-42.5 N, 87.0-91.5 W
+    if (lat >= 36.9 && lat <= 42.5 && lng >= -91.5 && lng <= -87.0) {
+      return 'Illinois';
+    }
+    // Colorado coordinates roughly: 36.9-41.0 N, 102.0-109.1 W
+    if (lat >= 36.9 && lat <= 41.0 && lng >= -109.1 && lng <= -102.0) {
+      return 'Colorado';
+    }
+    return 'Unknown';
+  };
+
+  // Check if user is in an enabled state
+  const userState = location ? getUserState(location.lat, location.lng) : null;
+  const isInEnabledState = userState && enabledStates[userState];
+
   // Filter deals by location if user location is available
   const getNearbyDeals = (allDeals: DealWithMerchant[], userLat?: number, userLng?: number, radiusKm = 50) => {
     if (!userLat || !userLng) return allDeals;
@@ -291,6 +338,38 @@ export default function MapPage() {
           <div className="bg-white rounded-lg p-6 text-center">
             <LoadingSpinner />
             <p className="mt-2 text-gray-600">Getting your location...</p>
+          </div>
+        </div>
+      )}
+
+      {/* State Disabled Overlay */}
+      {location && userState && !isInEnabledState && (
+        <div className="absolute inset-0 z-40 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-xl">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              We're not yet in your area
+            </h3>
+            <p className="text-gray-600 mb-4">
+              FlashDeals is currently available in select locations. We detected you're in {userState === 'NewYork' ? 'New York' : userState}.
+            </p>
+            <button
+              onClick={() => {
+                handleNotification("Thanks for your interest! We'll notify you when FlashDeals comes to your area.");
+                logAction("Notification Request", `User in ${userState} requested notification`);
+              }}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              Notify me when available
+            </button>
+            <p className="text-xs text-gray-500 mt-4">
+              Currently serving: Arizona
+            </p>
           </div>
         </div>
       )}

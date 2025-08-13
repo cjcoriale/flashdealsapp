@@ -83,6 +83,18 @@ export default function MerchantDashboard() {
   });
   const [isEditingInModal, setIsEditingInModal] = useState(false);
   
+  // State toggle management
+  const [enabledStates, setEnabledStates] = useState({
+    Arizona: true,
+    California: false,
+    Texas: false,
+    Florida: false,
+    NewYork: false,
+    Washington: false,
+    Illinois: false,
+    Colorado: false
+  });
+  
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
   
@@ -1588,20 +1600,13 @@ export default function MerchantDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Business Search and Creation Interface */}
+        {/* Super Merchant Interface */}
         <Dialog open={showBulkBusinessForm} onOpenChange={setShowBulkBusinessForm}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Business Search & Creation Tools</DialogTitle>
+              <DialogTitle>Super Merchant</DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900 mb-2">Super Merchant Search Tools</h3>
-                <p className="text-sm text-blue-700">
-                  Search for real businesses online and quickly add them to your app with pre-populated information.
-                </p>
-              </div>
-
               {/* Search Interface */}
               <div className="space-y-4">
                 <div className="flex gap-2">
@@ -1666,46 +1671,72 @@ export default function MerchantDashboard() {
                   </div>
                 )}
 
-                {/* Quick Action Buttons */}
+                {/* Super Search Buttons */}
                 <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-3">Quick Actions</h4>
+                  <h4 className="font-semibold mb-3">Super Search</h4>
                   <div className="grid md:grid-cols-3 gap-3">
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("restaurants New York")}
+                      onClick={() => setSearchQuery("restaurants Phoenix")}
                     >
-                      NYC Restaurants
+                      Phoenix Restaurants
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("coffee shops Seattle")}
+                      onClick={() => setSearchQuery("coffee shops Scottsdale")}
                     >
-                      Seattle Coffee
+                      Scottsdale Coffee
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("pizza Los Angeles")}
+                      onClick={() => setSearchQuery("pizza Tempe")}
                     >
-                      LA Pizza
+                      Tempe Pizza
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("sushi San Francisco")}
+                      onClick={() => setSearchQuery("sushi Tucson")}
                     >
-                      SF Sushi
+                      Tucson Sushi
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("barbecue Austin")}
+                      onClick={() => setSearchQuery("barbecue Mesa")}
                     >
-                      Austin BBQ
+                      Mesa BBQ
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setSearchQuery("tacos Miami")}
+                      onClick={() => setSearchQuery("tacos Chandler")}
                     >
-                      Miami Tacos
+                      Chandler Tacos
                     </Button>
+                  </div>
+                </div>
+
+                {/* State Management */}
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-3">Service Areas</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Control which states are available for the app. Disabled states will show a "coming soon" message.
+                  </p>
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {Object.entries(enabledStates).map(([state, enabled]) => (
+                      <button
+                        key={state}
+                        onClick={() => setEnabledStates(prev => ({ ...prev, [state]: !enabled }))}
+                        className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
+                          enabled 
+                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        {state === 'NewYork' ? 'New York' : state} {enabled ? '✓' : '○'}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Currently enabled: {Object.entries(enabledStates).filter(([_, enabled]) => enabled).map(([state]) => state === 'NewYork' ? 'New York' : state).join(', ')}
                   </div>
                 </div>
 

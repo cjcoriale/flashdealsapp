@@ -474,6 +474,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // State management (for super merchants)
+  app.get("/api/enabled-states", auditMiddleware("Get Enabled States"), async (req: AuditRequest, res) => {
+    try {
+      // For now, hardcode Arizona as the only enabled state
+      // In production, this would be stored in database
+      const enabledStates = {
+        Arizona: true,
+        California: false,
+        Texas: false,
+        Florida: false,
+        NewYork: false,
+        Washington: false,
+        Illinois: false,
+        Colorado: false
+      };
+      res.json(enabledStates);
+    } catch (error) {
+      auditError(req, error as Error, "Get Enabled States");
+      res.status(500).json({ message: "Failed to fetch enabled states" });
+    }
+  });
+
   // Background task to process recurring deals
   const processRecurringDeals = async () => {
     try {
