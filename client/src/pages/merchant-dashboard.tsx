@@ -767,8 +767,11 @@ export default function MerchantDashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Currently Managing Box */}
         {currentlyManaging && (
-          <Card className="mb-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <CardContent className="p-4">
+          <Card className="mb-6 bg-white dark:bg-white/5 cursor-pointer hover:shadow-md transition-shadow">
+            <CardContent 
+              className="p-4"
+              onClick={() => handleEditMerchant(currentlyManaging)}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg overflow-hidden">
@@ -779,18 +782,18 @@ export default function MerchantDashboard() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
-                        <Store className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <Store className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Currently Managing</p>
-                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">{currentlyManaging.name}</h3>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">{currentlyManaging.address}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Currently Managing</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{currentlyManaging.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{currentlyManaging.address}</p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
+                <Badge variant="default" className="bg-blue-600 hover:bg-blue-700 text-white">
                   Active
                 </Badge>
               </div>
@@ -800,136 +803,170 @@ export default function MerchantDashboard() {
 
 
 
-        {/* Create Merchant Form */}
+        {/* Business Edit Modal */}
         {showMerchantForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{editingMerchant ? 'Edit Business' : 'Create a Location'}</CardTitle>
-              <CardDescription>
-                {editingMerchant 
-                  ? 'Update your business information' 
-                  : 'Set up your business profile to start offering flash deals to local customers. Add your business name, image, and address below.'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={merchantForm.handleSubmit(onCreateMerchant)} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Business Name</Label>
-                    <Input
-                      id="name"
-                      {...merchantForm.register("name")}
-                      placeholder="Your business name"
-                    />
-                    {merchantForm.formState.errors.name && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {merchantForm.formState.errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select onValueChange={(value) => merchantForm.setValue("category", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="restaurant">Restaurant</SelectItem>
-                        <SelectItem value="retail">Retail</SelectItem>
-                        <SelectItem value="services">Services</SelectItem>
-                        <SelectItem value="entertainment">Entertainment</SelectItem>
-                        <SelectItem value="health">Health & Beauty</SelectItem>
-                        <SelectItem value="fitness">Fitness</SelectItem>
-                        <SelectItem value="automotive">Automotive</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {merchantForm.formState.errors.category && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {merchantForm.formState.errors.category.message}
-                      </p>
-                    )}
-                  </div>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Cover Image */}
+              <div className="relative h-40 bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-lg">
+                <button
+                  onClick={() => {
+                    setShowMerchantForm(false);
+                    setEditingMerchant(null);
+                    merchantForm.reset();
+                  }}
+                  className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingMerchant ? 'Edit Business' : 'Create Business'}
+                  </h2>
                 </div>
-                
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    {...merchantForm.register("description")}
-                    placeholder="Describe your business"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="imageUrl">Business Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    {...merchantForm.register("imageUrl")}
-                    placeholder="https://example.com/business-photo.jpg"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    {...merchantForm.register("address")}
-                    placeholder="123 Main St, City, State"
-                    onChange={(e) => {
-                      const address = e.target.value;
-                      merchantForm.setValue("address", address);
-                      // Set coordinates based on address context
-                      if (address.toLowerCase().includes("arizona") || address.toLowerCase().includes("az") || address.toLowerCase().includes("scottsdale")) {
-                        // Arizona coordinates
-                        merchantForm.setValue("latitude", 33.4942);
-                        merchantForm.setValue("longitude", -112.1236);
-                      } else {
-                        // Default to NYC coordinates
-                        merchantForm.setValue("latitude", 40.7128);
-                        merchantForm.setValue("longitude", -74.0060);
-                      }
-                    }}
-                  />
-                  {merchantForm.formState.errors.address && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {merchantForm.formState.errors.address.message}
-                    </p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label htmlFor="phone">Phone (Optional)</Label>
-                  <Input
-                    id="phone"
-                    {...merchantForm.register("phone")}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => {
-                      setShowMerchantForm(false);
-                      setEditingMerchant(null);
-                      merchantForm.reset();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createMerchantMutation.isPending || updateMerchantMutation.isPending}>
-                    {editingMerchant 
-                      ? (updateMerchantMutation.isPending ? "Updating..." : "Update Business")
-                      : (createMerchantMutation.isPending ? "Creating..." : "Create Business")
-                    }
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+              <div className="p-6">
+                <form onSubmit={merchantForm.handleSubmit(onCreateMerchant)} className="space-y-6">
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">
+                      Basic Information
+                    </h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Business Name *</Label>
+                        <Input
+                          id="name"
+                          {...merchantForm.register("name")}
+                          placeholder="Your business name"
+                          className="mt-1"
+                        />
+                        {merchantForm.formState.errors.name && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {merchantForm.formState.errors.name.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Category *</Label>
+                        <Select onValueChange={(value) => merchantForm.setValue("category", value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="restaurant">Restaurant</SelectItem>
+                            <SelectItem value="retail">Retail</SelectItem>
+                            <SelectItem value="services">Services</SelectItem>
+                            <SelectItem value="entertainment">Entertainment</SelectItem>
+                            <SelectItem value="health">Health & Beauty</SelectItem>
+                            <SelectItem value="fitness">Fitness</SelectItem>
+                            <SelectItem value="automotive">Automotive</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {merchantForm.formState.errors.category && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {merchantForm.formState.errors.category.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        {...merchantForm.register("description")}
+                        placeholder="Describe your business"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="imageUrl">Business Image URL</Label>
+                      <Input
+                        id="imageUrl"
+                        {...merchantForm.register("imageUrl")}
+                        placeholder="https://example.com/business-photo.jpg"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location & Contact */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">
+                      Location & Contact
+                    </h3>
+                    
+                    <div>
+                      <Label htmlFor="address">Address *</Label>
+                      <Input
+                        id="address"
+                        {...merchantForm.register("address")}
+                        placeholder="123 Main St, City, State"
+                        className="mt-1"
+                        onChange={(e) => {
+                          const address = e.target.value;
+                          merchantForm.setValue("address", address);
+                          if (address.toLowerCase().includes("arizona") || address.toLowerCase().includes("az") || address.toLowerCase().includes("scottsdale")) {
+                            merchantForm.setValue("latitude", 33.4942);
+                            merchantForm.setValue("longitude", -112.1236);
+                          } else {
+                            merchantForm.setValue("latitude", 40.7128);
+                            merchantForm.setValue("longitude", -74.0060);
+                          }
+                        }}
+                      />
+                      {merchantForm.formState.errors.address && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {merchantForm.formState.errors.address.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="phone">Phone (Optional)</Label>
+                      <Input
+                        id="phone"
+                        {...merchantForm.register("phone")}
+                        placeholder="+1 (555) 123-4567"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowMerchantForm(false);
+                        setEditingMerchant(null);
+                        merchantForm.reset();
+                      }}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      disabled={createMerchantMutation.isPending || updateMerchantMutation.isPending}
+                      className="flex-1"
+                    >
+                      {editingMerchant 
+                        ? (updateMerchantMutation.isPending ? "Updating..." : "Update Business")
+                        : (createMerchantMutation.isPending ? "Creating..." : "Create Business")
+                      }
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Recent Deals */}
@@ -2198,14 +2235,7 @@ export default function MerchantDashboard() {
         )}
       </div>
 
-      {/* Floating Action Button for Quick Deal Creation */}
-      <Button
-        onClick={handleCreateDealClick}
-        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 shadow-lg z-50"
-        size="sm"
-      >
-        <Plus className="w-6 h-6" />
-      </Button>
+
 
       {/* Bottom Navigation */}
       <BottomNavigation 
