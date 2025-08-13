@@ -1742,7 +1742,7 @@ export default function MerchantDashboard() {
                                   <p className={`text-sm ${
                                     isEnabled ? 'text-blue-600' : 'text-gray-400'
                                   }`}>
-                                    {isEnabled ? 'Active' : 'Coming Soon'}
+                                    {isEnabled ? 'Active' : 'Inactive'}
                                   </p>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
