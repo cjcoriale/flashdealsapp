@@ -416,6 +416,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete deal route
+  app.delete("/api/deals/:id", isAuthenticated, auditMiddleware("Delete Deal"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const dealId = parseInt(req.params.id);
+      
+      // Get the deal to verify ownership
+      const deal = await storage.getDeal(dealId);
+      if (!deal) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+      
+      // Verify user owns this deal's merchant
+      const merchant = await storage.getMerchant(deal.merchantId);
+      const currentUser = await storage.getUser(userId);
+      
+      if (!merchant || (merchant.userId !== userId && currentUser?.role !== 'super_merchant')) {
+        return res.status(403).json({ message: "Unauthorized to delete this deal" });
+      }
+      
+      await storage.deleteDeal(dealId);
+      res.json({ message: "Deal deleted successfully" });
+    } catch (error) {
+      console.error("Deal deletion error:", error);
+      auditError(req, error as Error, "Delete Deal");
+      res.status(500).json({ message: "Failed to delete deal" });
+    }
+  });
+
   // Search routes
   app.get("/api/search", auditMiddleware("Search"), async (req: AuditRequest, res) => {
     try {

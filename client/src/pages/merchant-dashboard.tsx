@@ -631,6 +631,42 @@ export default function MerchantDashboard() {
     },
   });
 
+  // Delete deal mutation
+  const deleteDealMutation = useMutation({
+    mutationFn: async (dealId: number) => {
+      return await apiRequest("DELETE", `/api/deals/${dealId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals/expired`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+      toast({
+        title: "Success",
+        description: "Deal deleted successfully!",
+      });
+      setShowDealDetails(false);
+      setSelectedDealForEdit(null);
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete deal",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Search businesses mutation
   const searchBusinessesMutation = useMutation({
     mutationFn: async (query: string) => {
@@ -1726,7 +1762,7 @@ export default function MerchantDashboard() {
                       {/* Deal Status */}
                       <div>
                         <Label className="text-sm font-medium">Deal Status</Label>
-                        <Select onValueChange={(value) => dealForm.setValue("isActive", value === "active")}>
+                        <Select>
                           <SelectTrigger className="mt-1">
                             <SelectValue placeholder="Active" />
                           </SelectTrigger>
@@ -2517,6 +2553,19 @@ export default function MerchantDashboard() {
                         >
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Deal
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete "${selectedDealForEdit.title}"? This action cannot be undone.`)) {
+                              deleteDealMutation.mutate(selectedDealForEdit.id);
+                            }
+                          }}
+                          disabled={deleteDealMutation.isPending}
+                          className="flex-1"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {deleteDealMutation.isPending ? "Deleting..." : "Delete"}
                         </Button>
                         <Button
                           variant="outline"

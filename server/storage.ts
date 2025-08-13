@@ -53,6 +53,7 @@ export interface IStorage {
   createDeal(deal: InsertDeal): Promise<Deal>;
   updateDeal(id: number, deal: Partial<InsertDeal>): Promise<Deal>;
   updateDealRedemptions(id: number): Promise<void>;
+  deleteDeal(id: number): Promise<void>;
   
   // Saved deals operations
   getSavedDeals(userId: string): Promise<SavedDealWithDetails[]>;
@@ -287,6 +288,10 @@ export class DatabaseStorage implements IStorage {
         currentRedemptions: sql`${deals.currentRedemptions} + 1` 
       })
       .where(eq(deals.id, id));
+  }
+
+  async deleteDeal(id: number): Promise<void> {
+    await db.delete(deals).where(eq(deals.id, id));
   }
 
   // Saved deals operations
