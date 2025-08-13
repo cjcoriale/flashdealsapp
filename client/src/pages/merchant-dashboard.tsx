@@ -125,13 +125,19 @@ export default function MerchantDashboard() {
   // Mutation to update enabled states on the server
   const updateEnabledStatesMutation = useMutation({
     mutationFn: async (newEnabledStates: { [key: string]: boolean }) => {
-      await apiRequest('/api/enabled-states', {
-        method: 'POST',
-        body: JSON.stringify({ enabledStates: newEnabledStates }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      try {
+        const response = await apiRequest('/api/enabled-states', {
+          method: 'POST',
+          body: JSON.stringify({ enabledStates: newEnabledStates }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        return response;
+      } catch (error) {
+        console.error('Failed to update enabled states:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/enabled-states'] });
@@ -140,7 +146,19 @@ export default function MerchantDashboard() {
         description: "State availability has been updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
       toast({
         title: "Update Failed",
         description: "Failed to update service areas. Please try again.",
@@ -151,9 +169,18 @@ export default function MerchantDashboard() {
 
   // State toggle function
   const toggleState = (stateName: string) => {
-    const newEnabledStates = { ...enabledStates, [stateName]: !enabledStates[stateName] };
-    setEnabledStates(newEnabledStates);
-    updateEnabledStatesMutation.mutate(newEnabledStates);
+    try {
+      const newEnabledStates = { ...enabledStates, [stateName]: !enabledStates[stateName] };
+      setEnabledStates(newEnabledStates);
+      updateEnabledStatesMutation.mutate(newEnabledStates);
+    } catch (error) {
+      console.error('Error toggling state:', error);
+      toast({
+        title: "Toggle Failed",
+        description: "Failed to toggle state. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Debug logging for search state (can be removed in production)
@@ -1768,12 +1795,16 @@ export default function MerchantDashboard() {
                           return (
                             <div
                               key={stateName}
-                              className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                              className={`p-4 rounded-lg border transition-all ${
+                                updateEnabledStatesMutation.isPending 
+                                  ? 'cursor-not-allowed opacity-60' 
+                                  : 'cursor-pointer'
+                              } ${
                                 isEnabled 
                                   ? 'border-l-4 border-l-blue-500 border-t border-r border-b border-gray-200 bg-white shadow-sm' 
                                   : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                               }`}
-                              onClick={() => toggleState(stateName)}
+                              onClick={() => !updateEnabledStatesMutation.isPending && toggleState(stateName)}
                             >
                               <div className="flex items-center justify-between">
                                 <div>
