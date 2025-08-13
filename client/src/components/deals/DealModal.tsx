@@ -41,90 +41,75 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
       }}
     >
       <div 
-        className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-hidden"
+        className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle Bar */}
         <div 
-          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4 cursor-pointer hover:bg-gray-400 transition-colors"
+          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-2 cursor-pointer hover:bg-gray-400 transition-colors"
           onClick={onClose}
         />
         
-        {/* Deal Cover with Emoji and Color */}
-        <div className={`relative h-32 ${deal.coverColor || 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center`}>
-          <div className="text-5xl">{deal.dealEmoji || '🏪'}</div>
-          <div className="absolute top-3 right-3">
-            <span className="bg-white bg-opacity-90 text-gray-800 px-3 py-1 rounded-full text-sm font-bold">
+        {/* Deal Cover */}
+        <div className={`relative h-24 ${deal.coverColor || 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center mb-4`}>
+          <div className="text-4xl">{deal.dealEmoji || '🏪'}</div>
+          <div className="absolute top-2 right-3">
+            <span className="bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold">
               {deal.discountPercentage}% OFF
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="absolute top-3 left-3 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
         </div>
         
-        <div className="px-6 pb-6">
-          {/* Location Header */}
-          <div className="py-4 border-b border-gray-100">
-            <div className="flex items-center text-sm text-gray-600 mb-1">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span>{deal.merchant.address}</span>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900">{deal.title}</h2>
-            <div className="flex items-center mt-2">
-              <div className="text-3xl mr-3">{deal.dealEmoji || '🏪'}</div>
-              <div className="text-lg font-semibold text-gray-700">{deal.merchant.name}</div>
-            </div>
+        <div className="px-5 pb-5">
+          {/* Location */}
+          <div className="flex items-center text-xs text-gray-500 mb-1">
+            <MapPin className="w-3 h-3 mr-1" />
+            <span className="truncate">{deal.merchant.address}</span>
           </div>
 
-          {/* Deal Details */}
-          <div className="py-4 space-y-4">
-            {deal.description && (
-              <p className="text-gray-600">{deal.description}</p>
-            )}
-            
-            {/* Pricing */}
-            <div className="flex items-center justify-between">
+          {/* Deal Title */}
+          <h2 className="text-xl font-bold text-gray-900 mb-1">{deal.title}</h2>
+          
+          {/* Business Name with Icon */}
+          <div className="flex items-center mb-4">
+            <span className="text-lg mr-2">{deal.dealEmoji || '🏪'}</span>
+            <span className="text-sm font-medium text-gray-700">{deal.merchant.name}</span>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-baseline">
-                <span className="text-3xl font-bold text-gray-900">${deal.discountedPrice}</span>
-                <span className="text-lg text-gray-500 line-through ml-3">${deal.originalPrice}</span>
+                <span className="text-2xl font-bold text-gray-900">${deal.discountedPrice}</span>
+                <span className="text-sm text-gray-500 line-through ml-2">${deal.originalPrice}</span>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-semibold text-green-600">
-                  ${(deal.originalPrice - deal.discountedPrice).toFixed(2)} saved
-                </div>
-              </div>
+              <span className="text-sm font-semibold text-green-600">
+                Save ${(deal.originalPrice - deal.discountedPrice).toFixed(2)}
+              </span>
             </div>
             
-            {/* Availability and Time */}
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center text-gray-600">
-                <Users className="w-4 h-4 mr-1" />
-                <span>{(deal.maxRedemptions || 0) - (deal.currentRedemptions || 0)} left of {deal.maxRedemptions}</span>
+            {/* Stats Row */}
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <div className="flex items-center">
+                <Users className="w-3 h-3 mr-1" />
+                <span>{(deal.maxRedemptions || 0) - (deal.currentRedemptions || 0)} left</span>
               </div>
-              <div className="flex items-center text-orange-600">
-                <Clock className="w-4 h-4 mr-1" />
+              <div className="flex items-center">
+                <Clock className="w-3 h-3 mr-1" />
                 <span>
                   {hours > 0 ? `${hours}h ${minutes}m left` : `${minutes}m left`}
                 </span>
               </div>
             </div>
-
-            {deal.merchant.rating && (
-              <div className="flex items-center text-sm text-gray-600">
-                <Star className="w-4 h-4 text-yellow-500 mr-1 fill-current" />
-                <span className="font-medium">{deal.merchant.rating}</span>
-                <span className="mx-1">•</span>
-                <span>{deal.merchant.reviewCount} reviews</span>
-              </div>
-            )}
           </div>
 
+          {/* Description */}
+          {deal.description && (
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed">{deal.description}</p>
+          )}
+
           {/* Action Buttons */}
-          <div className="space-y-3 pt-4">
+          <div className="space-y-3">
             <button 
               onClick={() => {
                 if (isAuthenticated) {
@@ -134,19 +119,19 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
                   onAuthRequired?.();
                 }
               }}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
+              className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-semibold text-base hover:bg-blue-700 transition-colors shadow-lg"
             >
-              {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim Deal'}
+              {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim'}
             </button>
             
-            <div className="flex space-x-3">
+            <div className="grid grid-cols-2 gap-3">
               {deal.merchant.phone && (
                 <button 
                   onClick={() => window.open(`tel:${deal.merchant.phone}`, '_self')}
-                  className="flex-1 flex items-center justify-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Call
+                  <Phone className="w-4 h-4 mr-1" />
+                  <span className="text-sm">Call</span>
                 </button>
               )}
               <button 
@@ -154,10 +139,10 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
                   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deal.merchant.address)}`;
                   window.open(mapUrl, '_blank');
                 }}
-                className="flex-1 flex items-center justify-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
               >
-                <Navigation className="w-4 h-4 mr-2" />
-                Directions
+                <Navigation className="w-4 h-4 mr-1" />
+                <span className="text-sm">Directions</span>
               </button>
             </div>
           </div>
