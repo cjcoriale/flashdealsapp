@@ -67,6 +67,7 @@ export default function MerchantDashboard() {
   const [superMerchantPassword, setSuperMerchantPassword] = useState("");
   const [isPasswordVerified, setIsPasswordVerified] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [stateSearchQuery, setStateSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [editingMerchant, setEditingMerchant] = useState<any>(null);
@@ -83,6 +84,18 @@ export default function MerchantDashboard() {
   });
   const [isEditingInModal, setIsEditingInModal] = useState(false);
   
+  // States data
+  const STATES = {
+    Arizona: { displayName: "Arizona" },
+    California: { displayName: "California" },
+    Texas: { displayName: "Texas" },
+    Florida: { displayName: "Florida" },
+    NewYork: { displayName: "New York" },
+    Washington: { displayName: "Washington" },
+    Illinois: { displayName: "Illinois" },
+    Colorado: { displayName: "Colorado" }
+  };
+
   // State toggle management
   const [enabledStates, setEnabledStates] = useState({
     Arizona: true,
@@ -95,6 +108,11 @@ export default function MerchantDashboard() {
     Colorado: false
   });
   
+  // State toggle function
+  const toggleState = (stateName: string) => {
+    setEnabledStates(prev => ({ ...prev, [stateName]: !prev[stateName] }));
+  };
+
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
   
@@ -1677,26 +1695,59 @@ export default function MerchantDashboard() {
                 {/* State Management */}
                 <div className="border-t pt-4">
                   <h4 className="font-semibold mb-3">Service Areas</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Control which states are available for the app. Disabled states will show a "coming soon" message.
-                  </p>
-                  <div className="grid grid-cols-4 gap-2 mb-4">
-                    {Object.entries(enabledStates).map(([state, enabled]) => (
-                      <button
-                        key={state}
-                        onClick={() => setEnabledStates(prev => ({ ...prev, [state]: !enabled }))}
-                        className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                          enabled 
-                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        {state === 'NewYork' ? 'New York' : state} {enabled ? '✓' : '○'}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Currently enabled: {Object.entries(enabledStates).filter(([_, enabled]) => enabled).map(([state]) => state === 'NewYork' ? 'New York' : state).join(', ')}
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Search states..."
+                      value={stateSearchQuery}
+                      onChange={(e) => setStateSearchQuery(e.target.value)}
+                      className="max-w-sm"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                      {Object.entries(STATES)
+                        .filter(([stateName, stateData]) => 
+                          stateData.displayName.toLowerCase().includes(stateSearchQuery.toLowerCase())
+                        )
+                        .map(([stateName, stateData]) => {
+                          const isEnabled = enabledStates[stateName];
+                          return (
+                            <div
+                              key={stateName}
+                              className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                                isEnabled 
+                                  ? 'border-l-4 border-l-blue-500 border-t border-r border-b border-gray-200 bg-white shadow-sm' 
+                                  : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                              }`}
+                              onClick={() => toggleState(stateName)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h5 className={`font-medium ${
+                                    isEnabled ? 'text-gray-900' : 'text-gray-500'
+                                  }`}>
+                                    {stateData.displayName}
+                                  </h5>
+                                  <p className={`text-sm ${
+                                    isEnabled ? 'text-blue-600' : 'text-gray-400'
+                                  }`}>
+                                    {isEnabled ? 'Active' : 'Coming Soon'}
+                                  </p>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  isEnabled 
+                                    ? 'border-blue-500 bg-blue-500' 
+                                    : 'border-gray-400 bg-white'
+                                }`}>
+                                  {isEnabled && (
+                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
                   </div>
                 </div>
 
