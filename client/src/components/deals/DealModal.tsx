@@ -1,4 +1,4 @@
-import { Clock, MapPin, X, Star, Users } from "lucide-react";
+import { Clock, MapPin, X, Star, Users, Phone, Navigation } from "lucide-react";
 import { DealWithMerchant } from "@shared/schema";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,7 +33,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center"
+      className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-end justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -41,96 +41,90 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
       }}
     >
       <div 
-        className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300"
+        className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle Bar */}
         <div 
-          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-6 cursor-pointer hover:bg-gray-400 transition-colors"
+          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4 cursor-pointer hover:bg-gray-400 transition-colors"
           onClick={onClose}
         />
         
+        {/* Deal Cover with Emoji and Color */}
+        <div className={`relative h-32 ${deal.coverColor || 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center`}>
+          <div className="text-5xl">{deal.dealEmoji || '🏪'}</div>
+          <div className="absolute top-3 right-3">
+            <span className="bg-white bg-opacity-90 text-gray-800 px-3 py-1 rounded-full text-sm font-bold">
+              {deal.discountPercentage}% OFF
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-3 left-3 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+        </div>
+        
         <div className="px-6 pb-6">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
-              <div className="flex items-center mb-2">
-                <div className="bg-primary p-2 rounded-xl mr-3">
-                  <span className="text-white text-xl">
-                    {deal.category === 'Food' ? '🍕' : 
-                     deal.category === 'Clothing' ? '👕' : 
-                     deal.category === 'Wellness' ? '🧘' : '🏪'}
-                  </span>
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">{deal.merchant.name}</h2>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    <span>{deal.merchant.address}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {deal.merchant.rating && (
-                <div className="flex items-center text-sm text-gray-600 mb-2">
-                  <Star className="w-4 h-4 text-yellow-500 mr-1 fill-current" />
-                  <span className="font-medium">{deal.merchant.rating}</span>
-                  <span className="mx-1">•</span>
-                  <span>{deal.merchant.reviewCount} reviews</span>
-                </div>
-              )}
+          {/* Location Header */}
+          <div className="py-4 border-b border-gray-100">
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <MapPin className="w-4 h-4 mr-1" />
+              <span>{deal.merchant.address}</span>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-6 h-6 text-gray-600" />
-            </button>
+            <h2 className="text-xl font-bold text-gray-900">{deal.title}</h2>
+            <div className="flex items-center mt-2">
+              <div className="text-3xl mr-3">{deal.dealEmoji || '🏪'}</div>
+              <div className="text-lg font-semibold text-gray-700">{deal.merchant.name}</div>
+            </div>
           </div>
 
-          {/* Deal Info */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{deal.title}</h3>
-            <p className="text-gray-600 mb-4">{deal.description}</p>
+          {/* Deal Details */}
+          <div className="py-4 space-y-4">
+            {deal.description && (
+              <p className="text-gray-600">{deal.description}</p>
+            )}
             
             {/* Pricing */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-baseline">
-                <span className="text-3xl font-bold text-gray-800">${deal.discountedPrice}</span>
+                <span className="text-3xl font-bold text-gray-900">${deal.discountedPrice}</span>
                 <span className="text-lg text-gray-500 line-through ml-3">${deal.originalPrice}</span>
-                <div className="ml-3">
-                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">
-                    {deal.discountPercentage}% OFF
-                  </span>
-                </div>
               </div>
-              
-              <div className="flex items-center text-orange-600 mb-1">
-                <Clock className="w-4 h-4 mr-1" />
-                <span className="text-sm font-medium">
-                </span>
-<div className="text-right">
+              <div className="text-right">
+                <div className="text-lg font-semibold text-green-600">
+                  ${(deal.originalPrice - deal.discountedPrice).toFixed(2)} saved
                 </div>
-                <div className="text-lg font-semibold text-green-600">${(deal.originalPrice - deal.discountedPrice).toFixed(2)} saved</div>
               </div>
             </div>
             
-            
-            {/* Availability */}
-            <div className="flex items-center justify-between text-sm text-gray-600 mb-6">
-              <div className="flex items-center">
+            {/* Availability and Time */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center text-gray-600">
                 <Users className="w-4 h-4 mr-1" />
-                <span>{deal.maxRedemptions! - deal.currentRedemptions!} left of {deal.maxRedemptions}</span>
+                <span>{(deal.maxRedemptions || 0) - (deal.currentRedemptions || 0)} left of {deal.maxRedemptions}</span>
               </div>
-              <span className="text-xs text-gray-500">
-                Deal ends {new Date(deal.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
+              <div className="flex items-center text-orange-600">
+                <Clock className="w-4 h-4 mr-1" />
+                <span>
+                  {hours > 0 ? `${hours}h ${minutes}m left` : `${minutes}m left`}
+                </span>
+              </div>
             </div>
+
+            {deal.merchant.rating && (
+              <div className="flex items-center text-sm text-gray-600">
+                <Star className="w-4 h-4 text-yellow-500 mr-1 fill-current" />
+                <span className="font-medium">{deal.merchant.rating}</span>
+                <span className="mx-1">•</span>
+                <span>{deal.merchant.reviewCount} reviews</span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
-          
-          <div className="space-y-3">
+          <div className="space-y-3 pt-4">
             <button 
               onClick={() => {
                 if (isAuthenticated) {
@@ -140,7 +134,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
                   onAuthRequired?.();
                 }
               }}
-              className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-colors"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
             >
               {isAuthenticated ? 'Claim Deal' : 'Sign In to Claim Deal'}
             </button>
@@ -149,21 +143,20 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
               {deal.merchant.phone && (
                 <button 
                   onClick={() => window.open(`tel:${deal.merchant.phone}`, '_self')}
-                  className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 flex items-center justify-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
                 >
+                  <Phone className="w-4 h-4 mr-2" />
                   Call
                 </button>
               )}
               <button 
                 onClick={() => {
-                  
-
-                  
                   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deal.merchant.address)}`;
                   window.open(mapUrl, '_blank');
                 }}
-                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                className="flex-1 flex items-center justify-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
               >
+                <Navigation className="w-4 h-4 mr-2" />
                 Directions
               </button>
             </div>
