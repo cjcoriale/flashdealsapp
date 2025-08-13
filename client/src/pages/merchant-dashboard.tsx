@@ -910,12 +910,6 @@ export default function MerchantDashboard() {
         <div className="px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={user?.profileImageUrl || undefined} />
-                <AvatarFallback>
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {Array.isArray(merchants) && merchants.length > 0 ? (
                   selectedMerchant 
@@ -926,8 +920,13 @@ export default function MerchantDashboard() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="w-4 h-4" />
+                <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+                  <Avatar className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all">
+                    <AvatarImage src={user?.profileImageUrl || undefined} />
+                    <AvatarFallback className="bg-blue-500 text-white">
+                      {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
