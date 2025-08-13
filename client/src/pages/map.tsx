@@ -52,7 +52,9 @@ export default function MapPage() {
   } = useQuery<DealWithMerchant[]>({
     queryKey: ["/api/search", searchQuery],
     enabled: !!searchQuery,
-    staleTime: 10000,
+    staleTime: 0, // Don't cache search results
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Get enabled states
@@ -126,6 +128,18 @@ export default function MapPage() {
 
   const nearbyDeals = location ? getNearbyDeals(deals, location.lat, location.lng) : deals;
   const displayedDeals = searchQuery ? searchResults : nearbyDeals;
+
+  // Debug logging to track search state
+  useEffect(() => {
+    console.log('Search state:', {
+      searchQuery,
+      searchResultsLength: searchResults.length,
+      nearbyDealsLength: nearbyDeals.length,
+      displayedDealsLength: displayedDeals.length,
+      isSearching: !!searchQuery,
+      searchLoading
+    });
+  }, [searchQuery, searchResults, nearbyDeals, displayedDeals, searchLoading]);
 
   useEffect(() => {
     logAction("App Initialized", "FlashDeals app started");
