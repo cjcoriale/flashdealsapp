@@ -798,6 +798,18 @@ export default function MerchantDashboard() {
   };
 
   const onCreateDeal = (data: any) => {
+    setHasAttemptedSubmit(true);
+    
+    // Check form validity
+    if (!isFormValid()) {
+      toast({
+        title: "Incomplete Form",
+        description: "Please complete all required sections before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
     
     const dealData = {
@@ -1864,17 +1876,6 @@ export default function MerchantDashboard() {
                   type="submit" 
                   className={`w-full text-sm ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={createDealMutation.isPending || !isFormValid()}
-                  onClick={(e) => {
-                    setHasAttemptedSubmit(true);
-                    if (!isFormValid()) {
-                      e.preventDefault();
-                      toast({
-                        title: "Incomplete Form",
-                        description: "Please complete all required sections before submitting.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
                 >
                   {createDealMutation.isPending ? "Creating..." : !isFormValid() ? "Complete Required Fields" : "Create Deal"}
                 </Button>
