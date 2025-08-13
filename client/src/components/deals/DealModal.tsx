@@ -46,9 +46,18 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
       >
         {/* Handle Bar */}
         <div 
-          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-2 cursor-pointer hover:bg-gray-400 transition-colors"
+          className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-3 cursor-pointer hover:bg-gray-400 transition-colors"
           onClick={onClose}
         />
+        
+        {/* Business Name - Above Cover */}
+        <div className="text-center mb-3 px-5">
+          <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
+          <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
+            <MapPin className="w-3 h-3 mr-1" />
+            <span>{deal.merchant.address.replace(', United States', '').replace(', USA', '')}</span>
+          </div>
+        </div>
         
         {/* Deal Cover */}
         <div className={`relative h-24 ${deal.coverColor || 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center mb-4`}>
@@ -61,14 +70,6 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
         </div>
         
         <div className="px-5 pb-5">
-          {/* Business Name - Main Header */}
-          <div className="text-center mb-4">
-            <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
-            <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
-              <MapPin className="w-3 h-3 mr-1" />
-              <span>{deal.merchant.address.replace(', United States', '').replace(', USA', '')}</span>
-            </div>
-          </div>
 
           {/* Deal Title & Description */}
           <div className="text-center mb-3">
