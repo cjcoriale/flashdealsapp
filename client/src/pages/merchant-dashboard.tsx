@@ -42,6 +42,7 @@ const dealFormSchema = insertDealSchema.extend({
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
   merchantId: z.number().min(1, "Please select a business location"),
+  maxRedemptions: z.number().min(1, "Quantity must be at least 1").default(25),
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
 }).refine((data) => {
@@ -121,12 +122,18 @@ export default function MerchantDashboard() {
 
   const isFormValid = () => {
     const values = dealForm.getValues();
-    return values.title && 
+    console.log("Form values:", values);
+    console.log("Form errors:", dealForm.formState.errors);
+    
+    const isValid = values.title && 
            values.originalPrice > 0 && 
            values.discountedPrice > 0 && 
            values.merchantId > 0 && 
            values.startTime && 
            values.endTime;
+           
+    console.log("Is form valid:", isValid);
+    return isValid;
   };
 
   // Gradient color options for deal covers
