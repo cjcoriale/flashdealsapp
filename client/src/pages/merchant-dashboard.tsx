@@ -977,9 +977,16 @@ export default function MerchantDashboard() {
                     return (
                       <div
                         key={deal.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                       >
-                        <div className="flex-1">
+                        {/* Percentage off in top right corner */}
+                        <div className="absolute top-2 right-2">
+                          <Badge variant="secondary" className="text-xs font-bold">
+                            {deal.discountPercentage}% OFF
+                          </Badge>
+                        </div>
+                        
+                        <div className="pr-16">
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-semibold text-sm">{deal.title}</h4>
                             <span className="text-xs text-gray-500">• {merchantName}</span>
@@ -989,9 +996,6 @@ export default function MerchantDashboard() {
                               ${deal.discountedPrice} (was ${deal.originalPrice})
                             </p>
                             <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {deal.discountPercentage}%
-                              </Badge>
                               {deal.isRecurring && (
                                 <Badge variant="outline" className="text-xs">
                                   <Clock className="w-3 h-3 mr-1" />
