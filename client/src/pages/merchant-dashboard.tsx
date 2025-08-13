@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail, MoreVertical, Trash2, Search, X } from "lucide-react";
+import { Store, Plus, Calendar, MapPin, Edit, TrendingUp, ArrowLeft, Clock, LogOut, Settings, User, Bell, Shield, Mail, MoreVertical, Trash2, Search, X, ChevronDown, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,6 +76,11 @@ export default function MerchantDashboard() {
   const [currentlyManaging, setCurrentlyManaging] = useState<any>(null);
   const [selectedDealForEdit, setSelectedDealForEdit] = useState<any>(null);
   const [showDealDetails, setShowDealDetails] = useState(false);
+  const [dealDetailsCollapsed, setDealDetailsCollapsed] = useState({
+    pricing: true,
+    status: true,
+    timing: true
+  });
   
   // Debug logging for search state (can be removed in production)
   // console.log("Current search state:", { searchQuery, searchResults: searchResults.length, isSearching, showBulkBusinessForm });
@@ -1698,29 +1703,37 @@ export default function MerchantDashboard() {
         {showDealDetails && selectedDealForEdit && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Deal Details
-                    </h2>
-                    <Badge variant={selectedDealForEdit.discountPercentage >= 50 ? "default" : "secondary"} className="text-lg px-3 py-1">
-                      {selectedDealForEdit.discountPercentage}% OFF
-                    </Badge>
-                  </div>
+              {/* Cover Image */}
+              <div className="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-lg overflow-hidden">
+                <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                <div className="absolute top-4 right-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
                       setShowDealDetails(false);
                       setSelectedDealForEdit(null);
+                      setDealDetailsCollapsed({ pricing: true, status: true, timing: true });
                     }}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white"
                   >
                     <X className="w-5 h-5" />
                   </Button>
                 </div>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-2xl font-bold text-white">
+                      Deal Details
+                    </h2>
+                    <Badge variant={selectedDealForEdit.discountPercentage >= 50 ? "default" : "secondary"} className="text-lg px-3 py-1">
+                      {selectedDealForEdit.discountPercentage}% OFF
+                    </Badge>
+                  </div>
+                </div>
+              </div>
 
-                <div className="space-y-6">
+              <div className="p-6">
+                <div className="space-y-4">
                   {/* Deal Header */}
                   <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
                     <h3 className="text-xl font-semibold mb-2">{selectedDealForEdit.title}</h3>
@@ -1741,12 +1754,21 @@ export default function MerchantDashboard() {
                     </div>
                   </div>
 
-                  {/* Pricing & Status */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
+                  {/* Pricing Section */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                      onClick={() => setDealDetailsCollapsed(prev => ({ ...prev, pricing: !prev.pricing }))}
+                    >
                       <h4 className="font-semibold text-gray-900 dark:text-white">Pricing</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
+                      <div className="flex items-center gap-4">
+                        <span className="text-green-600 font-bold">${selectedDealForEdit.discountedPrice}</span>
+                        {dealDetailsCollapsed.pricing ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </div>
+                    </div>
+                    {!dealDetailsCollapsed.pricing && (
+                      <div className="px-4 pb-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between pt-2">
                           <span className="text-gray-600 dark:text-gray-300">Original Price:</span>
                           <span className="font-medium">${selectedDealForEdit.originalPrice}</span>
                         </div>
@@ -1761,12 +1783,26 @@ export default function MerchantDashboard() {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    <div className="space-y-4">
+                  {/* Status & Activity Section */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                      onClick={() => setDealDetailsCollapsed(prev => ({ ...prev, status: !prev.status }))}
+                    >
                       <h4 className="font-semibold text-gray-900 dark:text-white">Status & Activity</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                          {selectedDealForEdit.currentRedemptions || 0}/{selectedDealForEdit.maxRedemptions}
+                        </span>
+                        {dealDetailsCollapsed.status ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </div>
+                    </div>
+                    {!dealDetailsCollapsed.status && (
+                      <div className="px-4 pb-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between pt-2">
                           <span className="text-gray-600 dark:text-gray-300">Status:</span>
                           <Badge variant={new Date(selectedDealForEdit.endTime) > new Date() ? "default" : "destructive"}>
                             {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
@@ -1788,26 +1824,39 @@ export default function MerchantDashboard() {
                           </div>
                         )}
                       </div>
-                    </div>
+                    )}
                   </div>
 
-                  {/* Timing */}
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">Timing</h4>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-gray-600 dark:text-gray-300 text-sm">Start Time:</span>
-                        <p className="font-medium">
-                          {new Date(selectedDealForEdit.startTime).toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 dark:text-gray-300 text-sm">End Time:</span>
-                        <p className="font-medium">
-                          {new Date(selectedDealForEdit.endTime).toLocaleString()}
-                        </p>
+                  {/* Timing Section */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                      onClick={() => setDealDetailsCollapsed(prev => ({ ...prev, timing: !prev.timing }))}
+                    >
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Timing</h4>
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                          {new Date(selectedDealForEdit.endTime) > new Date() ? "Active" : "Expired"}
+                        </span>
+                        {dealDetailsCollapsed.timing ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
+                    {!dealDetailsCollapsed.timing && (
+                      <div className="px-4 pb-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="pt-2">
+                          <span className="text-gray-600 dark:text-gray-300 text-sm">Start Time:</span>
+                          <p className="font-medium">
+                            {new Date(selectedDealForEdit.startTime).toLocaleString()}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-300 text-sm">End Time:</span>
+                          <p className="font-medium">
+                            {new Date(selectedDealForEdit.endTime).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
