@@ -1607,11 +1607,12 @@ export default function MerchantDashboard() {
               <DialogTitle>Super Merchant</DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
-              {/* Search Interface */}
+              {/* Super Search Interface */}
               <div className="space-y-4">
+                <h4 className="font-semibold text-lg">Super Search</h4>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Search for businesses (e.g., 'pizza New York', 'coffee shops Portland')"
+                    placeholder="Search for businesses (e.g., 'pizza Phoenix', 'coffee shops Scottsdale')"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -1671,48 +1672,7 @@ export default function MerchantDashboard() {
                   </div>
                 )}
 
-                {/* Super Search Buttons */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-3">Super Search</h4>
-                  <div className="grid md:grid-cols-3 gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("restaurants Phoenix")}
-                    >
-                      Phoenix Restaurants
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("coffee shops Scottsdale")}
-                    >
-                      Scottsdale Coffee
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("pizza Tempe")}
-                    >
-                      Tempe Pizza
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("sushi Tucson")}
-                    >
-                      Tucson Sushi
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("barbecue Mesa")}
-                    >
-                      Mesa BBQ
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchQuery("tacos Chandler")}
-                    >
-                      Chandler Tacos
-                    </Button>
-                  </div>
-                </div>
+
 
                 {/* State Management */}
                 <div className="border-t pt-4">
