@@ -122,18 +122,19 @@ export default function MerchantDashboard() {
 
   const isFormValid = () => {
     const values = dealForm.getValues();
-    console.log("Form values:", values);
-    console.log("Form errors:", dealForm.formState.errors);
+    const errors = dealForm.formState.errors;
     
-    const isValid = values.title && 
+    // Check for Zod validation errors first
+    if (Object.keys(errors).length > 0) {
+      return false;
+    }
+    
+    return values.title && 
            values.originalPrice > 0 && 
            values.discountedPrice > 0 && 
            values.merchantId > 0 && 
            values.startTime && 
            values.endTime;
-           
-    console.log("Is form valid:", isValid);
-    return isValid;
   };
 
   // Gradient color options for deal covers
@@ -388,12 +389,12 @@ export default function MerchantDashboard() {
     defaultValues: {
       title: "",
       description: "",
-      category: "",
+      category: "restaurant",
       originalPrice: 0,
       discountedPrice: 0,
       discountPercentage: 0,
-      startTime: "",
-      endTime: "",
+      startTime: new Date().toISOString().slice(0, 16),
+      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       maxRedemptions: 25,
       merchantId: 0,
       isRecurring: false,
