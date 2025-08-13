@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Routing**: Wouter for lightweight client-side routing.
 - **Map Integration**: Leaflet with React-Leaflet for interactive maps, utilizing OpenStreetMap for base map tiles.
 - **Build Tool**: Vite for development and optimized builds.
-- **UI/UX Decisions**: Mobile-first responsive design, consistent navigation patterns for both customer and merchant users, distinct interfaces based on user roles (CustomerHome, MerchantHome). Streamlined map interface, consolidated merchant dashboard.
+- **UI/UX Decisions**: Mobile-first responsive design, consistent navigation patterns for both customer and merchant users, distinct interfaces based on user roles (CustomerHome, MerchantHome). Streamlined map interface, consolidated merchant dashboard. Compact, centered deal modals with consolidated information display.
 
 ### Backend
 - **Runtime**: Node.js with Express.js.

@@ -62,19 +62,16 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
         
         <div className="px-5 pb-5">
           {/* Business Name - Main Header */}
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">{deal.dealEmoji || '🏪'}</span>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
-              <div className="flex items-center text-sm text-gray-500 mt-0.5">
-                <MapPin className="w-3 h-3 mr-1" />
-                <span className="truncate">{deal.merchant.address}</span>
-              </div>
+          <div className="text-center mb-4">
+            <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
+            <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
+              <MapPin className="w-3 h-3 mr-1" />
+              <span>{deal.merchant.address}</span>
             </div>
           </div>
 
           {/* Deal Title & Description */}
-          <div className="mb-3">
+          <div className="text-center mb-3">
             <h2 className="text-lg font-semibold text-gray-800 mb-1">{deal.title}</h2>
             {deal.description && (
               <p className="text-sm text-gray-600 leading-relaxed">{deal.description}</p>
