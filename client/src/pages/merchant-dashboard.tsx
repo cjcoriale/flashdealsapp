@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -38,10 +39,9 @@ const dealFormSchema = insertDealSchema.extend({
   title: z.string().min(3, "Title must be at least 3 characters"),
   originalPrice: z.number().min(0.01, "Price must be greater than 0"),
   discountedPrice: z.number().min(0.01, "Price must be greater than 0"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
   merchantId: z.number().min(1, "Please select a business location"),
-  dealType: z.string().min(1, "Deal type is required"),
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
 }).refine((data) => {
@@ -153,15 +153,27 @@ export default function MerchantDashboard() {
     Colorado: { displayName: "Colorado" }
   };
 
+  type EnabledStatesType = {
+    Arizona: boolean;
+    California: boolean;
+    Texas: boolean;
+    Florida: boolean;
+    NewYork: boolean;
+    Washington: boolean;
+    Illinois: boolean;
+    Colorado: boolean;
+    [key: string]: boolean;
+  };
+
   // Fetch enabled states from backend
-  const { data: backendEnabledStates = {} } = useQuery({
+  const { data: backendEnabledStates = {} as EnabledStatesType } = useQuery<EnabledStatesType>({
     queryKey: ['/api/enabled-states'],
     enabled: isAuthenticated && showSuperMerchantTools,
     staleTime: 30000, // Cache for 30 seconds
   });
 
   // Local state for enabled states (synced with backend)
-  const [enabledStates, setEnabledStates] = useState({
+  const [enabledStates, setEnabledStates] = useState<EnabledStatesType>({
     Arizona: true,
     California: false,
     Texas: false,
@@ -181,7 +193,7 @@ export default function MerchantDashboard() {
   
   // Mutation to update enabled states on the server
   const updateEnabledStatesMutation = useMutation({
-    mutationFn: async (newEnabledStates: { [key: string]: boolean }) => {
+    mutationFn: async (newEnabledStates: EnabledStatesType) => {
       try {
         const response = await apiRequest('POST', '/api/enabled-states', { enabledStates: newEnabledStates });
         return response;
@@ -296,7 +308,7 @@ export default function MerchantDashboard() {
   // Populate addedBusinessIds when merchants are loaded
   useEffect(() => {
     if (Array.isArray(merchants) && merchants.length > 0) {
-      const existingIdentifiers = new Set();
+      const existingIdentifiers = new Set<string>();
       merchants.forEach((merchant: any) => {
         if (merchant.address) {
           existingIdentifiers.add(merchant.address.toLowerCase().trim());
@@ -608,7 +620,7 @@ export default function MerchantDashboard() {
   const createFromSearchMutation = useMutation({
     mutationFn: async (businessData: any) => {
       // Check for duplicate addresses in existing merchants
-      const existingMerchants = merchants || [];
+      const existingMerchants = Array.isArray(merchants) ? merchants : [];
       const isDuplicate = existingMerchants.some((merchant: any) => 
         merchant.address?.toLowerCase().trim() === businessData.address?.toLowerCase().trim()
       );
@@ -814,7 +826,7 @@ export default function MerchantDashboard() {
     const isRecentlyAdded = addedBusinessIds.has(result.place_id) || addedBusinessIds.has(resultAddress);
     
     // Also check if it exists in current merchants
-    const existingMerchants = merchants || [];
+    const existingMerchants = Array.isArray(merchants) ? merchants : [];
     const existsInMerchants = existingMerchants.some((merchant: any) => 
       merchant.address?.toLowerCase().trim() === resultAddress
     );
@@ -1607,6 +1619,58 @@ export default function MerchantDashboard() {
                     />
                   </div>
                 </div>
+
+                {/* Recurring Deal Options - Collapsible */}
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between text-sm p-2">
+                      <span>Recurring Deal Options</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 pt-2">
+                    <div className="border rounded-lg p-3 bg-gray-50">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <input
+                          type="checkbox"
+                          id="recurring-checkbox"
+                          checked={dealForm.watch("isRecurring") || false}
+                          onChange={(e) => {
+                            dealForm.setValue("isRecurring", e.target.checked);
+                            if (!e.target.checked) {
+                              dealForm.setValue("recurringInterval", "");
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Label htmlFor="recurring-checkbox" className="text-sm font-medium">
+                          Make this a recurring deal
+                        </Label>
+                      </div>
+                      
+                      {dealForm.watch("isRecurring") && (
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-600">
+                            This deal will automatically repost when it expires
+                          </p>
+                          <div>
+                            <Label htmlFor="recurring-interval" className="text-xs">Repeat every:</Label>
+                            <Select onValueChange={(value) => dealForm.setValue("recurringInterval", value)}>
+                              <SelectTrigger className="mt-1 text-xs h-8">
+                                <SelectValue placeholder="Select interval" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Submit Button */}
                 <Button 
