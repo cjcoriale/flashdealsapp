@@ -66,7 +66,7 @@ export default function DealModal({ deal, onClose, onClaim, onAuthRequired }: De
             <h1 className="text-xl font-bold text-gray-900">{deal.merchant.name}</h1>
             <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
               <MapPin className="w-3 h-3 mr-1" />
-              <span>{deal.merchant.address}</span>
+              <span>{deal.merchant.address.replace(', United States', '').replace(', USA', '')}</span>
             </div>
           </div>
 
