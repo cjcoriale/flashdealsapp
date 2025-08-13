@@ -4,8 +4,15 @@ export function useLocation() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [permissionState, setPermissionState] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
 
-  // Load saved location on mount
+  // Save location to localStorage whenever it changes
+  const updateLocation = useCallback((newLocation: { lat: number; lng: number }) => {
+    setLocation(newLocation);
+    localStorage.setItem('merchant_location', JSON.stringify(newLocation));
+  }, []);
+
+  // Load saved location on mount and check permission silently
   useEffect(() => {
     const savedLocation = localStorage.getItem('merchant_location');
     if (savedLocation) {
@@ -18,13 +25,35 @@ export function useLocation() {
         console.error('Failed to parse saved location:', e);
       }
     }
-  }, []);
 
-  // Save location to localStorage whenever it changes
-  const updateLocation = useCallback((newLocation: { lat: number; lng: number }) => {
-    setLocation(newLocation);
-    localStorage.setItem('merchant_location', JSON.stringify(newLocation));
-  }, []);
+    // Check permission status silently without triggering UI
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        setPermissionState(result.state);
+        
+        // If already granted and no saved location, get it silently
+        if (result.state === 'granted' && !savedLocation && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              updateLocation({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              });
+            },
+            () => {}, // Silent error handling
+            {
+              enableHighAccuracy: false,
+              timeout: 5000,
+              maximumAge: 300000,
+            }
+          );
+        }
+      }).catch(() => {
+        // Fallback for browsers that don't support permissions API
+        setPermissionState('unknown');
+      });
+    }
+  }, [updateLocation]);
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -84,6 +113,7 @@ export function useLocation() {
     location,
     isLoading,
     error,
+    permissionState,
     requestLocation,
     setManualLocation,
     clearSavedLocation,

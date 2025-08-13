@@ -29,7 +29,7 @@ export default function MapPage() {
     visible: false
   });
 
-  const { location, requestLocation, isLoading: locationLoading } = useLocation();
+  const { location, requestLocation, isLoading: locationLoading, permissionState } = useLocation();
   const { logAction } = useAudit();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const authModal = useAuthModal();
@@ -138,17 +138,8 @@ export default function MapPage() {
     return () => clearInterval(interval);
   }, [logAction, refetchDeals]);
 
-  // Separate effect for location request on initial load only
-  useEffect(() => {
-    // Request location once on mount, but only if we don't have it yet
-    const timeoutId = setTimeout(() => {
-      if (!location && !locationLoading) {
-        requestLocation();
-      }
-    }, 1000); // Small delay to let the page load
-
-    return () => clearTimeout(timeoutId);
-  }, []); // Empty dependency array - only run once on mount
+  // Only request location if permission is explicitly denied or prompt state
+  // Don't auto-request on mount to avoid unnecessary permission prompts
 
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
@@ -253,7 +244,25 @@ export default function MapPage() {
                 Check back later or explore the map for deals in other areas!
               </p>
             </div>
-          ) : (
+          ) : permissionState === 'denied' ? (
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Location Access Denied</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Please enable location access in your browser settings to see nearby deals
+              </p>
+              <button 
+                onClick={handleLocationRequest}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : permissionState === 'prompt' || (permissionState === 'unknown' && !locationLoading) ? (
             <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +281,7 @@ export default function MapPage() {
                 Enable Location
               </button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
