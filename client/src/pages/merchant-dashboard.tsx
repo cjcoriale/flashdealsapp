@@ -110,7 +110,13 @@ export default function MerchantDashboard() {
   
   // State toggle function
   const toggleState = (stateName: string) => {
-    setEnabledStates(prev => ({ ...prev, [stateName]: !prev[stateName] }));
+    console.log('Toggle state called for:', stateName);
+    console.log('Current state before toggle:', enabledStates[stateName]);
+    setEnabledStates(prev => {
+      const newState = { ...prev, [stateName]: !prev[stateName] };
+      console.log('New state after toggle:', newState[stateName]);
+      return newState;
+    });
   };
 
   // Debug logging for search state (can be removed in production)
