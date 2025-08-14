@@ -416,7 +416,7 @@ export default function MapPage() {
             }
           }}
           onEdit={() => handleEditDeal(selectedDeal)}
-          onAuthRequired={() => authModal.openModal(`/deals/${selectedDeal.id}`)}
+          onAuthRequired={(forceCustomerLogin = false) => authModal.openModal(`/deals/${selectedDeal.id}`, forceCustomerLogin)}
         />
       )}
 
@@ -433,6 +433,7 @@ export default function MapPage() {
         isOpen={authModal.isOpen}
         onClose={authModal.closeModal}
         redirectAfterAuth={authModal.redirectAfterAuth}
+        forceCustomerLogin={authModal.forceCustomerLogin}
       />
 
       {/* Notification Toast */}

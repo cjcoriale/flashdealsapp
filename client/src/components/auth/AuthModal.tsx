@@ -9,10 +9,11 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   redirectAfterAuth?: string;
+  forceCustomerLogin?: boolean;
 }
 
-export default function AuthModal({ isOpen, onClose, redirectAfterAuth }: AuthModalProps) {
-  const [selectedUserType, setSelectedUserType] = useState<'customer' | 'vendor' | null>(null);
+export default function AuthModal({ isOpen, onClose, redirectAfterAuth, forceCustomerLogin = false }: AuthModalProps) {
+  const [selectedUserType, setSelectedUserType] = useState<'customer' | 'vendor' | null>(forceCustomerLogin ? 'customer' : null);
 
   const handleLogin = (userType: 'customer' | 'vendor') => {
     // Store the user type preference in localStorage
@@ -32,11 +33,11 @@ export default function AuthModal({ isOpen, onClose, redirectAfterAuth }: AuthMo
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
-            {selectedUserType ? 'Welcome!' : 'Join FlashDeals'}
+            {selectedUserType ? 'Welcome!' : forceCustomerLogin ? 'Login as Customer' : 'Join FlashDeals'}
           </DialogTitle>
         </DialogHeader>
 
-        {!selectedUserType ? (
+        {!selectedUserType && !forceCustomerLogin ? (
           <div className="space-y-4">
             <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
               Choose how you'd like to use FlashDeals
@@ -136,7 +137,7 @@ export default function AuthModal({ isOpen, onClose, redirectAfterAuth }: AuthMo
 
             <div className="space-y-3">
               <Button 
-                onClick={() => handleLogin(selectedUserType)} 
+                onClick={() => selectedUserType && handleLogin(selectedUserType)} 
                 className="w-full"
                 size="lg"
               >

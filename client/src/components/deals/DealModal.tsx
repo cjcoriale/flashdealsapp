@@ -10,7 +10,7 @@ interface DealModalProps {
   onClose: () => void;
   onClaim: () => void;
   onEdit?: () => void;
-  onAuthRequired?: () => void;
+  onAuthRequired?: (forceCustomerLogin?: boolean) => void;
 }
 
 export default function DealModal({ deal, onClose, onClaim, onEdit, onAuthRequired }: DealModalProps) {
@@ -145,7 +145,8 @@ export default function DealModal({ deal, onClose, onClaim, onEdit, onAuthRequir
                 </button>
                 <button
                   onClick={() => {
-                    onAuthRequired?.();
+                    // Force customer login for merchants wanting to claim deals
+                    onAuthRequired?.(true);
                     onClose();
                   }}
                   className="text-blue-600 hover:text-blue-800 text-xs underline transition-colors"
