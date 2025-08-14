@@ -1388,11 +1388,21 @@ export default function MerchantDashboard() {
                 <Calendar className="w-5 h-5" />
                 Recent Deals - {currentlyManaging?.name}
               </CardTitle>
-              <CardDescription>
-                Last 2 deals created for this location (including expired deals)
-              </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Search bar for deals */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search by deal name..."
+                    value={dealsSearchQuery}
+                    onChange={(e) => setDealsSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
               {Array.isArray(recentDeals) && recentDeals.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">🎯</div>
@@ -1412,7 +1422,13 @@ export default function MerchantDashboard() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {Array.isArray(recentDeals) && recentDeals.slice(0, 2)
+                  {Array.isArray(recentDeals) && recentDeals
+                    .filter((deal: any) => {
+                      if (!dealsSearchQuery) return true;
+                      const searchLower = dealsSearchQuery.toLowerCase();
+                      return deal.title.toLowerCase().includes(searchLower);
+                    })
+                    .slice(0, 2)
                     .map((deal: any) => {
                       const merchantName = Array.isArray(merchants) 
                         ? merchants.find((m: any) => m.id === deal.merchantId)?.name || "Unknown Restaurant"
