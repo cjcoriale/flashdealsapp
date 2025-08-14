@@ -288,7 +288,7 @@ export default function MapPage() {
       )}
 
       {/* Deal Cards */}
-      <div className={`absolute bottom-16 left-0 right-0 z-30 px-4 ${exploreMode ? 'top-28' : ''}`}>
+      <div className="absolute bottom-16 left-0 right-0 z-30 px-4">
         <div className="flex space-x-4 overflow-x-auto pb-4">
           {displayedDeals.length > 0 ? (
             displayedDeals.map((deal) => (
