@@ -1386,7 +1386,7 @@ export default function MerchantDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                Recent Deals - {currentlyManaging?.name}
+                Recent Deals
               </CardTitle>
             </CardHeader>
             <CardContent>
