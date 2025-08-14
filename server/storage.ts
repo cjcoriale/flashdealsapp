@@ -58,6 +58,8 @@ export interface IStorage {
   getDealsByLocation(lat: number, lng: number, radius: number): Promise<DealWithMerchant[]>;
   getDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
   getExpiredDealsByMerchant(merchantId: number): Promise<DealWithMerchant[]>;
+  getRecentMerchantDeals(merchantId: number, limit: number): Promise<DealWithMerchant[]>;
+  getMerchantDealHistory(merchantId: number, offset: number, limit: number): Promise<DealWithMerchant[]>;
   getAllExpiredDeals(): Promise<Deal[]>;
   createDeal(deal: InsertDeal): Promise<Deal>;
   updateDeal(id: number, deal: Partial<InsertDeal>): Promise<Deal>;
@@ -312,6 +314,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDeal(id: number): Promise<void> {
     await db.delete(deals).where(eq(deals.id, id));
+  }
+
+  async getRecentMerchantDeals(merchantId: number, limit: number): Promise<DealWithMerchant[]> {
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(eq(deals.merchantId, merchantId))
+      .orderBy(desc(deals.createdAt))
+      .limit(limit)
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
+  }
+
+  async getMerchantDealHistory(merchantId: number, offset: number, limit: number): Promise<DealWithMerchant[]> {
+    return await db
+      .select()
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(eq(deals.merchantId, merchantId))
+      .orderBy(desc(deals.createdAt))
+      .offset(offset)
+      .limit(limit)
+      .then(rows => rows.map(row => ({
+        ...row.deals,
+        merchant: row.merchants
+      })));
   }
 
   // Saved deals operations

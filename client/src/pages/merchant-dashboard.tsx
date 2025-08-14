@@ -321,6 +321,12 @@ export default function MerchantDashboard() {
     enabled: selectedMerchant !== null,
   });
 
+  // Get recent deals for selected merchant (last 2 created)
+  const { data: recentDeals = [] } = useQuery({
+    queryKey: [`/api/merchants/${selectedMerchant}/deals/recent`, { limit: 2 }],
+    enabled: selectedMerchant !== null,
+  });
+
   // Get all deals for the current user's merchants for recent deals display
   const { data: allUserDeals = [] } = useQuery({
     queryKey: ["/api/deals"],
@@ -1374,125 +1380,112 @@ export default function MerchantDashboard() {
           </div>
         )}
 
-        {/* Recent Deals */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Your Recent Deals
-            </CardTitle>
-            <CardDescription>
-              Manage your active flash deals
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Search bar for deals */}
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by restaurant or deal name..."
-                  value={dealsSearchQuery}
-                  onChange={(e) => setDealsSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-
-            {Array.isArray(allUserDeals) && allUserDeals.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-4">🎯</div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No deals yet
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Create your first flash deal to start attracting customers
-                </p>
-                <Button
-                  onClick={handleCreateDealClick}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Deal
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {Array.isArray(allUserDeals) && allUserDeals
-                  .filter((deal: any) => {
-                    if (!dealsSearchQuery) return true;
-                    const searchLower = dealsSearchQuery.toLowerCase();
-                    const merchantName = Array.isArray(merchants) 
-                      ? merchants.find((m: any) => m.id === deal.merchantId)?.name || ""
-                      : "";
-                    return (
-                      deal.title.toLowerCase().includes(searchLower) ||
-                      merchantName.toLowerCase().includes(searchLower)
-                    );
-                  })
-                  .slice(0, 2)
-                  .map((deal: any) => {
-                    const merchantName = Array.isArray(merchants) 
-                      ? merchants.find((m: any) => m.id === deal.merchantId)?.name || "Unknown Restaurant"
-                      : "Unknown Restaurant";
-                    
-                    return (
-                      <div
-                        key={deal.id}
-                        className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setSelectedDealForEdit(deal);
-                          setIsEditingInModal(false);
-                          setShowDealDetails(true);
-                          setDealDetailsCollapsed({ pricing: true, status: true, timing: true });
-                        }}
-                      >
-                        {/* Percentage off in top right corner */}
-                        <div className="absolute top-2 right-2">
-                          <Badge variant="secondary" className="text-xs font-bold">
-                            {deal.discountPercentage}% OFF
-                          </Badge>
-                        </div>
-                        
-                        <div className="pr-16">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-sm">{deal.title}</h4>
-                            <span className="text-xs text-gray-500">• {merchantName}</span>
+        {/* Recent Deals for Selected Location */}
+        {selectedMerchant && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Recent Deals - {currentlyManaging?.name}
+              </CardTitle>
+              <CardDescription>
+                Last 2 deals created for this location (including expired deals)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Array.isArray(recentDeals) && recentDeals.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🎯</div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No deals yet for this location
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Create your first flash deal for {currentlyManaging?.name}
+                  </p>
+                  <Button
+                    onClick={handleCreateDealClick}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Deal
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {Array.isArray(recentDeals) && recentDeals.slice(0, 2)
+                    .map((deal: any) => {
+                      const merchantName = Array.isArray(merchants) 
+                        ? merchants.find((m: any) => m.id === deal.merchantId)?.name || "Unknown Restaurant"
+                        : "Unknown Restaurant";
+                      
+                      return (
+                        <div
+                          key={deal.id}
+                          className="relative p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                          onClick={() => {
+                            setSelectedDealForEdit(deal);
+                            setIsEditingInModal(false);
+                            setShowDealDetails(true);
+                            setDealDetailsCollapsed({ pricing: true, status: true, timing: true });
+                          }}
+                        >
+                          {/* Percentage off in top right corner */}
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="secondary" className="text-xs font-bold">
+                              {deal.discountPercentage}% OFF
+                            </Badge>
                           </div>
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="flex items-center gap-2">
-                              {deal.isRecurring && (
-                                <Badge variant="outline" className="text-xs">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Recurring
+                          
+                          <div className="pr-16">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-semibold text-sm">{deal.title}</h4>
+                              <span className="text-xs text-gray-500">• {merchantName}</span>
+                            </div>
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                {deal.isRecurring && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    Recurring
+                                  </Badge>
+                                )}
+                                <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"} className="text-xs">
+                                  {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
                                 </Badge>
-                              )}
-                              <Badge variant={new Date(deal.endTime) > new Date() ? "default" : "destructive"} className="text-xs">
-                                {new Date(deal.endTime) > new Date() ? "Active" : "Expired"}
-                              </Badge>
-                              <span className="text-xs text-gray-500 whitespace-nowrap">
-                                {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
-                              </span>
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  {deal.currentRedemptions || 0}/{deal.maxRedemptions} claimed
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                
-                {/* See more link */}
-                {Array.isArray(allUserDeals) && allUserDeals.length > 2 && (
-                  <div className="text-center pt-2">
-                    <Button variant="link" className="text-blue-600 hover:text-blue-800 text-sm">
-                      See more deals ({allUserDeals.length - 2} remaining)
-                    </Button>
-                  </div>
-                )}
+                      );
+                    })}
+                  
+                  {/* Show More Button for Deal History */}
+                  {Array.isArray(recentDeals) && recentDeals.length >= 2 && (
+                    <div className="text-center pt-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // TODO: Implement show more functionality with history endpoint
+                          toast({
+                            title: "Coming Soon",
+                            description: "Deal history view is being developed",
+                          });
+                        }}
+                        className="text-sm"
+                      >
+                        Show More Deals
+                      </Button>
+                    </div>
+                  )}
               </div>
             )}
           </CardContent>
         </Card>
+        )}
 
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

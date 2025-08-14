@@ -342,6 +342,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get recent deals for a merchant (last 2 created, including expired)
+  app.get("/api/merchants/:id/deals/recent", auditMiddleware("View Recent Merchant Deals"), async (req: AuditRequest, res) => {
+    try {
+      const merchantId = parseInt(req.params.id);
+      const limit = parseInt(req.query.limit as string) || 2;
+      const recentDeals = await storage.getRecentMerchantDeals(merchantId, limit);
+      res.json(recentDeals);
+    } catch (error) {
+      auditError(req, error as Error, "View Recent Merchant Deals");
+      res.status(500).json({ message: "Failed to get recent merchant deals" });
+    }
+  });
+
+  // Get all historical deals for a merchant with pagination
+  app.get("/api/merchants/:id/deals/history", auditMiddleware("View Merchant Deal History"), async (req: AuditRequest, res) => {
+    try {
+      const merchantId = parseInt(req.params.id);
+      const offset = parseInt(req.query.offset as string) || 0;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const historicalDeals = await storage.getMerchantDealHistory(merchantId, offset, limit);
+      res.json(historicalDeals);
+    } catch (error) {
+      auditError(req, error as Error, "View Merchant Deal History");
+      res.status(500).json({ message: "Failed to get merchant deal history" });
+    }
+  });
+
   app.post("/api/deals/:id/repost", isAuthenticated, auditMiddleware("Repost Deal"), async (req: AuditRequest, res) => {
     try {
       const userId = (req as any).user.claims.sub;
