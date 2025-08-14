@@ -382,9 +382,38 @@ export default function MapPage() {
         <DealModal
           deal={selectedDeal}
           onClose={handleCloseModal}
-          onClaim={() => {
-            logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
-            handleNotification("Deal claimed successfully!");
+          onClaim={async () => {
+            try {
+              // Make the claim request using apiRequest
+              await queryClient.getQueryData(["/api/deals"]) // This will force the cache to be fresh
+              const response = await fetch(`/api/deals/${selectedDeal.id}/claim`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                  'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+              });
+              
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to claim deal');
+              }
+              
+              logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
+              handleNotification("Deal claimed successfully!");
+              
+              // Refresh deals after claiming
+              queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+              
+            } catch (error) {
+              console.error('Claim error:', error);
+              if (error instanceof Error) {
+                handleNotification(error.message);
+              } else {
+                handleNotification("Failed to claim deal. Please try again.");
+              }
+            }
           }}
           onEdit={() => handleEditDeal(selectedDeal)}
           onAuthRequired={() => authModal.openModal(`/deals/${selectedDeal.id}`)}

@@ -20,12 +20,12 @@ export default function DealModal({ deal, onClose, onClaim, onEdit, onAuthRequir
   // Get user's merchants to check ownership
   const { data: userMerchants = [] } = useQuery<Merchant[]>({
     queryKey: ["/api/my-merchants"],
-    enabled: !!user && user.role === 'merchant',
+    enabled: !!user && (user.role === 'merchant' || user.role === 'super_merchant'),
   });
   
   // Check if current user owns this deal's merchant
   const userOwnsMerchant = userMerchants.some(merchant => merchant.id === deal.merchantId);
-  const isMerchant = user?.role === 'merchant';
+  const isMerchant = user?.role === 'merchant' || user?.role === 'super_merchant';
   const canEditDeal = isMerchant && userOwnsMerchant;
 
   useEffect(() => {
