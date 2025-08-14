@@ -64,6 +64,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req as any).user.claims.sub;
       const dealId = parseInt(req.params.id);
       
+      // Get current user to check role
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Prevent merchants from claiming deals - they need to log in as customers
+      if (currentUser.role === 'merchant' || currentUser.role === 'super_merchant') {
+        return res.status(403).json({ 
+          message: "Merchants cannot claim deals. Please log in as a customer to claim deals." 
+        });
+      }
+      
       // Check if deal exists and is still active
       const deal = await storage.getDeal(dealId);
       if (!deal || !deal.isActive || new Date() > new Date(deal.endTime)) {

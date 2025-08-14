@@ -136,12 +136,17 @@ export default function DealModal({ deal, onClose, onClaim, onEdit, onAuthRequir
                 Edit Deal
               </button>
             ) : isMerchant ? (
-              <button 
-                disabled
-                className="w-full bg-gray-400 text-white py-3.5 rounded-xl font-semibold text-base cursor-not-allowed shadow-lg"
-              >
-                View Only (Not Your Deal)
-              </button>
+              <div className="text-center">
+                <button 
+                  disabled
+                  className="w-full bg-gray-400 text-white py-3.5 rounded-xl font-semibold text-base cursor-not-allowed shadow-lg mb-2"
+                >
+                  View Only (Not Your Deal)
+                </button>
+                <p className="text-xs text-gray-500">
+                  Log in as a customer to claim deals
+                </p>
+              </div>
             ) : (
               <button 
                 onClick={() => {
