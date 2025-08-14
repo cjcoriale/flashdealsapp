@@ -24,6 +24,7 @@ export default function MapPage() {
   const [showSideMenu, setShowSideMenu] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [exploreMode, setExploreMode] = useState(false);
 
   const [notification, setNotification] = useState<{ message: string; visible: boolean }>({
     message: "",
@@ -129,8 +130,32 @@ export default function MapPage() {
     });
   };
 
-  const nearbyDeals = location ? getNearbyDeals(deals, location.lat, location.lng) : deals;
-  const displayedDeals = searchQuery ? searchResults : nearbyDeals;
+  // Handle deal filtering logic based on explore mode and location
+  const getFilteredDeals = () => {
+    if (searchQuery) {
+      return searchResults;
+    }
+    
+    // If in explore mode, show all deals regardless of location
+    if (exploreMode) {
+      return deals;
+    }
+    
+    // If user is in an enabled state, show nearby deals
+    if (location && isInEnabledState) {
+      return getNearbyDeals(deals, location.lat, location.lng);
+    }
+    
+    // If user is not in an enabled state and not in explore mode, show empty array
+    if (location && !isInEnabledState && !exploreMode) {
+      return [];
+    }
+    
+    // Default: show all deals if no location
+    return deals;
+  };
+
+  const displayedDeals = getFilteredDeals();
 
   // Debug logging to track search state
   useEffect(() => {
@@ -138,13 +163,16 @@ export default function MapPage() {
       searchQuery,
       searchResultsLength: searchResults.length,
       searchResultsData: searchResults,
-      nearbyDealsLength: nearbyDeals.length,
+      dealsLength: deals.length,
       displayedDealsLength: displayedDeals.length,
       isSearching: !!searchQuery,
       searchLoading,
-      searchEnabled: !!searchQuery && searchQuery.length > 0
+      searchEnabled: !!searchQuery && searchQuery.length > 0,
+      exploreMode,
+      isInEnabledState,
+      userState
     });
-  }, [searchQuery, searchResults, nearbyDeals, displayedDeals, searchLoading]);
+  }, [searchQuery, searchResults, deals, displayedDeals, searchLoading, exploreMode, isInEnabledState, userState]);
 
   useEffect(() => {
     logAction("App Initialized", "FlashDeals app started");
@@ -241,8 +269,26 @@ export default function MapPage() {
         searchQuery={searchQuery}
       />
 
+      {/* Explore Mode Banner */}
+      {exploreMode && (
+        <div className="absolute top-16 left-0 right-0 z-30 bg-blue-600 text-white text-center py-2 px-4">
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-sm font-medium">Exploring all deals</span>
+            <button
+              onClick={() => {
+                setExploreMode(false);
+                logAction("Explore Mode", "User exited explore mode");
+              }}
+              className="text-blue-200 hover:text-white text-sm underline ml-2"
+            >
+              Exit explore mode
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Deal Cards */}
-      <div className="absolute bottom-16 left-0 right-0 z-30 px-4">
+      <div className={`absolute bottom-16 left-0 right-0 z-30 px-4 ${exploreMode ? 'top-28' : ''}`}>
         <div className="flex space-x-4 overflow-x-auto pb-4">
           {displayedDeals.length > 0 ? (
             displayedDeals.map((deal) => (
@@ -378,7 +424,7 @@ export default function MapPage() {
       )}
 
       {/* State Disabled Overlay */}
-      {location && userState && !isInEnabledState && (
+      {location && userState && !isInEnabledState && !exploreMode && (
         <div className="absolute inset-0 z-40 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-xl">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 mx-auto">
@@ -401,6 +447,16 @@ export default function MapPage() {
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Notify me when available
+            </button>
+            <button
+              onClick={() => {
+                // Enable exploration mode by clearing location restrictions
+                setExploreMode(true);
+                logAction("Explore Mode", `User in ${userState} started exploring all deals`);
+              }}
+              className="block w-full mt-3 text-blue-600 hover:text-blue-800 transition-colors underline"
+            >
+              Take a look around
             </button>
             <p className="text-xs text-gray-500 mt-4">
               Currently serving: Arizona
