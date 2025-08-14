@@ -220,10 +220,24 @@ export async function setupSimpleAuth(app: Express) {
       await storage.deleteAuthSession(token);
     }
     res.clearCookie('auth_token');
-    // Clear any session data and redirect to login
-    const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
-    const redirectUrl = `${protocol}://${req.get('host')}/?logout=success`;
-    res.redirect(redirectUrl);
+    
+    // Check if this is a customer login request (merchant switching to customer)
+    const customerLogin = req.query.customer_login === 'true';
+    const returnTo = req.query.returnTo as string;
+    
+    if (customerLogin) {
+      // Set customer role preference and redirect to login
+      const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
+      const loginUrl = returnTo 
+        ? `${protocol}://${req.get('host')}/api/auth/login?role=customer&returnTo=${encodeURIComponent(returnTo)}`
+        : `${protocol}://${req.get('host')}/api/auth/login?role=customer`;
+      res.redirect(loginUrl);
+    } else {
+      // Normal logout - redirect to landing page
+      const protocol = req.get('host')?.includes('replit.dev') ? 'https' : req.protocol;
+      const redirectUrl = `${protocol}://${req.get('host')}/?logout=success`;
+      res.redirect(redirectUrl);
+    }
   });
 
   // Debug endpoint to check available headers

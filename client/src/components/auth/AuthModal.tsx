@@ -19,9 +19,17 @@ export default function AuthModal({ isOpen, onClose, redirectAfterAuth, forceCus
     // Store the user type preference in localStorage
     localStorage.setItem('userType', userType);
     
-    // Redirect to login with return URL
-    const returnUrl = redirectAfterAuth || window.location.pathname;
-    window.location.href = `/api/login?returnTo=${encodeURIComponent(returnUrl)}`;
+    // If forcing customer login (merchant switching to customer), logout first
+    if (forceCustomerLogin && userType === 'customer') {
+      // First logout current session, then redirect to login for customer
+      const returnUrl = redirectAfterAuth || window.location.pathname;
+      window.location.href = `/api/auth/logout?customer_login=true&returnTo=${encodeURIComponent(returnUrl)}`;
+      return;
+    } else {
+      // Normal login flow
+      const returnUrl = redirectAfterAuth || window.location.pathname;
+      window.location.href = `/api/login?returnTo=${encodeURIComponent(returnUrl)}`;
+    }
   };
 
   const resetSelection = () => {
