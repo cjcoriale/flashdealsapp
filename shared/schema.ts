@@ -82,6 +82,8 @@ export const deals = pgTable("deals", {
   lastRecurredAt: timestamp("last_recurred_at"),
   coverColor: text("cover_color").default("bg-blue-500"),
   dealEmoji: text("deal_emoji").default("🏷️"),
+  status: varchar("status").default("active"), // active, expired, deleted, archived
+  archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

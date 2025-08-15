@@ -34,7 +34,7 @@ import {
   type InsertUserPreference,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, lt, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, lt, sql, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -250,7 +250,12 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(deals)
       .innerJoin(merchants, eq(deals.merchantId, merchants.id))
-      .where(eq(deals.merchantId, merchantId))
+      .where(
+        and(
+          eq(deals.merchantId, merchantId),
+          ne(deals.status, "deleted") // Exclude deleted/archived deals
+        )
+      )
       .orderBy(desc(deals.createdAt))
       .then(rows => rows.map(row => ({
         ...row.deals,
@@ -313,7 +318,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDeal(id: number): Promise<void> {
-    await db.delete(deals).where(eq(deals.id, id));
+    // Archive the deal instead of deleting it
+    await db
+      .update(deals)
+      .set({ 
+        status: "deleted",
+        archivedAt: new Date(),
+        isActive: false
+      })
+      .where(eq(deals.id, id));
   }
 
   async getRecentMerchantDeals(merchantId: number, limit: number): Promise<DealWithMerchant[]> {
@@ -321,7 +334,12 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(deals)
       .innerJoin(merchants, eq(deals.merchantId, merchants.id))
-      .where(eq(deals.merchantId, merchantId))
+      .where(
+        and(
+          eq(deals.merchantId, merchantId),
+          ne(deals.status, "deleted") // Exclude deleted/archived deals
+        )
+      )
       .orderBy(desc(deals.createdAt))
       .limit(limit)
       .then(rows => rows.map(row => ({
