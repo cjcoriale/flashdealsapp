@@ -1530,6 +1530,142 @@ export default function MerchantDashboard() {
         </Card>
         )}
 
+        {/* Add Location Box - Shows when merchant is selected */}
+        {selectedMerchant && (
+          <Card className="mb-6">
+            <div 
+              className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+              onClick={() => setShowSearchBox(!showSearchBox)}
+            >
+              <div className="flex items-center gap-2">
+                <Plus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <h3 className="font-semibold text-gray-900 dark:text-white">Add Another Location</h3>
+              </div>
+              {showSearchBox ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </div>
+            
+            {showSearchBox && (
+              <CardContent className="pt-0 border-t border-gray-200 dark:border-gray-700">
+                <div className="space-y-4">
+                  {/* Google Places Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search for your business on Google..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (searchQuery.trim()) {
+                            setIsSearching(true);
+                            searchBusinessesMutation.mutate(searchQuery.trim());
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        if (searchQuery.trim()) {
+                          setIsSearching(true);
+                          searchBusinessesMutation.mutate(searchQuery.trim());
+                        }
+                      }}
+                      disabled={!searchQuery.trim() || isSearching}
+                      variant="default"
+                      className="flex-1"
+                    >
+                      {isSearching ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4 mr-2" />
+                          Quick Add
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => setShowMerchantForm(true)}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Manual Add
+                    </Button>
+                  </div>
+                  
+                  {/* Search Results */}
+                  {searchResults.length > 0 && (
+                    <div className="space-y-3 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                      {searchResults.map((business: any, index) => {
+                        const isAdded = addedBusinessIds.has(business.place_id) || 
+                                       addedBusinessIds.has(business.formatted_address?.toLowerCase().trim());
+                        
+                        return (
+                          <div key={business.place_id || index} className="flex justify-between items-start p-2 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                                {business.name}
+                              </h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                                {business.formatted_address}
+                              </p>
+                              {business.rating && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  ⭐ {business.rating} ({business.user_ratings_total || 0} reviews)
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => addBusinessFromSearch.mutate(business)}
+                              disabled={addBusinessFromSearch.isPending || isAdded}
+                              className="ml-3"
+                            >
+                              {addBusinessFromSearch.isPending ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : isAdded ? (
+                                "✓ Added"
+                              ) : (
+                                <>
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Add
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                      
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSearchResults([]);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            )}
+          </Card>
+        )}
+
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
@@ -1559,11 +1695,12 @@ export default function MerchantDashboard() {
 
 
 
-        {/* Change Locations */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Change Locations
-          </h2>
+        {/* Change Locations - Only show if multiple locations */}
+        {Array.isArray(merchants) && merchants.length > 1 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Change Locations
+            </h2>
           
           {/* Location Search */}
           <div className="mb-6">
@@ -1805,6 +1942,7 @@ export default function MerchantDashboard() {
             </div>
           )}
         </div>
+        )}
 
 
 
