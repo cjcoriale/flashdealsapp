@@ -762,7 +762,7 @@ export default function MerchantDashboard() {
   });
 
   // Create business from search result mutation
-  const createFromSearchMutation = useMutation({
+  const addBusinessFromSearch = useMutation({
     mutationFn: async (businessData: any) => {
       // Check for duplicate addresses in existing merchants
       const existingMerchants = Array.isArray(merchants) ? merchants : [];
@@ -1584,19 +1584,156 @@ export default function MerchantDashboard() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             </div>
           ) : (merchants as any[]).length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No locations yet</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Create your first location to start offering deals
-                </p>
-                <Button onClick={() => setShowMerchantForm(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Location
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Add Your First Location</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Get started by adding your business location to begin offering deals
+                  </p>
+                  
+                  {/* Quick Add with Google Places Search */}
+                  <div className="space-y-4 max-w-md mx-auto">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="Search for your business on Google..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (searchQuery.trim()) {
+                              setIsSearching(true);
+                              searchBusinessesMutation.mutate(searchQuery.trim());
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2 justify-center">
+                      <Button 
+                        onClick={() => {
+                          if (searchQuery.trim()) {
+                            setIsSearching(true);
+                            searchBusinessesMutation.mutate(searchQuery.trim());
+                          }
+                        }}
+                        disabled={!searchQuery.trim() || isSearching}
+                        variant="default"
+                        className="flex-1"
+                      >
+                        {isSearching ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Searching...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="w-4 h-4 mr-2" />
+                            Quick Add
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => setShowMerchantForm(true)}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Manual Add
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Search Results</CardTitle>
+                    <CardDescription>
+                      Found {searchResults.length} businesses matching "{searchQuery}"
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {searchResults.map((business: any, index) => {
+                        const isAdded = addedBusinessIds.has(business.place_id) || 
+                                       addedBusinessIds.has(business.formatted_address?.toLowerCase().trim());
+                        
+                        return (
+                          <div key={business.place_id || index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 dark:text-white">
+                                  {business.name}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                  {business.formatted_address}
+                                </p>
+                                {business.types && business.types.length > 0 && (
+                                  <p className="text-xs text-gray-500 mt-2">
+                                    {business.types.slice(0, 3).join(', ')}
+                                  </p>
+                                )}
+                                {business.rating && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    ⭐ {business.rating} ({business.user_ratings_total || 0} reviews)
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => addBusinessFromSearch.mutate(business)}
+                                disabled={addBusinessFromSearch.isPending || isAdded}
+                                className="ml-3"
+                              >
+                                {addBusinessFromSearch.isPending ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                ) : isAdded ? (
+                                  <>
+                                    ✓ Added
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-4 h-4 mr-1" />
+                                    Add
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSearchResults([]);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Clear Results
+                      </Button>
+                      
+                      <p className="text-xs text-gray-500">
+                        Click "Add" to create your business from search results
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(merchants as any[])
