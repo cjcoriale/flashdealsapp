@@ -247,6 +247,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to delete this merchant" });
       }
 
+      // Check if merchant has active deals
+      const activeDeals = await storage.getDealsByMerchant(merchantId);
+      const hasActiveDeals = activeDeals.some(deal => deal.isActive && new Date(deal.endTime) > new Date());
+      
+      if (hasActiveDeals) {
+        return res.status(400).json({ 
+          message: "Cannot delete merchant with active deals", 
+          details: "Please end or delete all active deals before deleting this merchant"
+        });
+      }
+
       await storage.deleteMerchant(merchantId);
       res.json({ message: "Merchant deleted successfully" });
     } catch (error) {

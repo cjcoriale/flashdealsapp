@@ -504,11 +504,24 @@ export default function MerchantDashboard() {
         }, 500);
         return;
       }
+      
+      // Check if error is due to active deals
+      if (error.message.includes("Cannot delete merchant with active deals")) {
+        toast({
+          title: "Cannot Delete Business",
+          description: "This business has active deals. Please end or delete all active deals before deleting the business.",
+          variant: "destructive",
+        });
+        setShowDeleteConfirm(null);
+        return;
+      }
+      
       toast({
         title: "Error",
         description: "Failed to delete business",
         variant: "destructive",
       });
+      setShowDeleteConfirm(null);
     },
   });
 
