@@ -247,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to delete this merchant" });
       }
 
-      // Check if merchant has active deals
+      // Check if merchant has active deals (getDealsByMerchant already filters out archived deals)
       const activeDeals = await storage.getDealsByMerchant(merchantId);
       const hasActiveDeals = activeDeals.some(deal => deal.isActive && new Date(deal.endTime) > new Date());
       
