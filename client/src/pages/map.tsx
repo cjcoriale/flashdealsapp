@@ -290,7 +290,17 @@ export default function MapPage() {
       {/* Deal Cards */}
       <div className="absolute bottom-16 left-0 right-0 z-30 px-4">
         <div className="flex space-x-4 overflow-x-auto pb-4">
-          {displayedDeals.length > 0 ? (
+          {searchLoading ? (
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Thinking...</h3>
+              <p className="text-gray-600 text-sm">
+                Searching for deals matching your query
+              </p>
+            </div>
+          ) : displayedDeals.length > 0 ? (
             displayedDeals.map((deal) => (
               <DealCard
                 key={deal.id}
@@ -299,6 +309,21 @@ export default function MapPage() {
                 userLocation={location || undefined}
               />
             ))
+          ) : searchQuery && !searchLoading ? (
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">No Results Found</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                No deals match your search for "{searchQuery}"
+              </p>
+              <p className="text-gray-500 text-xs">
+                Try different keywords or browse all available deals
+              </p>
+            </div>
           ) : location ? (
             <div className="bg-white rounded-lg shadow-lg p-6 min-w-80 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
