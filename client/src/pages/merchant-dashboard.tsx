@@ -704,6 +704,7 @@ export default function MerchantDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals`] });
       queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals/expired`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/merchants/${selectedMerchant}/deals/recent`] });
       queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
       toast({
         title: "Success",
