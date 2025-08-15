@@ -169,7 +169,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMerchantsByUser(userId: string): Promise<Merchant[]> {
-    return await db.select().from(merchants).where(eq(merchants.userId, userId));
+    return await db
+      .select()
+      .from(merchants)
+      .where(
+        and(
+          eq(merchants.userId, userId),
+          eq(merchants.isActive, true) // Only return active merchants
+        )
+      );
   }
 
   async createMerchant(merchantData: InsertMerchant): Promise<Merchant> {
