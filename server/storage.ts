@@ -190,7 +190,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteMerchant(id: number): Promise<void> {
-    await db.delete(merchants).where(eq(merchants.id, id));
+    // Soft delete merchant by marking as inactive instead of hard delete
+    // This prevents foreign key constraint issues with archived deals
+    await db
+      .update(merchants)
+      .set({ isActive: false })
+      .where(eq(merchants.id, id));
   }
 
   // Deal operations

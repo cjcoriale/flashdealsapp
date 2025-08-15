@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: PostgreSQL session store for persistent sessions across server restarts.
 - **API Design**: RESTful endpoints with JSON responses, including role-based authentication endpoints.
 - **Core Functionality**: Location-based deal searching, deal claiming, recurring deals system, comprehensive audit logging, merchant portal for deal and business management, role-based authentication (customer vs. merchant), persistent location storage for merchants across sessions, database-backed application configuration, user preferences system, state management with full persistence, explore mode for non-service areas, and comprehensive role-based permissions preventing merchants from claiming deals.
-- **Database Schema**: Comprehensive database persistence including Users, Merchants, Deals, Audit Logs, Saved Deals, Deal Claims, Enabled States, App Settings, User Preferences, and PostgreSQL session storage. All application state and configuration data is stored in the database for consistent cross-session experience.
+- **Database Schema**: Comprehensive database persistence including Users, Merchants, Deals, Audit Logs, Saved Deals, Deal Claims, Enabled States, App Settings, User Preferences, and PostgreSQL session storage. All application state and configuration data is stored in the database for consistent cross-session experience. Implemented archival system with soft deletion for both deals (status-based archiving) and merchants (isActive flag) to maintain data integrity while preventing foreign key constraint issues.
 
 ## External Dependencies
 
