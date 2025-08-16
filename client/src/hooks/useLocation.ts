@@ -10,6 +10,7 @@ export function useLocation() {
   const updateLocation = useCallback((newLocation: { lat: number; lng: number }) => {
     setLocation(newLocation);
     localStorage.setItem('merchant_location', JSON.stringify(newLocation));
+    console.log('[AUDIT] Location Updated: Lat:', newLocation.lat, ', Lng:', newLocation.lng);
   }, []);
 
   // Load saved location on mount and check permission silently after delay
@@ -89,6 +90,7 @@ export function useLocation() {
         switch (error.code) {
           case error.PERMISSION_DENIED:
             errorMessage = 'Location access denied by user';
+            setPermissionState('denied');
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = 'Location information is unavailable';

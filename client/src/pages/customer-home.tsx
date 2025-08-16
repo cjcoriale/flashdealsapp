@@ -19,20 +19,20 @@ export default function CustomerHome() {
   const { location } = useLocation();
 
   // Fetch deals
-  const { data: deals = [], isLoading } = useQuery({
+  const { data: deals = [], isLoading } = useQuery<DealWithMerchant[]>({
     queryKey: ["/api/deals"],
   });
 
   // Filter deals based on search and category
-  const filteredDeals = deals.filter((deal: DealWithMerchant) => {
+  const filteredDeals = (deals || []).filter((deal: DealWithMerchant) => {
     const matchesSearch = deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         deal.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (deal.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || deal.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
   // Get unique categories
-  const categories = Array.from(new Set(deals.map((deal: DealWithMerchant) => deal.category)));
+  const categories = Array.from(new Set((deals || []).map((deal: DealWithMerchant) => deal.category)));
 
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
@@ -85,8 +85,8 @@ export default function CustomerHome() {
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                  <SelectItem key={String(category)} value={String(category)}>
+                    {String(category)}
                   </SelectItem>
                 ))}
               </SelectContent>
