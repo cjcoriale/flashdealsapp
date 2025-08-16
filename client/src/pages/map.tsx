@@ -258,7 +258,7 @@ export default function MapPage() {
           onDealClick={handleDealClick}
           onLocationUpdate={(lat, lng) => {
             logAction("Location Updated", `Lat: ${lat}, Lng: ${lng}`);
-            handleNotification("Location updated! Map centered on your area.");
+            handleNotification(`Location found! Showing deals near ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
           }}
         />
       </div>
@@ -376,8 +376,9 @@ export default function MapPage() {
               <button 
                 onClick={handleLocationRequest}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                disabled={locationLoading}
               >
-                Enable Location
+                {locationLoading ? "Getting Location..." : "Enable Location"}
               </button>
             </div>
           ) : null}
