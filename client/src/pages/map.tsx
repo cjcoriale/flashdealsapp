@@ -370,6 +370,9 @@ export default function MapPage() {
               <p className="text-gray-600 text-sm mb-4">
                 Allow location access to see deals near you
               </p>
+              <p className="text-xs text-gray-500 mb-4">
+                Looking to create deals? <a href="/merchant-dashboard" className="text-blue-500 hover:underline">Go to Merchant Dashboard</a>
+              </p>
               <button 
                 onClick={handleLocationRequest}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
