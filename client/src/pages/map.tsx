@@ -12,7 +12,7 @@ import AuditModal from "@/components/audit/AuditModal";
 import AuthModal from "@/components/auth/AuthModal";
 
 import DealCard from "@/components/deals/DealCard";
-import NotificationToast from "@/components/ui/NotificationToast";
+
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useLocation } from "@/hooks/useLocation";
 import { useAudit } from "@/hooks/useAudit";
@@ -26,10 +26,7 @@ export default function MapPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [exploreMode, setExploreMode] = useState(false);
 
-  const [notification, setNotification] = useState<{ message: string; visible: boolean }>({
-    message: "",
-    visible: false
-  });
+
 
   const { location, requestLocation, isLoading: locationLoading, permissionState } = useLocation();
   const { logAction } = useAudit();
@@ -215,12 +212,7 @@ export default function MapPage() {
     logAction("Location Request", "User requested current location");
   };
 
-  const handleNotification = (message: string) => {
-    setNotification({ message, visible: true });
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, visible: false }));
-    }, 3000);
-  };
+
 
   const handleEditDeal = (deal: DealWithMerchant) => {
     // Navigate to merchant dashboard for editing
@@ -258,7 +250,6 @@ export default function MapPage() {
           onDealClick={handleDealClick}
           onLocationUpdate={(lat, lng) => {
             logAction("Location Updated", `Lat: ${lat}, Lng: ${lng}`);
-            handleNotification(`Location found! Showing deals near ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
           }}
         />
       </div>
@@ -430,18 +421,12 @@ export default function MapPage() {
               }
               
               logAction("Deal Claimed", `Deal ID: ${selectedDeal.id}`);
-              handleNotification("Deal claimed successfully!");
               
               // Refresh deals after claiming
               queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
               
             } catch (error) {
               console.error('Claim error:', error);
-              if (error instanceof Error) {
-                handleNotification(error.message);
-              } else {
-                handleNotification("Failed to claim deal. Please try again.");
-              }
             }
           }}
           onEdit={() => handleEditDeal(selectedDeal)}
@@ -465,12 +450,7 @@ export default function MapPage() {
         forceCustomerLogin={authModal.forceCustomerLogin}
       />
 
-      {/* Notification Toast */}
-      <NotificationToast
-        message={notification.message}
-        visible={notification.visible}
-        onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
-      />
+
 
       {/* Loading Overlay */}
       {locationLoading && (
