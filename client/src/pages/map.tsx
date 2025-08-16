@@ -28,7 +28,11 @@ export default function MapPage() {
 
 
 
-  const { location, requestLocation, isLoading: locationLoading, permissionState } = useLocation();
+  const { location, requestLocation, isLoading: locationLoading, permissionState, setManualLocation } = useLocation();
+  
+  const setLocation = (newLocation: { lat: number; lng: number }) => {
+    setManualLocation(newLocation.lat, newLocation.lng);
+  };
   const { logAction } = useAudit();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const authModal = useAuthModal();
@@ -258,6 +262,11 @@ export default function MapPage() {
       <TopNavigation
         onSearch={handleSearch}
         searchQuery={searchQuery}
+        onLocationSelect={(coordinates, title) => {
+          logAction("City Selected", `Selected: ${title} (${coordinates.lat}, ${coordinates.lng})`);
+          // Update the map to center on the selected city
+          setLocation(coordinates);
+        }}
       />
 
       {/* Explore Mode Banner */}
@@ -490,7 +499,7 @@ export default function MapPage() {
             </p>
             <button
               onClick={() => {
-                handleNotification("Thanks for your interest! We'll notify you when FlashDeals comes to your area.");
+                // Could show a toast notification here
                 logAction("Notification Request", `User in ${userState} requested notification`);
               }}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"

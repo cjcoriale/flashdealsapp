@@ -103,6 +103,15 @@ export interface IStorage {
   // User preferences operations
   getUserPreference(userId: string, key: string): Promise<UserPreference | undefined>;
   setUserPreference(userId: string, key: string, value: string, category?: string): Promise<UserPreference>;
+
+  // Search operations
+  getSearchSuggestions(query: string): Promise<Array<{
+    type: 'deal' | 'merchant' | 'city';
+    id?: number;
+    title: string;
+    subtitle?: string;
+    coordinates?: { lat: number; lng: number };
+  }>>;
   getUserPreferences(userId: string, category?: string): Promise<UserPreference[]>;
   deleteUserPreference(userId: string, key: string): Promise<void>;
 }
@@ -547,7 +556,7 @@ export class DatabaseStorage implements IStorage {
     
     const statesMap: { [key: string]: boolean } = {};
     states.forEach(state => {
-      statesMap[state.stateName] = state.isEnabled;
+      statesMap[state.stateName] = state.isEnabled || false;
     });
     
     return statesMap;
@@ -689,6 +698,124 @@ export class DatabaseStorage implements IStorage {
         eq(userPreferences.userId, userId),
         eq(userPreferences.preferenceKey, key)
       ));
+  }
+
+  async getSearchSuggestions(query: string): Promise<Array<{
+    type: 'deal' | 'merchant' | 'city';
+    id?: number;
+    title: string;
+    subtitle?: string;
+    coordinates?: { lat: number; lng: number };
+  }>> {
+    const suggestions: Array<{
+      type: 'deal' | 'merchant' | 'city';
+      id?: number;
+      title: string;
+      subtitle?: string;
+      coordinates?: { lat: number; lng: number };
+    }> = [];
+
+    const searchTerm = `%${query}%`;
+
+    // Search for deals
+    const dealsQuery = db
+      .select({
+        id: deals.id,
+        title: deals.title,
+        description: deals.description,
+        merchant: {
+          name: merchants.name,
+          address: merchants.address,
+          latitude: merchants.latitude,
+          longitude: merchants.longitude,
+        }
+      })
+      .from(deals)
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(deals.status, 'active'),
+          gte(deals.endTime, new Date()),
+          sql`LOWER(${deals.title}) LIKE LOWER(${searchTerm})`
+        )
+      )
+      .limit(5);
+
+    const dealResults = await dealsQuery;
+    for (const deal of dealResults) {
+      suggestions.push({
+        type: 'deal',
+        id: deal.id,
+        title: deal.title,
+        subtitle: deal.merchant.name,
+        coordinates: {
+          lat: deal.merchant.latitude,
+          lng: deal.merchant.longitude
+        }
+      });
+    }
+
+    // Search for merchants
+    const merchantsQuery = db
+      .select({
+        id: merchants.id,
+        name: merchants.name,
+        address: merchants.address,
+        latitude: merchants.latitude,
+        longitude: merchants.longitude,
+        category: merchants.category,
+      })
+      .from(merchants)
+      .where(
+        and(
+          eq(merchants.isActive, true),
+          sql`LOWER(${merchants.name}) LIKE LOWER(${searchTerm})`
+        )
+      )
+      .limit(5);
+
+    const merchantResults = await merchantsQuery;
+    for (const merchant of merchantResults) {
+      suggestions.push({
+        type: 'merchant',
+        id: merchant.id,
+        title: merchant.name,
+        subtitle: `${merchant.category} • ${merchant.address}`,
+        coordinates: {
+          lat: merchant.latitude,
+          lng: merchant.longitude
+        }
+      });
+    }
+
+    // Add some popular city suggestions for Arizona (since that's the enabled state)
+    if (query.length >= 2) {
+      const cities = [
+        { name: 'Phoenix', state: 'Arizona', lat: 33.4484, lng: -112.0740 },
+        { name: 'Tucson', state: 'Arizona', lat: 32.2540, lng: -110.9742 },
+        { name: 'Mesa', state: 'Arizona', lat: 33.4152, lng: -111.8315 },
+        { name: 'Chandler', state: 'Arizona', lat: 33.3062, lng: -111.8413 },
+        { name: 'Scottsdale', state: 'Arizona', lat: 33.4942, lng: -111.9261 },
+        { name: 'Glendale', state: 'Arizona', lat: 33.5387, lng: -112.1860 },
+        { name: 'Tempe', state: 'Arizona', lat: 33.4255, lng: -111.9400 },
+      ];
+
+      for (const city of cities) {
+        if (city.name.toLowerCase().includes(query.toLowerCase())) {
+          suggestions.push({
+            type: 'city',
+            title: city.name,
+            subtitle: city.state,
+            coordinates: {
+              lat: city.lat,
+              lng: city.lng
+            }
+          });
+        }
+      }
+    }
+
+    return suggestions.slice(0, 8); // Limit total suggestions to 8
   }
 }
 

@@ -45,6 +45,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search suggestions endpoint
+  app.get("/api/search/suggestions", auditMiddleware("Search Suggestions"), async (req: AuditRequest, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string' || q.length < 2) {
+        return res.json({ suggestions: [] });
+      }
+
+      const query = q.toLowerCase().trim();
+      const suggestions = await storage.getSearchSuggestions(query);
+      res.json({ suggestions });
+    } catch (error) {
+      auditError(req, error as Error, "Search Suggestions");
+      res.status(500).json({ message: "Failed to fetch search suggestions" });
+    }
+  });
+
   app.get("/api/deals/:id", auditMiddleware("View Deal Details"), async (req: AuditRequest, res) => {
     try {
       const deal = await storage.getDeal(parseInt(req.params.id));
@@ -512,15 +529,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deal.description?.toLowerCase().includes(searchTerm) ||
         deal.merchant.name.toLowerCase().includes(searchTerm) ||
         deal.category.toLowerCase().includes(searchTerm) ||
-        deal.merchant.address.toLowerCase().includes(searchTerm) ||
-        deal.merchant.city?.toLowerCase().includes(searchTerm) ||
-        deal.merchant.state?.toLowerCase().includes(searchTerm)
+        deal.merchant.address.toLowerCase().includes(searchTerm)
       );
       
       res.json(filteredDeals);
     } catch (error) {
       auditError(req, error as Error, "Search");
       res.status(500).json({ message: "Failed to search deals" });
+    }
+  });
+
+  // Search suggestions API endpoint
+  app.get("/api/search/suggestions", auditMiddleware("Search Suggestions"), async (req: AuditRequest, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string' || q.length < 2) {
+        return res.json({ suggestions: [] });
+      }
+      
+      const suggestions = await storage.getSearchSuggestions(q);
+      res.json({ suggestions });
+    } catch (error) {
+      auditError(req, error as Error, "Search Suggestions");
+      res.status(500).json({ message: "Failed to fetch search suggestions" });
     }
   });
 
