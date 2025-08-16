@@ -1,19 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertMerchantSchema } from "@shared/schema";
 import { z } from "zod";
-import { MapPin, Search, Loader2 } from "lucide-react";
+import { MapPin, Search, Loader2, X, CheckCircle, AlertCircle, Phone, Globe, Star } from "lucide-react";
 
 const locationFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
@@ -34,13 +36,17 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [step, setStep] = useState(editingLocation ? 2 : 1); // 1: Search, 2: Form
 
   const form = useForm({
     resolver: zodResolver(locationFormSchema),
+    mode: "onChange",
     defaultValues: {
       name: editingLocation?.name || "",
       description: editingLocation?.description || "",
-      category: editingLocation?.category || "",
+      category: editingLocation?.category || "restaurant",
       address: editingLocation?.address || "",
       latitude: editingLocation?.latitude || 0,
       longitude: editingLocation?.longitude || 0,
@@ -48,6 +54,41 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
       imageUrl: editingLocation?.imageUrl || "",
     },
   });
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setStep(editingLocation ? 2 : 1);
+      setSearchQuery("");
+      setSearchResults([]);
+      setSelectedResult(null);
+      setShowSearch(false);
+      
+      if (editingLocation) {
+        form.reset({
+          name: editingLocation.name || "",
+          description: editingLocation.description || "",
+          category: editingLocation.category || "restaurant",
+          address: editingLocation.address || "",
+          latitude: editingLocation.latitude || 0,
+          longitude: editingLocation.longitude || 0,
+          phone: editingLocation.phone || "",
+          imageUrl: editingLocation.imageUrl || "",
+        });
+      } else {
+        form.reset({
+          name: "",
+          description: "",
+          category: "restaurant",
+          address: "",
+          latitude: 0,
+          longitude: 0,
+          phone: "",
+          imageUrl: "",
+        });
+      }
+    }
+  }, [isOpen, editingLocation, form]);
 
   const createLocationMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -122,12 +163,20 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
             <MapPin className="w-5 h-5" />
             {editingLocation ? "Edit Location" : "Add Location"}
           </DialogTitle>
+          <DialogDescription>
+            {editingLocation 
+              ? "Update your business location information" 
+              : "Add a new business location to create deals"}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Google Places Search */}
           <div className="space-y-2">
-            <Label>Search for your business</Label>
+            <Label className="flex items-center gap-1">
+              <Search className="w-4 h-4" />
+              Search for your business
+            </Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -165,15 +214,20 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
           {/* Manual Entry Fields */}
           <div className="space-y-4 pt-4 border-t">
             <div>
-              <Label htmlFor="name">Business Name *</Label>
+              <Label htmlFor="name" className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                Business Name *
+              </Label>
               <Input
                 id="name"
                 {...form.register("name")}
                 placeholder="Your business name"
+                className="font-medium"
               />
               {form.formState.errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {form.formState.errors.name.message}
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {String(form.formState.errors.name.message)}
                 </p>
               )}
             </div>
@@ -196,7 +250,7 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
               </Select>
               {form.formState.errors.category && (
                 <p className="text-red-500 text-sm mt-1">
-                  {form.formState.errors.category.message}
+                  {String(form.formState.errors.category.message)}
                 </p>
               )}
             </div>
@@ -210,13 +264,16 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
               />
               {form.formState.errors.address && (
                 <p className="text-red-500 text-sm mt-1">
-                  {form.formState.errors.address.message}
+                  {String(form.formState.errors.address.message)}
                 </p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="flex items-center gap-1">
+                <Phone className="w-4 h-4" />
+                Phone Number
+              </Label>
               <Input
                 id="phone"
                 {...form.register("phone")}
@@ -225,7 +282,10 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="flex items-center gap-1">
+                <Globe className="w-4 h-4" />
+                Description
+              </Label>
               <Textarea
                 id="description"
                 {...form.register("description")}
@@ -235,13 +295,37 @@ export default function LocationModal({ isOpen, onClose, editingLocation }: Loca
             </div>
           </div>
 
+          {/* Form Summary */}
+          {form.watch("name") && form.watch("address") && (
+            <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-3">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
+                  <div className="space-y-1">
+                    <div className="font-medium text-blue-800 dark:text-blue-200">
+                      {form.watch("name")}
+                    </div>
+                    <div className="text-sm text-blue-600 dark:text-blue-300">
+                      {form.watch("address")}
+                    </div>
+                    {form.watch("phone") && (
+                      <div className="text-xs text-blue-500 dark:text-blue-400">
+                        {form.watch("phone")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
             <Button 
               type="submit" 
-              disabled={createLocationMutation.isPending}
+              disabled={createLocationMutation.isPending || !form.watch("name") || !form.watch("address")}
               className="flex-1"
             >
               {createLocationMutation.isPending ? (
