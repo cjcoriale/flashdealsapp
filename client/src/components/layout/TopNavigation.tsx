@@ -25,7 +25,7 @@ export default function TopNavigation({ onSearch, searchQuery, onLocationSelect 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch search suggestions
-  const { data: suggestionsData } = useQuery({
+  const { data: suggestionsData, isLoading: suggestionsLoading } = useQuery({
     queryKey: ["/api/search/suggestions", localSearch],
     enabled: localSearch.length >= 2 && showSuggestions,
     refetchOnWindowFocus: false,
@@ -33,6 +33,15 @@ export default function TopNavigation({ onSearch, searchQuery, onLocationSelect 
   });
 
   const suggestions: SearchSuggestion[] = (suggestionsData as any)?.suggestions || [];
+  
+  // Debug logging
+  console.log('Search state:', {
+    localSearch,
+    showSuggestions,
+    suggestionsCount: suggestions.length,
+    isLoading: suggestionsLoading,
+    rawData: suggestionsData
+  });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -136,7 +145,7 @@ export default function TopNavigation({ onSearch, searchQuery, onLocationSelect 
 
           {/* Search Suggestions */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto z-30">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto z-50">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={`${suggestion.type}-${suggestion.id || suggestion.title}`}
@@ -168,6 +177,13 @@ export default function TopNavigation({ onSearch, searchQuery, onLocationSelect 
                   </div>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Debug info */}
+          {showSuggestions && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-red-500 text-white p-2 rounded text-xs z-50">
+              Debug: showSuggestions={showSuggestions.toString()}, suggestions.length={suggestions.length}, localSearch="{localSearch}"
             </div>
           )}
         </div>
