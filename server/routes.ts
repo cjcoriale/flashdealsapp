@@ -543,11 +543,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/search/suggestions", auditMiddleware("Search Suggestions"), async (req: AuditRequest, res) => {
     try {
       const { q } = req.query;
+      console.log('Search suggestions request:', { q, queryLength: q ? q.length : 0 });
+      
       if (!q || typeof q !== 'string' || q.length < 2) {
+        console.log('Query too short or missing, returning empty suggestions');
         return res.json({ suggestions: [] });
       }
       
       const suggestions = await storage.getSearchSuggestions(q);
+      console.log('Suggestions found:', suggestions.length);
       res.json({ suggestions });
     } catch (error) {
       auditError(req, error as Error, "Search Suggestions");

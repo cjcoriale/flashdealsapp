@@ -802,6 +802,7 @@ export class DatabaseStorage implements IStorage {
 
       for (const city of cities) {
         if (city.name.toLowerCase().includes(query.toLowerCase())) {
+          console.log(`City match: ${city.name} matches query "${query}"`);
           suggestions.push({
             type: 'city',
             title: city.name,
