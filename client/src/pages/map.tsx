@@ -354,19 +354,24 @@ export default function MapPage() {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 616 0z" />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Enable Location</h3>
               <p className="text-gray-600 text-sm mb-4">
                 Allow location access to see deals near you
               </p>
+              {/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && (
+                <p className="text-xs text-orange-600 mb-2 bg-orange-50 p-2 rounded">
+                  Safari detected: If location doesn't work, try refreshing or allow location in Safari settings
+                </p>
+              )}
               <p className="text-xs text-gray-500 mb-4">
                 Looking to create deals? <a href="/merchant-dashboard" className="text-blue-500 hover:underline">Go to Merchant Dashboard</a>
               </p>
               <button 
                 onClick={handleLocationRequest}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors disabled:opacity-50"
                 disabled={locationLoading}
               >
                 {locationLoading ? "Getting Location..." : "Enable Location"}
@@ -458,6 +463,11 @@ export default function MapPage() {
           <div className="bg-white rounded-lg p-6 text-center">
             <LoadingSpinner />
             <p className="mt-2 text-gray-600">Getting your location...</p>
+            {/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && (
+              <p className="mt-1 text-xs text-orange-600">
+                Safari may take longer or require permission in browser settings
+              </p>
+            )}
           </div>
         </div>
       )}

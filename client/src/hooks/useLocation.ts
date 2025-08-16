@@ -32,7 +32,11 @@ export function useLocation() {
       // Only check permission if we don't already have location
       const currentLocation = localStorage.getItem('merchant_location');
       if (!currentLocation && !savedLocation) {
-        if (navigator.permissions && navigator.permissions.query) {
+        // Detect Safari browser
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (!isSafari && navigator.permissions && navigator.permissions.query) {
+          // Non-Safari browsers: use permissions API
           navigator.permissions.query({ name: 'geolocation' }).then((result) => {
             setPermissionState(result.state);
             
@@ -55,11 +59,11 @@ export function useLocation() {
             }
           }).catch(() => {
             // Fallback for browsers that don't support permissions API
-            setPermissionState('unknown');
+            setPermissionState('prompt');
           });
         } else {
-          // For browsers without permissions API, set unknown
-          setPermissionState('unknown');
+          // Safari or browsers without permissions API
+          setPermissionState('prompt');
         }
       }
     }, 8000); // 8 second delay
@@ -76,15 +80,41 @@ export function useLocation() {
     setIsLoading(true);
     setError(null);
 
+    // Detect Safari browser
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    // Safari-specific options for better compatibility
+    const safariOptions = {
+      enableHighAccuracy: true, // Safari often needs this
+      timeout: 20000, // Longer timeout for Safari
+      maximumAge: 60000 // Shorter cache for Safari
+    };
+
+    const defaultOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000
+    };
+
+    const options = isSafari ? safariOptions : defaultOptions;
+
+    console.log('[AUDIT] Requesting location with browser:', isSafari ? 'Safari' : 'Other');
+    console.log('[AUDIT] Location options:', options);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('[AUDIT] Location success - accuracy:', position.coords.accuracy, 'meters');
         updateLocation({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         });
         setIsLoading(false);
+        setPermissionState('granted');
       },
       (error) => {
+        console.log('[AUDIT] Geolocation error code:', error.code);
+        console.log('[AUDIT] Geolocation error message:', error.message);
+        
         let errorMessage = 'Unable to retrieve location';
         
         switch (error.code) {
@@ -103,11 +133,7 @@ export function useLocation() {
         setError(errorMessage);
         setIsLoading(false);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
-      }
+      options
     );
   }, [updateLocation]);
 
