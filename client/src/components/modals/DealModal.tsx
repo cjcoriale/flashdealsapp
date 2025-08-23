@@ -100,7 +100,7 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
 
   const createDealMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/deals", data);
+      return await apiRequest("POST", `/api/merchants/${data.merchantId}/deals`, data);
     },
     onSuccess: () => {
       toast({
