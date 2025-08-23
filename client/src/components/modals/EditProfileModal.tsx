@@ -67,7 +67,7 @@ export default function EditProfileModal({ user, open, onOpenChange }: EditProfi
   
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileFormData) => {
-      return await apiRequest("/api/auth/user", "PUT", data);
+      return await apiRequest("PUT", "/api/auth/user", data);
     },
     onSuccess: () => {
       toast({
