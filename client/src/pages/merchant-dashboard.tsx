@@ -314,7 +314,9 @@ export default function MerchantDashboard() {
   };
 
   const handleCreateDealClick = () => {
+    console.log("Create Deal button clicked! Current showDealModal:", showDealModal);
     setShowDealModal(true);
+    console.log("Modal should now be open");
   };
 
   // Auth check

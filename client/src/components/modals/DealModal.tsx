@@ -42,6 +42,7 @@ interface DealModalProps {
 }
 
 export default function DealModal({ isOpen, onClose, merchants, selectedMerchant }: DealModalProps) {
+  console.log("DealModal render - isOpen:", isOpen, "at", new Date().toLocaleTimeString());
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [discountPercentage, setDiscountPercentage] = useState(0);
