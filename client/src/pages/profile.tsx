@@ -3,9 +3,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudit } from "@/hooks/useAudit";
 import { useToast } from "@/hooks/use-toast";
-import PageHeader from "@/components/layout/PageHeader";
-import DealCard from "@/components/deals/DealCard";
-import DealModal from "@/components/deals/DealModal";
 import EditProfileModal from "@/components/modals/EditProfileModal";
 
 import { Button } from "@/components/ui/button";
@@ -19,10 +16,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut, MapPinIcon, Clock } from "lucide-react";
+import { User, Settings, Store, Crown, MapPin, Star, Heart, Trophy, ShoppingBag, Bell, Shield, LogOut, Mail } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import BottomNavigation from "@/components/layout/BottomNavigation";
-import { DealWithMerchant, DealClaimWithDetails, SavedDealWithDetails, Merchant } from "@shared/schema";
+import { DealClaimWithDetails, SavedDealWithDetails, Merchant } from "@shared/schema";
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -60,39 +57,7 @@ export default function ProfilePage() {
     enabled: !!user && isMerchant,
   });
 
-  // Fetch all available deals for customer users
-  const { data: allDeals = [] } = useQuery<DealWithMerchant[]>({
-    queryKey: ["/api/deals"],
-    enabled: !!user && !isMerchant,
-  });
-
-  const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-
-  const handleDealClick = (deal: DealWithMerchant) => {
-    setSelectedDeal(deal);
-    logAction("Deal Viewed", `Viewed deal: ${deal.title}`);
-  };
-
-  // Mutation to claim a deal
-  const claimDealMutation = useMutation({
-    mutationFn: async (dealId: number) => {
-      const response = await apiRequest(`/api/deals/${dealId}/claim`, "POST", {});
-      return response;
-    },
-    onSuccess: (_, dealId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/claimed-deals"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
-      logAction("Deal Claimed", `Claimed deal ID: ${dealId}`);
-    },
-  });
-
-  const handleDealClaim = () => {
-    if (selectedDeal) {
-      claimDealMutation.mutate(selectedDeal.id);
-      setSelectedDeal(null);
-    }
-  };
 
   if (authLoading) {
     return (
@@ -149,14 +114,6 @@ export default function ProfilePage() {
                   <Bell className="w-4 h-4 mr-2" />
                   Notifications
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Shield className="w-4 h-4 mr-2" />
-                  Privacy Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email Preferences
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => window.location.href = '/api/auth/logout'}
                   className="text-red-600 dark:text-red-400"
@@ -171,184 +128,15 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* My Deals Section for Customers */}
-        {!isMerchant && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <ShoppingBag className="w-5 h-5 text-green-600" />
-                <span>My Deals</span>
-              </CardTitle>
-              <CardDescription>
-                Deals you've claimed and saved
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Claimed Deals */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                    <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
-                    Claimed ({Array.isArray(claimedDeals) ? claimedDeals.length : 0})
-                  </h3>
-                  {Array.isArray(claimedDeals) && claimedDeals.length > 0 ? (
-                    <div className="space-y-2">
-                      {claimedDeals.slice(0, 3).map((claimedDeal) => (
-                        <div
-                          key={claimedDeal.id}
-                          className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm text-green-900 dark:text-green-100">
-                                {claimedDeal.deal.title}
-                              </p>
-                              <p className="text-xs text-green-700 dark:text-green-300">
-                                {claimedDeal.deal.merchant.name}
-                              </p>
-                            </div>
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Claimed
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">No claimed deals yet</p>
-                  )}
-                </div>
-
-                {/* Saved Deals */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                    <Heart className="w-4 h-4 mr-2 text-red-500" />
-                    Saved ({Array.isArray(savedDeals) ? savedDeals.length : 0})
-                  </h3>
-                  {Array.isArray(savedDeals) && savedDeals.length > 0 ? (
-                    <div className="space-y-2">
-                      {savedDeals.slice(0, 3).map((savedDeal) => (
-                        <div
-                          key={savedDeal.id}
-                          className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm text-blue-900 dark:text-blue-100">
-                                {savedDeal.deal.title}
-                              </p>
-                              <p className="text-xs text-blue-700 dark:text-blue-300">
-                                {savedDeal.deal.merchant.name}
-                              </p>
-                            </div>
-                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                              Saved
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">No saved deals yet</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Available Deals Section for Customers */}
-        {!isMerchant && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="w-5 h-5 text-blue-600" />
-                <span>Available Deals</span>
-              </CardTitle>
-              <CardDescription>
-                Discover flash deals near you
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {Array.isArray(allDeals) && allDeals.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {allDeals.slice(0, 6).map((deal: DealWithMerchant) => (
-                    <DealCard
-                      key={deal.id}
-                      deal={deal}
-                      onClick={() => handleDealClick(deal)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No deals available</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Check back later for new flash deals in your area
-                  </p>
-                </div>
-              )}
-              {Array.isArray(allDeals) && allDeals.length > 6 && (
-                <div className="mt-4 text-center">
-                  <Button variant="outline" onClick={() => window.location.href = '/'}>
-                    View All Deals on Map
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Account Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Settings className="w-5 h-5" />
-              <span>Account Settings</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Email Notifications</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Receive updates about deals and account activity</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Manage
-                </Button>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Location Preferences</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Set your preferred areas for deal discovery</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Configure
-                </Button>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Privacy Settings</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Control your data and privacy preferences</div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Review
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* User Stats */}
+        {/* User Stats - Clean Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{Array.isArray(savedDeals) ? savedDeals.length : 0}</div>
+                <div className="flex items-center justify-center mb-2">
+                  <Heart className="w-5 h-5 text-red-500 mr-2" />
+                  <div className="text-2xl font-bold text-red-600">{Array.isArray(savedDeals) ? savedDeals.length : 0}</div>
+                </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">Saved Deals</div>
               </div>
             </CardContent>
@@ -356,7 +144,10 @@ export default function ProfilePage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{Array.isArray(claimedDeals) ? claimedDeals.length : 0}</div>
+                <div className="flex items-center justify-center mb-2">
+                  <Trophy className="w-5 h-5 text-green-500 mr-2" />
+                  <div className="text-2xl font-bold text-green-600">{Array.isArray(claimedDeals) ? claimedDeals.length : 0}</div>
+                </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">Claimed Deals</div>
               </div>
             </CardContent>
@@ -364,59 +155,88 @@ export default function ProfilePage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {isMerchant ? (Array.isArray(merchants) ? merchants.length : 0) : 0}
+                <div className="flex items-center justify-center mb-2">
+                  <Store className="w-5 h-5 text-purple-500 mr-2" />
+                  <div className="text-2xl font-bold text-purple-600">
+                    {isMerchant ? (Array.isArray(merchants) ? merchants.length : 0) : 0}
+                  </div>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  {isMerchant ? "My Businesses" : "Business Status"}
+                  {isMerchant ? "Businesses" : "Business Status"}
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Manage your account and explore deals</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                className="justify-start h-12" 
+                onClick={() => window.location.href = '/'}
+              >
+                <MapPin className="w-4 h-4 mr-3" />
+                View Deals on Map
+              </Button>
+              {!isMerchant && (
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-12" 
+                  onClick={() => window.location.href = '/saved-deals'}
+                >
+                  <Heart className="w-4 h-4 mr-3" />
+                  My Saved Deals
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                className="justify-start h-12" 
+                onClick={() => window.location.href = '/notifications'}
+              >
+                <Bell className="w-4 h-4 mr-3" />
+                Notifications
+              </Button>
+              <Button 
+                variant="outline" 
+                className="justify-start h-12" 
+                onClick={() => setIsEditProfileOpen(true)}
+              >
+                <User className="w-4 h-4 mr-3" />
+                Edit Profile
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Merchant Section */}
         {isMerchant ? (
           <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center space-x-2 text-purple-700 dark:text-purple-300">
-                    <Crown className="w-5 h-5" />
-                    <span>Business Dashboard</span>
-                  </CardTitle>
-                  <CardDescription className="text-purple-600 dark:text-purple-400">
-                    Manage your restaurants and create flash deals
-                  </CardDescription>
-                </div>
-                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
-                  Dashboard integrated below ↓
-                </div>
-              </div>
+              <CardTitle className="flex items-center space-x-2 text-purple-700 dark:text-purple-300">
+                <Crown className="w-5 h-5" />
+                <span>Business Dashboard</span>
+              </CardTitle>
+              <CardDescription className="text-purple-600 dark:text-purple-400">
+                Manage your business and create deals
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                  <div>
-                    <div className="font-medium">Manage Locations</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">Add and edit business locations</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <Star className="w-6 h-6 text-green-600" />
-                  <div>
-                    <div className="font-medium">Create Deals</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">Add flash deals to the map</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <Settings className="w-6 h-6 text-purple-600" />
-                  <div>
-                    <div className="font-medium">Analytics</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">Track deal performance</div>
-                  </div>
-                </div>
+              <div className="text-center">
+                <Button 
+                  onClick={() => window.location.href = '/merchant-dashboard'}
+                  className="bg-purple-600 hover:bg-purple-700"
+                  size="lg"
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  Go to Merchant Dashboard
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -430,7 +250,7 @@ export default function ProfilePage() {
                 Become a Merchant
               </CardTitle>
               <CardDescription className="text-purple-700 dark:text-purple-300">
-                Join FlashDeals as a business owner and start creating amazing deals for local customers to discover.
+                Join FlashDeals as a business owner and start creating deals for local customers.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
@@ -438,18 +258,15 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <Store className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="font-medium">Create Business Profile</div>
-                    <div className="text-gray-600 dark:text-gray-300">Set up your business info</div>
+                    <div className="font-medium">Business Profile</div>
                   </div>
                   <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <MapPin className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="font-medium">Add Deals to Map</div>
-                    <div className="text-gray-600 dark:text-gray-300">Reach local customers</div>
+                    <div className="font-medium">Map Deals</div>
                   </div>
                   <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <Star className="w-6 h-6 text-purple-600 mx-auto mb-2" />
                     <div className="font-medium">Track Performance</div>
-                    <div className="text-gray-600 dark:text-gray-300">Monitor deal success</div>
                   </div>
                 </div>
                 <Button 
@@ -465,67 +282,7 @@ export default function ProfilePage() {
           </Card>
         )}
 
-        {/* Merchant Dashboard - Inline */}
-        {isMerchant && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Store className="w-5 h-5" />
-                  <span>My Businesses</span>
-                </CardTitle>
-                <CardDescription>
-                  Manage your restaurants and locations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Merchant Dashboard</h3>
-                  <p className="text-gray-600 mb-4">Your business management tools are here</p>
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Business
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Zap className="w-5 h-5" />
-                  <span>Active Deals</span>
-                </CardTitle>
-                <CardDescription>
-                  Monitor your flash deals performance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Zap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Deal management coming soon</h3>
-                  <p className="text-gray-600 mb-4">Create and manage your flash deals</p>
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Deal
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
       </div>
-
-      {/* Deal Modal for Customers */}
-      {selectedDeal && (
-        <DealModal
-          deal={selectedDeal}
-          onClose={() => setSelectedDeal(null)}
-          onClaim={handleDealClaim}
-        />
-      )}
 
       {/* Edit Profile Modal */}
       {user && (
