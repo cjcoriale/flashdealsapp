@@ -146,16 +146,15 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
   if (!isOpen) return null;
   
   return (
-    <>
-      {/* Backdrop */}
+    <div 
+      className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center p-4" 
+      style={{ zIndex: 99999 }}
+      onClick={onClose}
+    >
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
+        onClick={(e) => e.stopPropagation()}
+      >
           <div className="p-6">
             <div className="flex items-center gap-2 mb-2">
               <Tag className="w-5 h-5" />
@@ -393,8 +392,7 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
               </div>
             </form>
           </div>
-        </div>
       </div>
-    </>
+    </div>
   );
 }
