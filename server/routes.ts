@@ -5,6 +5,7 @@ import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
 import cookieParser from "cookie-parser";
 import { auditMiddleware, type AuditRequest, auditError } from "./middleware/audit";
 import { insertDealSchema, insertMerchantSchema, insertSavedDealSchema, insertDealClaimSchema, insertNotificationSchema } from "@shared/schema";
+import { placesService } from "./places";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser for simple auth
@@ -217,15 +218,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Address validation endpoint
+  app.post("/api/validate-address", isAuthenticated, auditMiddleware("Validate Address"), async (req: AuditRequest, res) => {
+    try {
+      const { address, businessName } = req.body;
+      
+      if (!address) {
+        return res.status(400).json({ message: "Address is required" });
+      }
+
+      const validation = await placesService.validateAndNormalizeAddress(address, businessName);
+      res.json(validation);
+    } catch (error) {
+      auditError(req, error as Error, "Validate Address");
+      res.status(500).json({ message: "Failed to validate address" });
+    }
+  });
+
+  // Business search endpoint using Google Places
+  app.post("/api/search-businesses", isAuthenticated, auditMiddleware("Search Businesses"), async (req: AuditRequest, res) => {
+    try {
+      const { query, location } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      const businesses = await placesService.searchBusinesses(query, location);
+      res.json(businesses);
+    } catch (error) {
+      auditError(req, error as Error, "Search Businesses");
+      res.status(500).json({ message: "Failed to search businesses" });
+    }
+  });
+
   app.post("/api/merchants", isAuthenticated, auditMiddleware("Create Merchant"), async (req: AuditRequest, res) => {
     try {
       const userId = (req as any).user.claims.sub;
-      const merchantData = insertMerchantSchema.parse({ ...req.body, userId });
-      const merchant = await storage.createMerchant(merchantData);
+      let merchantData = { ...req.body, userId };
+
+      // Validate and normalize address using Google Places API
+      if (merchantData.address) {
+        const validation = await placesService.validateAndNormalizeAddress(
+          merchantData.address, 
+          merchantData.name
+        );
+
+        if (validation.isValid) {
+          // Use normalized address and coordinates from Google Places
+          merchantData.address = validation.normalizedAddress;
+          if (validation.coordinates) {
+            merchantData.latitude = validation.coordinates.lat;
+            merchantData.longitude = validation.coordinates.lng;
+          }
+          
+          // If Google Places returned business details, use suggested name
+          if (validation.placeDetails && validation.placeDetails.name) {
+            merchantData.name = validation.placeDetails.name;
+          }
+        } else {
+          return res.status(400).json({ 
+            message: "Invalid address. Please provide a valid business address.",
+            error: validation.error 
+          });
+        }
+      }
+
+      const parsedMerchantData = insertMerchantSchema.parse(merchantData);
+      const merchant = await storage.createMerchant(parsedMerchantData);
       res.json(merchant);
     } catch (error) {
       auditError(req, error as Error, "Create Merchant");
-      res.status(500).json({ message: "Failed to create merchant" });
+      if (error.message && error.message.includes('unique_merchant_location')) {
+        res.status(400).json({ message: "A merchant with this name already exists at this address" });
+      } else {
+        res.status(500).json({ message: "Failed to create merchant" });
+      }
     }
   });
 
@@ -242,12 +310,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to update this merchant" });
       }
 
-      const merchantData = insertMerchantSchema.parse({ ...req.body, userId: existingMerchant.userId });
-      const updatedMerchant = await storage.updateMerchant(merchantId, merchantData);
+      let merchantData = { ...req.body, userId: existingMerchant.userId };
+
+      // Validate and normalize address if it's being updated
+      if (merchantData.address && merchantData.address !== existingMerchant.address) {
+        const validation = await placesService.validateAndNormalizeAddress(
+          merchantData.address, 
+          merchantData.name || existingMerchant.name
+        );
+
+        if (validation.isValid) {
+          // Use normalized address and coordinates from Google Places
+          merchantData.address = validation.normalizedAddress;
+          if (validation.coordinates) {
+            merchantData.latitude = validation.coordinates.lat;
+            merchantData.longitude = validation.coordinates.lng;
+          }
+        } else {
+          return res.status(400).json({ 
+            message: "Invalid address. Please provide a valid business address.",
+            error: validation.error 
+          });
+        }
+      }
+
+      const parsedMerchantData = insertMerchantSchema.parse(merchantData);
+      const updatedMerchant = await storage.updateMerchant(merchantId, parsedMerchantData);
       res.json(updatedMerchant);
     } catch (error) {
       auditError(req, error as Error, "Update Merchant");
-      res.status(500).json({ message: "Failed to update merchant" });
+      if (error.message && error.message.includes('unique_merchant_location')) {
+        res.status(400).json({ message: "A merchant with this name already exists at this address" });
+      } else {
+        res.status(500).json({ message: "Failed to update merchant" });
+      }
     }
   });
 
