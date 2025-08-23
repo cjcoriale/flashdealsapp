@@ -299,7 +299,6 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                 type="submit" 
                 disabled={createDealMutation.isPending}
                 className="flex-1"
-                onClick={() => {}}
               >
                 {createDealMutation.isPending ? (
                   <>

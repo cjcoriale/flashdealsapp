@@ -6,6 +6,11 @@ FlashDeals is a location-based mobile application designed for discovering local
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+- **August 23, 2025**: Fixed Create Deal modal functionality - resolved form validation issues by creating custom schema for form fields and automatically providing required database fields (category, startTime, endTime, discountPercentage) with sensible defaults.
+- **August 23, 2025**: Fixed Business Dashboard filtering - updated /api/deals endpoint to accept merchantId parameter and properly filter deals by merchant location instead of showing all deals from all businesses.
+- **Core Functionality**: Deal creation modal now works properly with automatic field defaults, Business Dashboard correctly filters deals by selected merchant location.
+
 ## System Architecture
 
 ### Frontend
