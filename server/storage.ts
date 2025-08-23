@@ -80,6 +80,10 @@ export interface IStorage {
   
   // Deal claims operations
   getClaimedDeals(userId: string): Promise<DealClaimWithDetails[]>;
+  getArchivedClaimedDeals(userId: string): Promise<DealClaimWithDetails[]>;
+  getClaimedDeal(id: number): Promise<DealClaim | undefined>;
+  archiveClaimedDeal(id: number): Promise<void>;
+  deleteClaimedDeal(id: number): Promise<void>;
   claimDeal(dealClaim: InsertDealClaim): Promise<DealClaim>;
   
   // Audit log operations
@@ -470,7 +474,12 @@ export class DatabaseStorage implements IStorage {
       .from(dealClaims)
       .innerJoin(deals, eq(dealClaims.dealId, deals.id))
       .innerJoin(merchants, eq(deals.merchantId, merchants.id))
-      .where(eq(dealClaims.userId, userId))
+      .where(
+        and(
+          eq(dealClaims.userId, userId),
+          eq(dealClaims.isArchived, false)
+        )
+      )
       .orderBy(desc(dealClaims.claimedAt))
       .then(rows => rows.map(row => ({
         ...row.deal_claims,
@@ -479,6 +488,44 @@ export class DatabaseStorage implements IStorage {
           merchant: row.merchants
         }
       })));
+  }
+
+  async getArchivedClaimedDeals(userId: string): Promise<DealClaimWithDetails[]> {
+    return await db
+      .select()
+      .from(dealClaims)
+      .innerJoin(deals, eq(dealClaims.dealId, deals.id))
+      .innerJoin(merchants, eq(deals.merchantId, merchants.id))
+      .where(
+        and(
+          eq(dealClaims.userId, userId),
+          eq(dealClaims.isArchived, true)
+        )
+      )
+      .orderBy(desc(dealClaims.claimedAt))
+      .then(rows => rows.map(row => ({
+        ...row.deal_claims,
+        deal: {
+          ...row.deals,
+          merchant: row.merchants
+        }
+      })));
+  }
+
+  async getClaimedDeal(id: number): Promise<DealClaim | undefined> {
+    const [claimedDeal] = await db.select().from(dealClaims).where(eq(dealClaims.id, id));
+    return claimedDeal;
+  }
+
+  async archiveClaimedDeal(id: number): Promise<void> {
+    await db
+      .update(dealClaims)
+      .set({ isArchived: true })
+      .where(eq(dealClaims.id, id));
+  }
+
+  async deleteClaimedDeal(id: number): Promise<void> {
+    await db.delete(dealClaims).where(eq(dealClaims.id, id));
   }
 
   async claimDeal(dealClaimData: InsertDealClaim): Promise<DealClaim> {

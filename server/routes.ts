@@ -177,6 +177,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get archived claimed deals
+  app.get("/api/claimed-deals/archived", isAuthenticated, auditMiddleware("View Archived Claimed Deals"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const archivedDeals = await storage.getArchivedClaimedDeals(userId);
+      res.json(archivedDeals);
+    } catch (error) {
+      auditError(req, error as Error, "View Archived Claimed Deals");
+      res.status(500).json({ message: "Failed to fetch archived claimed deals" });
+    }
+  });
+
+  // Archive claimed deal (soft archive)
+  app.patch("/api/claimed-deals/:id/archive", isAuthenticated, auditMiddleware("Archive Claimed Deal"), async (req: AuditRequest, res) => {
+    try {
+      const claimId = parseInt(req.params.id);
+      const userId = (req as any).user.claims.sub;
+      
+      const claimedDeal = await storage.getClaimedDeal(claimId);
+      if (!claimedDeal || claimedDeal.userId !== userId) {
+        return res.status(404).json({ message: "Claimed deal not found" });
+      }
+
+      await storage.archiveClaimedDeal(claimId);
+      res.json({ message: "Deal archived successfully" });
+    } catch (error) {
+      auditError(req, error as Error, "Archive Claimed Deal");
+      res.status(500).json({ message: "Failed to archive claimed deal" });
+    }
+  });
+
+  // Permanently delete claimed deal
+  app.delete("/api/claimed-deals/:id", isAuthenticated, auditMiddleware("Delete Claimed Deal"), async (req: AuditRequest, res) => {
+    try {
+      const claimId = parseInt(req.params.id);
+      const userId = (req as any).user.claims.sub;
+      
+      const claimedDeal = await storage.getClaimedDeal(claimId);
+      if (!claimedDeal || claimedDeal.userId !== userId) {
+        return res.status(404).json({ message: "Claimed deal not found" });
+      }
+
+      await storage.deleteClaimedDeal(claimId);
+      res.json({ message: "Deal permanently deleted" });
+    } catch (error) {
+      auditError(req, error as Error, "Delete Claimed Deal");
+      res.status(500).json({ message: "Failed to delete claimed deal" });
+    }
+  });
+
   // Merchant routes
   app.get("/api/merchants", auditMiddleware("View Merchants"), async (req: AuditRequest, res) => {
     try {

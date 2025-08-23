@@ -107,6 +107,7 @@ export const dealClaims = pgTable("deal_claims", {
   dealId: integer("deal_id").references(() => deals.id).notNull(),
   claimedAt: timestamp("claimed_at").defaultNow(),
   status: varchar("status").default("claimed"), // claimed, used, expired
+  isArchived: boolean("is_archived").default(false),
 });
 
 export const auditLogs = pgTable("audit_logs", {
