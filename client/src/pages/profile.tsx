@@ -130,7 +130,11 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* User Stats - Clean Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
+          {/* Clickable Saved Deals Card */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => window.location.href = '/saved-deals'}
+          >
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
@@ -141,7 +145,12 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          
+          {/* Clickable Claimed Deals Card */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => window.location.href = '/claimed-deals'}
+          >
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
@@ -152,6 +161,8 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Non-clickable Business Status Card */}
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
