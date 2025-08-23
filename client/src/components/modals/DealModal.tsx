@@ -38,6 +38,7 @@ interface DealModalProps {
 }
 
 export default function DealModal({ isOpen, onClose, merchants, selectedMerchant }: DealModalProps) {
+  console.log("DealModal props - merchants:", merchants, "selectedMerchant:", selectedMerchant);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [discountPercentage, setDiscountPercentage] = useState(0);
@@ -153,8 +154,11 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
             <div>
               <Label htmlFor="merchantId">Business Location *</Label>
               <Select 
-                onValueChange={(value) => form.setValue("merchantId", parseInt(value))}
-                defaultValue={selectedMerchant?.toString() || (merchants.length > 0 ? merchants[0].id.toString() : "")}
+                onValueChange={(value) => {
+                  console.log("Selected merchant ID:", value);
+                  form.setValue("merchantId", parseInt(value));
+                }}
+                defaultValue={selectedMerchant?.id?.toString() || (merchants.length > 0 ? merchants[0].id.toString() : "")}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a business location" />
