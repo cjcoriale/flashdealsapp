@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { MapPin, Clock, Trash2, Star, StarIcon } from "lucide-react";
-import { SavedDealWithDetails } from "@shared/schema";
+import { MapPin, Clock, Trash2, Star, StarIcon, Trophy } from "lucide-react";
+import { SavedDealWithDetails, DealClaimWithDetails } from "@shared/schema";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import PageHeader from "@/components/layout/PageHeader";
 import AuthModal from "@/components/auth/AuthModal";
@@ -22,6 +22,12 @@ export default function SavedDealsPage() {
   // Get actual saved deals if authenticated
   const { data: savedDeals = [], isLoading } = useQuery({
     queryKey: ["/api/saved-deals"],
+    enabled: isAuthenticated,
+  });
+
+  // Get claimed deals to check if any saved deals are already claimed
+  const { data: claimedDeals = [] } = useQuery<DealClaimWithDetails[]>({
+    queryKey: ["/api/claimed-deals"],
     enabled: isAuthenticated,
   });
 
@@ -107,6 +113,11 @@ export default function SavedDealsPage() {
 
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
   const formatDiscount = (percentage: number) => `${percentage}% OFF`;
+
+  // Helper function to check if a deal is already claimed
+  const isDealClaimed = (dealId: number) => {
+    return claimedDeals.some(claim => claim.dealId === dealId);
+  };
 
   if (isLoading) {
     return (
@@ -219,14 +230,21 @@ export default function SavedDealsPage() {
                       <div className="flex gap-3 mt-4">
                         {isAuthenticated ? (
                           <>
-                            <Button 
-                              size="sm" 
-                              className="flex-1 py-2.5"
-                              onClick={() => claimDealMutation.mutate(deal.id)}
-                              disabled={claimDealMutation.isPending || isExpired}
-                            >
-                              {isExpired ? "Expired" : claimDealMutation.isPending ? "Claiming..." : "Claim Deal"}
-                            </Button>
+                            {isDealClaimed(deal.id) ? (
+                              <Badge className="flex-1 bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900 dark:text-green-300 py-2.5 justify-center">
+                                <Trophy className="w-4 h-4 mr-2" />
+                                Already Claimed
+                              </Badge>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                className="flex-1 py-2.5"
+                                onClick={() => claimDealMutation.mutate(deal.id)}
+                                disabled={claimDealMutation.isPending || isExpired}
+                              >
+                                {isExpired ? "Expired" : claimDealMutation.isPending ? "Claiming..." : "Claim Deal"}
+                              </Button>
+                            )}
                             <Button 
                               size="sm" 
                               variant="outline"
