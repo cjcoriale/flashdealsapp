@@ -8,6 +8,7 @@ import {
   serial,
   jsonb,
   index,
+  uniqueIndex,
   real,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -61,7 +62,11 @@ export const merchants = pgTable("merchants", {
   reviewCount: integer("review_count").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  // Unique constraint: one merchant per name-address combination
+  // Allows same business at multiple locations, prevents duplicates at same address
+  uniqueIndex("unique_merchant_location").on(table.name, table.address),
+]);
 
 export const deals = pgTable("deals", {
   id: serial("id").primaryKey(),
