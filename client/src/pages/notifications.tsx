@@ -104,12 +104,21 @@ export default function NotificationsPage() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-deals"] });
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to save deal",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if it's already saved error
+      if (error.message && error.message.includes("Deal already saved")) {
+        toast({
+          title: "Already Saved",
+          description: "This deal is already in your saved list",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save deal",
+          variant: "destructive",
+        });
+      }
     },
   });
 
