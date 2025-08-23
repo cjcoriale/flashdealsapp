@@ -27,7 +27,7 @@ export default function Landing() {
               Get Started
             </Button>
             <Button 
-              onClick={() => setShowSignupModal(true)}
+              onClick={() => window.location.href = '/api/login'}
               size="lg"
               variant="outline"
               className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
