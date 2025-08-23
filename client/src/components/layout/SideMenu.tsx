@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, UserCircle, Heart, Bell, Settings, ClipboardList, Store } from "lucide-react";
+import { X, UserCircle, Heart, Bell, Settings, ClipboardList, Store, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -22,7 +22,7 @@ export default function SideMenu({ isOpen, onClose, onAuditClick, onMerchantClic
   };
 
   const menuItems = [
-    { icon: UserCircle, label: "Profile", href: "/profile", onClick: () => onClose() },
+    { icon: Grid3X3, label: "Dashboard", href: "/profile", onClick: () => onClose() },
     { icon: Heart, label: "Saved Deals", href: "/saved-deals", onClick: () => onClose() },
     { icon: Bell, label: "Notifications", onClick: () => onClose() },
     { icon: Settings, label: "Settings", onClick: () => onClose() },

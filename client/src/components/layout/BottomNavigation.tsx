@@ -1,4 +1,4 @@
-import { Map, List, Heart, BarChart3, User, Store, Home } from "lucide-react";
+import { Map, List, Heart, BarChart3, User, Store, Home, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +22,7 @@ export default function BottomNavigation({ currentPage, onAuditClick }: BottomNa
     } else {
       return [
         { id: 'map', label: 'Map', icon: Map, href: '/' },
-        { id: 'profile', label: 'Profile', icon: User, href: '/profile' },
+        { id: 'profile', label: 'Dashboard', icon: Grid3X3, href: '/profile' },
       ];
     }
   };
