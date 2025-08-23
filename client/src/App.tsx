@@ -16,6 +16,7 @@ import ProfilePage from "@/pages/profile";
 import CustomerHome from "@/pages/customer-home";
 import MerchantHome from "@/pages/merchant-home";
 import NotificationsPage from "@/pages/notifications";
+import FavoriteMerchantsPage from "@/pages/favorite-merchants";
 import NotFound from "@/pages/not-found";
 import { Loader2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,7 @@ function Router() {
             <>
               <Route path="/saved-deals" component={SavedDealsPage} />
               <Route path="/claimed-deals" component={ClaimedDealsPage} />
-              <Route path="/favorite-merchants" component={lazy(() => import("@/pages/favorite-merchants"))} />
+              <Route path="/favorite-merchants" component={FavoriteMerchantsPage} />
             </>
           )}
           

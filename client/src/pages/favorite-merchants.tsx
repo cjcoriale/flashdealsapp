@@ -20,13 +20,13 @@ export default function FavoriteMerchants() {
   const [viewMode, setViewMode] = useState<'favorites' | 'all'>('favorites');
 
   // Get all merchants
-  const { data: allMerchants = [], isLoading: loadingAll } = useQuery({
+  const { data: allMerchants = [], isLoading: loadingAll } = useQuery<Merchant[]>({
     queryKey: ['/api/merchants'],
     enabled: viewMode === 'all',
   });
 
   // Get user's favorite merchants
-  const { data: favoriteMerchants = [], isLoading: loadingFavorites } = useQuery({
+  const { data: favoriteMerchants = [], isLoading: loadingFavorites } = useQuery<Merchant[]>({
     queryKey: ['/api/favorite-merchants'],
     enabled: isAuthenticated,
   });
@@ -79,7 +79,7 @@ export default function FavoriteMerchants() {
 
   const formatRating = (rating: number) => `${rating.toFixed(1)}`;
   
-  const displayMerchants = viewMode === 'favorites' ? favoriteMerchants : allMerchantsWithFavorite;
+  const displayMerchants: (Merchant | MerchantWithFavorite)[] = viewMode === 'favorites' ? favoriteMerchants : allMerchantsWithFavorite;
   const isLoading = viewMode === 'favorites' ? loadingFavorites : loadingAll;
 
   if (isLoading) {
@@ -139,7 +139,7 @@ export default function FavoriteMerchants() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayMerchants.map((merchant) => {
+            {displayMerchants.map((merchant: Merchant | MerchantWithFavorite) => {
               const isFavorited = 'isFavorited' in merchant ? merchant.isFavorited : true;
               
               return (
@@ -188,7 +188,7 @@ export default function FavoriteMerchants() {
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 text-yellow-500 fill-current" />
                           <span className="text-sm font-medium">
-                            {formatRating(merchant.rating)}
+                            {formatRating(merchant.rating || 0)}
                           </span>
                           <span className="text-sm text-gray-500">
                             ({merchant.reviewCount} reviews)
