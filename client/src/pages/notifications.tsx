@@ -32,7 +32,8 @@ import {
   AlertCircle,
   Info,
   Loader2,
-  Bookmark
+  Bookmark,
+  Trophy
 } from "lucide-react";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import { format } from "date-fns";
@@ -121,6 +122,41 @@ export default function NotificationsPage() {
         toast({
           title: "Error",
           description: "Failed to save deal",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  // Claim deal mutation
+  const claimDealMutation = useMutation({
+    mutationFn: async (dealId: number) => {
+      await apiRequest("POST", `/api/deals/${dealId}/claim`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Deal Claimed!",
+        description: "You've successfully claimed this deal",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/claimed-deals"] });
+    },
+    onError: (error: any) => {
+      if (error.message && error.message.includes("Deal already claimed")) {
+        toast({
+          title: "Deal already claimed!",
+          description: "You have already claimed this deal",
+          variant: "default",
+        });
+      } else if (error.message && error.message.includes("Deal is no longer available")) {
+        toast({
+          title: "Deal Expired",
+          description: "This deal is no longer available",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to claim deal",
           variant: "destructive",
         });
       }
@@ -372,21 +408,37 @@ export default function NotificationsPage() {
                             <Mail className="w-4 h-4 text-blue-500" />
                           )}
                           
-                          {/* Save Deal Button - only show for deal notifications */}
+                          {/* Deal Action Buttons - only show for deal notifications */}
                           {notification.dealId && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                saveDealMutation.mutate(notification.dealId!);
-                              }}
-                              disabled={saveDealMutation.isPending}
-                              className="text-gray-500 hover:text-blue-500"
-                              title="Save Deal"
-                            >
-                              <Bookmark className="w-4 h-4" />
-                            </Button>
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  claimDealMutation.mutate(notification.dealId!);
+                                }}
+                                disabled={claimDealMutation.isPending}
+                                className="text-gray-500 hover:text-green-500"
+                                title="Claim Deal"
+                              >
+                                <Trophy className="w-4 h-4" />
+                              </Button>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  saveDealMutation.mutate(notification.dealId!);
+                                }}
+                                disabled={saveDealMutation.isPending}
+                                className="text-gray-500 hover:text-blue-500"
+                                title="Save Deal"
+                              >
+                                <Bookmark className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                           
                           <Button
