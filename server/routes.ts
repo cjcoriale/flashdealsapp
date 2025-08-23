@@ -890,6 +890,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }, 60 * 60 * 1000); // Run every hour
 
+  // Favorite merchants endpoints
+  app.get("/api/favorite-merchants", isAuthenticated, auditMiddleware("Get Favorite Merchants"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const favorites = await storage.getFavoriteMerchants(userId);
+      res.json(favorites);
+    } catch (error) {
+      auditError(req, error as Error, "Get Favorite Merchants");
+      res.status(500).json({ message: "Failed to get favorite merchants" });
+    }
+  });
+
+  app.get("/api/merchants", auditMiddleware("Get All Merchants"), async (req: AuditRequest, res) => {
+    try {
+      const merchants = await storage.getAllMerchants();
+      res.json(merchants);
+    } catch (error) {
+      auditError(req, error as Error, "Get All Merchants");
+      res.status(500).json({ message: "Failed to get merchants" });
+    }
+  });
+
+  app.post("/api/merchants/:id/favorite", isAuthenticated, auditMiddleware("Favorite Merchant"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      
+      const favorite = await storage.addFavoriteMerchant(userId, merchantId);
+      res.json(favorite);
+    } catch (error) {
+      auditError(req, error as Error, "Favorite Merchant");
+      res.status(500).json({ message: "Failed to favorite merchant" });
+    }
+  });
+
+  app.delete("/api/merchants/:id/favorite", isAuthenticated, auditMiddleware("Unfavorite Merchant"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      
+      await storage.removeFavoriteMerchant(userId, merchantId);
+      res.json({ message: "Merchant unfavorited successfully" });
+    } catch (error) {
+      auditError(req, error as Error, "Unfavorite Merchant");
+      res.status(500).json({ message: "Failed to unfavorite merchant" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

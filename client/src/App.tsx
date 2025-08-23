@@ -20,7 +20,7 @@ import NotFound from "@/pages/not-found";
 import { Loader2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNavigation from "@/components/layout/BottomNavigation";
-import { useEffect } from "react";
+import { useEffect, lazy } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -56,6 +56,7 @@ function Router() {
             <>
               <Route path="/saved-deals" component={SavedDealsPage} />
               <Route path="/claimed-deals" component={ClaimedDealsPage} />
+              <Route path="/favorite-merchants" component={lazy(() => import("@/pages/favorite-merchants"))} />
             </>
           )}
           

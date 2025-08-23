@@ -10,6 +10,7 @@ import {
   appSettings,
   userPreferences,
   notifications,
+  favoriteMerchants,
   type User,
   type UpsertUser,
   type Merchant,
@@ -35,6 +36,8 @@ import {
   type InsertUserPreference,
   type Notification,
   type InsertNotification,
+  type FavoriteMerchant,
+  type InsertFavoriteMerchant,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, lt, sql, ne } from "drizzle-orm";
@@ -114,6 +117,12 @@ export interface IStorage {
   markNotificationAsRead(notificationId: number, userId: string): Promise<void>;
   deleteNotification(notificationId: number, userId: string): Promise<void>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
+
+  // Favorite merchants operations
+  getFavoriteMerchants(userId: string): Promise<Merchant[]>;
+  addFavoriteMerchant(userId: string, merchantId: number): Promise<FavoriteMerchant>;
+  removeFavoriteMerchant(userId: string, merchantId: number): Promise<void>;
+  isMerchantFavorited(userId: string, merchantId: number): Promise<boolean>;
 
   // Search operations
   getSearchSuggestions(query: string): Promise<Array<{
@@ -891,6 +900,66 @@ export class DatabaseStorage implements IStorage {
         eq(notifications.userId, userId),
         eq(notifications.isRead, false)
       ));
+  }
+
+  // Favorite merchants operations
+  async getFavoriteMerchants(userId: string): Promise<Merchant[]> {
+    const result = await db
+      .select({
+        id: merchants.id,
+        userId: merchants.userId,
+        name: merchants.name,
+        description: merchants.description,
+        category: merchants.category,
+        latitude: merchants.latitude,
+        longitude: merchants.longitude,
+        address: merchants.address,
+        phone: merchants.phone,
+        rating: merchants.rating,
+        reviewCount: merchants.reviewCount,
+        isActive: merchants.isActive,
+        createdAt: merchants.createdAt,
+        imageUrl: merchants.imageUrl,
+      })
+      .from(favoriteMerchants)
+      .innerJoin(merchants, eq(favoriteMerchants.merchantId, merchants.id))
+      .where(and(
+        eq(favoriteMerchants.userId, userId),
+        eq(merchants.isActive, true)
+      ))
+      .orderBy(desc(favoriteMerchants.favoritedAt));
+    
+    return result;
+  }
+
+  async addFavoriteMerchant(userId: string, merchantId: number): Promise<FavoriteMerchant> {
+    const [favorite] = await db
+      .insert(favoriteMerchants)
+      .values({ userId, merchantId })
+      .returning();
+    return favorite;
+  }
+
+  async removeFavoriteMerchant(userId: string, merchantId: number): Promise<void> {
+    await db
+      .delete(favoriteMerchants)
+      .where(and(
+        eq(favoriteMerchants.userId, userId),
+        eq(favoriteMerchants.merchantId, merchantId)
+      ));
+  }
+
+  async isMerchantFavorited(userId: string, merchantId: number): Promise<boolean> {
+    const result = await db
+      .select({ id: favoriteMerchants.id })
+      .from(favoriteMerchants)
+      .where(and(
+        eq(favoriteMerchants.userId, userId),
+        eq(favoriteMerchants.merchantId, merchantId)
+      ))
+      .limit(1);
+    
+    return result.length > 0;
   }
 }
 

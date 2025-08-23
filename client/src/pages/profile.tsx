@@ -57,6 +57,12 @@ export default function ProfilePage() {
     enabled: !!user && isMerchant,
   });
 
+  // Get favorite merchants for non-merchants
+  const { data: favoriteMerchants = [] } = useQuery<Merchant[]>({
+    queryKey: ["/api/favorite-merchants"],
+    enabled: !!user && !isMerchant,
+  });
+
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   if (authLoading) {
@@ -162,18 +168,24 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
           
-          {/* Non-clickable Business Status Card */}
-          <Card>
+          {/* Business/Favorite Merchants Card */}
+          <Card 
+            className={!isMerchant ? "cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50 dark:hover:bg-gray-800" : ""}
+            onClick={!isMerchant ? () => window.location.href = '/favorite-merchants' : undefined}
+          >
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Store className="w-5 h-5 text-purple-500 mr-2" />
                   <div className="text-2xl font-bold text-purple-600">
-                    {isMerchant ? (Array.isArray(merchants) ? merchants.length : 0) : 0}
+                    {isMerchant 
+                      ? (Array.isArray(merchants) ? merchants.length : 0)
+                      : (Array.isArray(favoriteMerchants) ? favoriteMerchants.length : 0)
+                    }
                   </div>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  {isMerchant ? "Businesses" : "Business Status"}
+                  {isMerchant ? "Businesses" : "Favorite Merchants"}
                 </div>
               </div>
             </CardContent>

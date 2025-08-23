@@ -160,6 +160,17 @@ export const notifications = pgTable("notifications", {
   readAt: timestamp("read_at"),
 });
 
+// Favorite merchants table
+export const favoriteMerchants = pgTable("favorite_merchants", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  merchantId: integer("merchant_id").references(() => merchants.id).notNull(),
+  favoritedAt: timestamp("favorited_at").defaultNow(),
+}, (table) => [
+  // Ensure one favorite per user-merchant pair
+  index("user_merchant_favorite_idx").on(table.userId, table.merchantId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   merchants: many(merchants),
@@ -167,6 +178,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   dealClaims: many(dealClaims),
   auditLogs: many(auditLogs),
   notifications: many(notifications),
+  favoriteMerchants: many(favoriteMerchants),
 }));
 
 export const merchantsRelations = relations(merchants, ({ one, many }) => ({
@@ -175,6 +187,7 @@ export const merchantsRelations = relations(merchants, ({ one, many }) => ({
     references: [users.id],
   }),
   deals: many(deals),
+  favoritedBy: many(favoriteMerchants),
 }));
 
 export const dealsRelations = relations(deals, ({ one, many }) => ({
@@ -223,6 +236,17 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+export const favoriteMerchantsRelations = relations(favoriteMerchants, ({ one }) => ({
+  user: one(users, {
+    fields: [favoriteMerchants.userId],
+    references: [users.id],
+  }),
+  merchant: one(merchants, {
+    fields: [favoriteMerchants.merchantId],
+    references: [merchants.id],
+  }),
+}));
+
 // Schema types
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertMerchantSchema = createInsertSchema(merchants).omit({ id: true, createdAt: true });
@@ -234,6 +258,7 @@ export const insertEnabledStateSchema = createInsertSchema(enabledStates).omit({
 export const insertAppSettingSchema = createInsertSchema(appSettings).omit({ id: true, updatedAt: true });
 export const insertUserPreferenceSchema = createInsertSchema(userPreferences).omit({ id: true, updatedAt: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true, readAt: true });
+export const insertFavoriteMerchantSchema = createInsertSchema(favoriteMerchants).omit({ id: true, favoritedAt: true });
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -255,6 +280,8 @@ export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
 export type UserPreference = typeof userPreferences.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type InsertFavoriteMerchant = z.infer<typeof insertFavoriteMerchantSchema>;
+export type FavoriteMerchant = typeof favoriteMerchants.$inferSelect;
 
 export type DealWithMerchant = Deal & {
   merchant: Merchant;
