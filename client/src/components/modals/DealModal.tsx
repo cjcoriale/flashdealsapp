@@ -16,7 +16,7 @@ import { insertDealSchema } from "@shared/schema";
 import { z } from "zod";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
-const dealFormSchema = insertDealSchema.extend({
+const dealFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   originalPrice: z.number().min(0.01, "Original price must be greater than 0"),
@@ -123,11 +123,20 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
     // Calculate discount percentage
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
     
-    console.log("Creating deal with:", { ...data, discountPercentage });
-    createDealMutation.mutate({
+    // Set default values for required fields
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+    
+    const dealData = {
       ...data,
       discountPercentage,
-    });
+      category: selectedMerchantData?.category || "food", // Use merchant's category or default to food
+      startTime: now.toISOString(),
+      endTime: tomorrow.toISOString(),
+    };
+    
+    console.log("Creating deal with:", dealData);
+    createDealMutation.mutate(dealData);
   };
 
   if (!isOpen) return null;
