@@ -44,13 +44,24 @@ export default function MerchantHome() {
         {/* Recent Deals */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Store className="w-5 h-5" />
-              Your Recent Deals
-            </CardTitle>
-            <CardDescription>
-              Manage your active flash deals
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Store className="w-5 h-5" />
+                  Your Recent Deals
+                </CardTitle>
+                <CardDescription>
+                  Manage your active flash deals
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => window.location.href = "/merchant-dashboard"}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Deal
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {deals.length === 0 ? (
