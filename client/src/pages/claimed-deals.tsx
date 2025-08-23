@@ -54,6 +54,41 @@ export default function ClaimedDealsPage() {
         </div>
       </div>
 
+      {/* Savings Summary - Pinned at top */}
+      {claimedDeals.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 border-b shadow-sm">
+          <div className="max-w-4xl mx-auto p-4">
+            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Your Savings Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      {claimedDeals.length}
+                    </div>
+                    <div className="text-sm text-green-600 font-medium">Deals Claimed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      ${claimedDeals.reduce((total, claim) => {
+                        const savings = claim.deal.originalPrice - claim.deal.discountedPrice;
+                        return total + savings;
+                      }, 0).toFixed(2)}
+                    </div>
+                    <div className="text-sm text-green-600 font-medium">Total Saved</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="max-w-4xl mx-auto p-4">
         {claimedDeals.length === 0 ? (
@@ -138,34 +173,6 @@ export default function ClaimedDealsPage() {
               );
             })}
             
-            {/* Summary card */}
-            <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-              <CardHeader>
-                <CardTitle className="text-green-700 dark:text-green-300 flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" />
-                  Your Savings Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">
-                      {claimedDeals.length}
-                    </div>
-                    <div className="text-sm text-green-600">Deals Claimed</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">
-                      ${claimedDeals.reduce((total, claim) => {
-                        const savings = claim.deal.originalPrice - claim.deal.discountedPrice;
-                        return total + savings;
-                      }, 0).toFixed(2)}
-                    </div>
-                    <div className="text-sm text-green-600">Total Saved</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
       </div>
