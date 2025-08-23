@@ -14,6 +14,7 @@ import MerchantDashboard from "@/pages/merchant-dashboard";
 import ProfilePage from "@/pages/profile";
 import CustomerHome from "@/pages/customer-home";
 import MerchantHome from "@/pages/merchant-home";
+import NotificationsPage from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -45,6 +46,7 @@ function Router() {
             CustomerHome
           } />
           <Route path="/profile" component={ProfilePage} />
+          <Route path="/notifications" component={NotificationsPage} />
           
           {/* Customer-specific routes */}
           {user?.role === 'customer' && (

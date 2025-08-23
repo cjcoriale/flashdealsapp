@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
 import cookieParser from "cookie-parser";
 import { auditMiddleware, type AuditRequest, auditError } from "./middleware/audit";
-import { insertDealSchema, insertMerchantSchema, insertSavedDealSchema, insertDealClaimSchema } from "@shared/schema";
+import { insertDealSchema, insertMerchantSchema, insertSavedDealSchema, insertDealClaimSchema, insertNotificationSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser for simple auth
@@ -744,6 +744,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       auditError(req, error as Error, "Update User Profile");
       res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Notifications routes
+  app.get("/api/notifications", isAuthenticated, auditMiddleware("Get Notifications"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const notifications = await storage.getNotifications(currentUserId);
+      res.json(notifications);
+    } catch (error) {
+      auditError(req, error as Error, "Get Notifications");
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", isAuthenticated, auditMiddleware("Get Unread Count"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const count = await storage.getUnreadNotificationsCount(currentUserId);
+      res.json({ count });
+    } catch (error) {
+      auditError(req, error as Error, "Get Unread Count");
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  app.post("/api/notifications", isAuthenticated, auditMiddleware("Create Notification"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const notificationData = insertNotificationSchema.parse({ ...req.body, userId: currentUserId });
+      const notification = await storage.createNotification(notificationData);
+      res.json(notification);
+    } catch (error) {
+      auditError(req, error as Error, "Create Notification");
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.put("/api/notifications/:id/read", isAuthenticated, auditMiddleware("Mark Notification Read"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId, currentUserId);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      auditError(req, error as Error, "Mark Notification Read");
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.put("/api/notifications/mark-all-read", isAuthenticated, auditMiddleware("Mark All Read"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      await storage.markAllNotificationsAsRead(currentUserId);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      auditError(req, error as Error, "Mark All Read");
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", isAuthenticated, auditMiddleware("Delete Notification"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const notificationId = parseInt(req.params.id);
+      await storage.deleteNotification(notificationId, currentUserId);
+      res.json({ message: "Notification deleted" });
+    } catch (error) {
+      auditError(req, error as Error, "Delete Notification");
+      res.status(500).json({ message: "Failed to delete notification" });
     }
   });
 

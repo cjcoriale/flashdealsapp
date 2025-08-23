@@ -145,7 +145,7 @@ export default function ProfilePage() {
                   <User className="w-4 h-4 mr-2" />
                   Edit Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.location.href = '/notifications'}>
                   <Bell className="w-4 h-4 mr-2" />
                   Notifications
                 </DropdownMenuItem>

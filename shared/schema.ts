@@ -146,12 +146,27 @@ export const userPreferences = pgTable("user_preferences", {
   index("user_preference_idx").on(table.userId, table.preferenceKey),
 ]);
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type").notNull(), // deal_created, deal_claimed, deal_expired, deal_reminder, system
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  dealId: integer("deal_id").references(() => deals.id),
+  merchantId: integer("merchant_id").references(() => merchants.id),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   merchants: many(merchants),
   savedDeals: many(savedDeals),
   dealClaims: many(dealClaims),
   auditLogs: many(auditLogs),
+  notifications: many(notifications),
 }));
 
 export const merchantsRelations = relations(merchants, ({ one, many }) => ({
@@ -193,6 +208,21 @@ export const dealClaimsRelations = relations(dealClaims, ({ one }) => ({
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  deal: one(deals, {
+    fields: [notifications.dealId],
+    references: [deals.id],
+  }),
+  merchant: one(merchants, {
+    fields: [notifications.merchantId],
+    references: [merchants.id],
+  }),
+}));
+
 // Schema types
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertMerchantSchema = createInsertSchema(merchants).omit({ id: true, createdAt: true });
@@ -203,6 +233,7 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: tru
 export const insertEnabledStateSchema = createInsertSchema(enabledStates).omit({ id: true, updatedAt: true });
 export const insertAppSettingSchema = createInsertSchema(appSettings).omit({ id: true, updatedAt: true });
 export const insertUserPreferenceSchema = createInsertSchema(userPreferences).omit({ id: true, updatedAt: true });
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true, readAt: true });
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -222,6 +253,8 @@ export type InsertAppSetting = z.infer<typeof insertAppSettingSchema>;
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
 export type UserPreference = typeof userPreferences.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
 
 export type DealWithMerchant = Deal & {
   merchant: Merchant;
