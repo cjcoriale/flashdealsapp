@@ -314,7 +314,6 @@ export default function MerchantDashboard() {
   };
 
   const handleCreateDealClick = () => {
-    console.log("Create Deal button clicked! Opening modal...");
     setShowDealModal(true);
   };
 

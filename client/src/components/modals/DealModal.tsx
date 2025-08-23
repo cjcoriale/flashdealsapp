@@ -42,7 +42,6 @@ interface DealModalProps {
 }
 
 export default function DealModal({ isOpen, onClose, merchants, selectedMerchant }: DealModalProps) {
-  console.log("DealModal props:", { isOpen, merchants: merchants?.length, selectedMerchant });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [discountPercentage, setDiscountPercentage] = useState(0);
@@ -143,21 +142,30 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
     });
   };
 
+  if (!isOpen) return null;
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Tag className="w-5 h-5" />
-            Create Flash Deal
-          </DialogTitle>
-          <DialogDescription>
-            Create a limited-time discount for your customers to discover
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Tag className="w-5 h-5" />
+              <h2 className="text-lg font-semibold">Create Flash Deal</h2>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+              Create a limited-time discount for your customers to discover
+            </p>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div>
             <Label htmlFor="merchantId">Business Location *</Label>
             <Select 
               onValueChange={(value) => form.setValue("merchantId", parseInt(value))}
@@ -381,9 +389,11 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                 "Create Deal"
               )}
             </Button>
+              </div>
+            </form>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </>
   );
 }
