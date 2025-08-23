@@ -118,9 +118,11 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
   });
 
   const onSubmit = (data: any) => {
+    console.log("Form submitted with data:", data);
     // Calculate discount percentage
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
     
+    console.log("Creating deal with:", { ...data, discountPercentage });
     createDealMutation.mutate({
       ...data,
       discountPercentage,
@@ -290,6 +292,7 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                 type="submit" 
                 disabled={createDealMutation.isPending}
                 className="flex-1"
+                onClick={() => console.log("Create Deal button clicked!")}
               >
                 {createDealMutation.isPending ? (
                   <>
