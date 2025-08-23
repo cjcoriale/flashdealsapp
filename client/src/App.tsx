@@ -16,7 +16,9 @@ import CustomerHome from "@/pages/customer-home";
 import MerchantHome from "@/pages/merchant-home";
 import NotificationsPage from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 import { useEffect } from "react";
 
 function Router() {
@@ -52,6 +54,34 @@ function Router() {
           {user?.role === 'customer' && (
             <>
               <Route path="/saved-deals" component={SavedDealsPage} />
+              <Route path="/claimed-deals" component={() => (
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+                  <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+                    <div className="px-4 py-6">
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Trophy className="w-6 h-6 text-green-500" />
+                        My Claimed Deals
+                      </h1>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Track your claimed deals and savings
+                      </p>
+                    </div>
+                  </div>
+                  <div className="max-w-4xl mx-auto p-4">
+                    <div className="text-center py-12">
+                      <Trophy className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Your Claimed Deals</h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        View your successfully claimed deals here. Start claiming deals from the map to see them listed.
+                      </p>
+                      <Button onClick={() => window.location.href = '/map'}>
+                        Find Deals to Claim
+                      </Button>
+                    </div>
+                  </div>
+                  <BottomNavigation currentPage="profile" onAuditClick={() => {}} />
+                </div>
+              )} />
             </>
           )}
           

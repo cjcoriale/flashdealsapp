@@ -195,6 +195,16 @@ export default function ProfilePage() {
                   My Saved Deals
                 </Button>
               )}
+              {!isMerchant && (
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-12" 
+                  onClick={() => window.location.href = '/claimed-deals'}
+                >
+                  <Trophy className="w-4 h-4 mr-3" />
+                  My Claimed Deals
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 className="justify-start h-12" 
