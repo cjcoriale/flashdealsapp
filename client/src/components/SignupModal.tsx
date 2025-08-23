@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialStep?: 'role' | 'signup' | 'signin';
 }
 
-export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
-  const [step, setStep] = useState<'role' | 'signup' | 'signin'>('role');
+export default function SignupModal({ isOpen, onClose, initialStep = 'role' }: SignupModalProps) {
+  const [step, setStep] = useState<'role' | 'signup' | 'signin'>(initialStep);
   const [selectedRole, setSelectedRole] = useState<'customer' | 'merchant' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +27,13 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
     lastName: '',
     confirmPassword: ''
   });
+
+  // Reset to initial step when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setStep(initialStep);
+    }
+  }, [isOpen, initialStep]);
 
   const handleRoleSelection = (role: 'customer' | 'merchant') => {
     setSelectedRole(role);

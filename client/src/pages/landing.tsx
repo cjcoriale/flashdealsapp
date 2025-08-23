@@ -6,6 +6,7 @@ import SignupModal from "@/components/SignupModal";
 
 export default function Landing() {
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [modalStep, setModalStep] = useState<'role' | 'signup' | 'signin'>('role');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -27,7 +28,10 @@ export default function Landing() {
               Get Started
             </Button>
             <Button 
-              onClick={() => window.location.href = '/api/auth/login?role=customer'}
+              onClick={() => {
+                setModalStep('signin');
+                setShowSignupModal(true);
+              }}
               size="lg"
               variant="outline"
               className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
@@ -39,7 +43,11 @@ export default function Landing() {
 
         <SignupModal 
           isOpen={showSignupModal} 
-          onClose={() => setShowSignupModal(false)} 
+          onClose={() => {
+            setShowSignupModal(false);
+            setModalStep('role');
+          }}
+          initialStep={modalStep}
         />
 
         {/* Features Grid */}
@@ -140,7 +148,10 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => window.location.href = '/api/auth/login?role=customer'} 
+                onClick={() => {
+                  setModalStep('signin');
+                  setShowSignupModal(true);
+                }}
                 variant="secondary"
                 size="lg"
               >
