@@ -216,7 +216,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Merchant Section */}
-        {isMerchant ? (
+        {isMerchant && (
           <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-purple-700 dark:text-purple-300">
@@ -236,46 +236,6 @@ export default function ProfilePage() {
                 >
                   <Store className="w-4 h-4 mr-2" />
                   Go to Merchant Dashboard
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-800">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Crown className="w-12 h-12 text-purple-600" />
-              </div>
-              <CardTitle className="text-purple-900 dark:text-purple-100">
-                Become a Merchant
-              </CardTitle>
-              <CardDescription className="text-purple-700 dark:text-purple-300">
-                Join FlashDeals as a business owner and start creating deals for local customers.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
-                    <Store className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="font-medium">Business Profile</div>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
-                    <MapPin className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="font-medium">Map Deals</div>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
-                    <Star className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="font-medium">Track Performance</div>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => promoteMutation.mutate()}
-                  disabled={promoteMutation.isPending}
-                  className="bg-purple-600 hover:bg-purple-700"
-                  size="lg"
-                >
-                  {promoteMutation.isPending ? "Setting up..." : "Upgrade to Merchant"}
                 </Button>
               </div>
             </CardContent>
