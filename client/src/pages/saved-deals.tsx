@@ -132,6 +132,7 @@ export default function SavedDealsPage() {
       {/* Header */}
       <PageHeader 
         title="Saved Deals" 
+        backTo="/profile"
         actions={
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <Star className="w-4 h-4 text-yellow-500" />
