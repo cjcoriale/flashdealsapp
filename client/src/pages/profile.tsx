@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import PageHeader from "@/components/layout/PageHeader";
 import DealCard from "@/components/deals/DealCard";
 import DealModal from "@/components/deals/DealModal";
+import EditProfileModal from "@/components/modals/EditProfileModal";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,7 +22,7 @@ import {
 import { User, Settings, Store, Crown, MapPin, Calendar, Mail, Star, Phone, Edit2, Eye, Plus, Zap, TrendingUp, Heart, Trophy, ShoppingBag, Bell, Shield, ChevronRight, LogOut, MapPinIcon, Clock } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import BottomNavigation from "@/components/layout/BottomNavigation";
-import { DealWithMerchant } from "@shared/schema";
+import { DealWithMerchant, DealClaimWithDetails, SavedDealWithDetails, Merchant } from "@shared/schema";
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -44,28 +45,29 @@ export default function ProfilePage() {
   });
 
   // Fetch user stats
-  const { data: savedDeals = [] } = useQuery({
+  const { data: savedDeals = [] } = useQuery<SavedDealWithDetails[]>({
     queryKey: ["/api/saved-deals"],
     enabled: !!user,
   });
 
-  const { data: claimedDeals = [] } = useQuery({
+  const { data: claimedDeals = [] } = useQuery<DealClaimWithDetails[]>({
     queryKey: ["/api/claimed-deals"],
     enabled: !!user,
   });
 
-  const { data: merchants = [] } = useQuery({
+  const { data: merchants = [] } = useQuery<Merchant[]>({
     queryKey: ["/api/my-merchants"],
     enabled: !!user && isMerchant,
   });
 
   // Fetch all available deals for customer users
-  const { data: allDeals = [] } = useQuery({
+  const { data: allDeals = [] } = useQuery<DealWithMerchant[]>({
     queryKey: ["/api/deals"],
     enabled: !!user && !isMerchant,
   });
 
   const [selectedDeal, setSelectedDeal] = useState<DealWithMerchant | null>(null);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   const handleDealClick = (deal: DealWithMerchant) => {
     setSelectedDeal(deal);
@@ -139,7 +141,7 @@ export default function ProfilePage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEditProfileOpen(true)}>
                   <User className="w-4 h-4 mr-2" />
                   Edit Profile
                 </DropdownMenuItem>
@@ -187,9 +189,9 @@ export default function ProfilePage() {
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
                     <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
-                    Claimed ({claimedDeals?.length || 0})
+                    Claimed ({Array.isArray(claimedDeals) ? claimedDeals.length : 0})
                   </h3>
-                  {claimedDeals?.length > 0 ? (
+                  {Array.isArray(claimedDeals) && claimedDeals.length > 0 ? (
                     <div className="space-y-2">
                       {claimedDeals.slice(0, 3).map((claimedDeal) => (
                         <div
@@ -221,9 +223,9 @@ export default function ProfilePage() {
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
                     <Heart className="w-4 h-4 mr-2 text-red-500" />
-                    Saved ({savedDeals?.length || 0})
+                    Saved ({Array.isArray(savedDeals) ? savedDeals.length : 0})
                   </h3>
-                  {savedDeals?.length > 0 ? (
+                  {Array.isArray(savedDeals) && savedDeals.length > 0 ? (
                     <div className="space-y-2">
                       {savedDeals.slice(0, 3).map((savedDeal) => (
                         <div
@@ -522,6 +524,15 @@ export default function ProfilePage() {
           deal={selectedDeal}
           onClose={() => setSelectedDeal(null)}
           onClaim={handleDealClaim}
+        />
+      )}
+
+      {/* Edit Profile Modal */}
+      {user && (
+        <EditProfileModal
+          user={user}
+          open={isEditProfileOpen}
+          onOpenChange={setIsEditProfileOpen}
         />
       )}
 

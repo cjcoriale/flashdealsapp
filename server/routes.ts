@@ -709,6 +709,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile update route
+  app.put("/api/auth/user", isAuthenticated, auditMiddleware("Update User Profile"), async (req: AuditRequest, res) => {
+    try {
+      const currentUserId = (req as any).user.claims.sub;
+      const { firstName, lastName, email, profileImageUrl } = req.body;
+      
+      // Get current user
+      const currentUser = await storage.getUser(currentUserId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if email is changing and already exists for another user
+      if (email && email !== currentUser.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== currentUserId) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      }
+
+      // Update user profile
+      const updatedUser = await storage.upsertUser({
+        id: currentUserId,
+        email: email || currentUser.email,
+        firstName: firstName || currentUser.firstName,
+        lastName: lastName || currentUser.lastName,
+        profileImageUrl: profileImageUrl || currentUser.profileImageUrl,
+        password: currentUser.password, // Keep existing password
+        role: currentUser.role, // Keep existing role
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      auditError(req, error as Error, "Update User Profile");
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
   // Background task to process recurring deals
   const processRecurringDeals = async () => {
     try {
