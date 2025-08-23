@@ -105,10 +105,15 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/saved-deals"] });
     },
     onError: (error: any) => {
-      // Check if it's already saved error
-      if (error.message && error.message.includes("Deal already saved")) {
+      // Check if it's a unique key database error or already saved error
+      if (error.message && (
+        error.message.includes("Deal already saved") ||
+        error.message.includes("unique constraint") ||
+        error.message.includes("duplicate key") ||
+        error.message.includes("UNIQUE constraint failed")
+      )) {
         toast({
-          title: "Already Saved",
+          title: "Deal already saved!",
           description: "This deal is already in your saved list",
           variant: "default",
         });
