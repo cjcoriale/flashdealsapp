@@ -83,6 +83,12 @@ export default function MerchantDashboard() {
   // Fetch deals for selected merchant
   const { data: recentDeals = [], isLoading: dealsLoading } = useQuery({
     queryKey: ["/api/deals", selectedMerchant?.id],
+    queryFn: selectedMerchant?.id ? () => 
+      fetch(`/api/deals?merchantId=${selectedMerchant.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        }
+      }).then(res => res.json()) : undefined,
     enabled: !!selectedMerchant?.id,
   });
 

@@ -38,7 +38,6 @@ interface DealModalProps {
 }
 
 export default function DealModal({ isOpen, onClose, merchants, selectedMerchant }: DealModalProps) {
-  console.log("DealModal props - merchants:", merchants, "selectedMerchant:", selectedMerchant);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [discountPercentage, setDiscountPercentage] = useState(0);
@@ -119,7 +118,6 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
   });
 
   const onSubmit = (data: any) => {
-    console.log("Form submitted with data:", data);
     // Calculate discount percentage
     const discountPercentage = Math.round(((data.originalPrice - data.discountedPrice) / data.originalPrice) * 100);
     
@@ -130,12 +128,11 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
     const dealData = {
       ...data,
       discountPercentage,
-      category: selectedMerchantData?.category || "food", // Use merchant's category or default to food
+      category: selectedMerchantData?.category || "food",
       startTime: now.toISOString(),
       endTime: tomorrow.toISOString(),
     };
     
-    console.log("Creating deal with:", dealData);
     createDealMutation.mutate(dealData);
   };
 
@@ -163,10 +160,7 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
             <div>
               <Label htmlFor="merchantId">Business Location *</Label>
               <Select 
-                onValueChange={(value) => {
-                  console.log("Selected merchant ID:", value);
-                  form.setValue("merchantId", parseInt(value));
-                }}
+                onValueChange={(value) => form.setValue("merchantId", parseInt(value))}
                 defaultValue={selectedMerchant?.id?.toString() || (merchants.length > 0 ? merchants[0].id.toString() : "")}
               >
                 <SelectTrigger>
@@ -305,12 +299,7 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                 type="submit" 
                 disabled={createDealMutation.isPending}
                 className="flex-1"
-                onClick={() => {
-                  console.log("Create Deal button clicked!");
-                  console.log("Form errors:", form.formState.errors);
-                  console.log("Form values:", form.getValues());
-                  console.log("Form is valid:", form.formState.isValid);
-                }}
+                onClick={() => {}}
               >
                 {createDealMutation.isPending ? (
                   <>

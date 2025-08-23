@@ -19,8 +19,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public deal routes (no auth required)
   app.get("/api/deals", auditMiddleware("View Deals"), async (req: AuditRequest, res) => {
     try {
-      const deals = await storage.getAllActiveDeals();
-      res.json(deals);
+      const { merchantId } = req.query;
+      
+      if (merchantId) {
+        // Filter deals by merchant ID
+        const deals = await storage.getDealsByMerchant(parseInt(merchantId as string));
+        res.json(deals);
+      } else {
+        // Return all active deals
+        const deals = await storage.getAllActiveDeals();
+        res.json(deals);
+      }
     } catch (error) {
       auditError(req, error as Error, "View Deals");
       res.status(500).json({ message: "Failed to fetch deals" });
