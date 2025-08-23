@@ -292,7 +292,12 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                 type="submit" 
                 disabled={createDealMutation.isPending}
                 className="flex-1"
-                onClick={() => console.log("Create Deal button clicked!")}
+                onClick={() => {
+                  console.log("Create Deal button clicked!");
+                  console.log("Form errors:", form.formState.errors);
+                  console.log("Form values:", form.getValues());
+                  console.log("Form is valid:", form.formState.isValid);
+                }}
               >
                 {createDealMutation.isPending ? (
                   <>
