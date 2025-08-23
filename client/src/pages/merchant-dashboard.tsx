@@ -314,9 +314,7 @@ export default function MerchantDashboard() {
   };
 
   const handleCreateDealClick = () => {
-    console.log("Create Deal button clicked! Current showDealModal:", showDealModal);
     setShowDealModal(true);
-    console.log("Modal should now be open");
   };
 
   // Auth check
@@ -353,9 +351,16 @@ export default function MerchantDashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <PageHeader 
         title="Business Dashboard"
-        subtitle="Manage your businesses and deals"
         showBackButton={false}
       />
+      
+      {currentlyManaging && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-2">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Currently managing: <span className="font-semibold">{currentlyManaging.name}</span>
+          </p>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 pt-20 pb-24">
         {/* Quick Actions */}
