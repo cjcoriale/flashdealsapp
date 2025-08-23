@@ -17,7 +17,7 @@ export default function FavoriteMerchants() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [viewMode, setViewMode] = useState<'favorites' | 'all'>('favorites');
+  const [viewMode, setViewMode] = useState<'favorites' | 'all'>('all');
 
   // Get all merchants
   const { data: allMerchants = [], isLoading: loadingAll } = useQuery<Merchant[]>({

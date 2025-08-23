@@ -289,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(merchant);
     } catch (error) {
       auditError(req, error as Error, "Create Merchant");
-      if (error.message && error.message.includes('unique_merchant_location')) {
+      if ((error as Error).message && (error as Error).message.includes('unique_merchant_location')) {
         res.status(400).json({ message: "A merchant with this name already exists at this address" });
       } else {
         res.status(500).json({ message: "Failed to create merchant" });
@@ -339,7 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedMerchant);
     } catch (error) {
       auditError(req, error as Error, "Update Merchant");
-      if (error.message && error.message.includes('unique_merchant_location')) {
+      if ((error as Error).message && (error as Error).message.includes('unique_merchant_location')) {
         res.status(400).json({ message: "A merchant with this name already exists at this address" });
       } else {
         res.status(500).json({ message: "Failed to update merchant" });
