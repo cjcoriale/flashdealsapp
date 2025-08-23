@@ -27,7 +27,7 @@ export default function Landing() {
               Get Started
             </Button>
             <Button 
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/api/auth/login?role=customer'}
               size="lg"
               variant="outline"
               className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
@@ -140,7 +140,7 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => window.location.href = '/api/login'} 
+                onClick={() => window.location.href = '/api/auth/login?role=customer'} 
                 variant="secondary"
                 size="lg"
               >
