@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Notification } from "@shared/schema";
 
@@ -41,8 +42,17 @@ import { format } from "date-fns";
 export default function NotificationsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+
+  // Determine the correct back route based on user role
+  const getBackRoute = () => {
+    if (user?.role === 'merchant' || user?.role === 'super_merchant') {
+      return '/merchant-dashboard';
+    }
+    return '/'; // Default to map page for customers
+  };
 
   // Fetch notifications
   const { data: notifications = [], isLoading, refetch } = useQuery<Notification[]>({
@@ -251,7 +261,7 @@ export default function NotificationsPage() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.history.back()}
+                onClick={() => setLocation(getBackRoute())}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
