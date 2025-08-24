@@ -360,6 +360,38 @@ export default function MerchantDashboard() {
         showBackButton={false}
       />
       
+      {/* User Menu Header */}
+      <div className="fixed top-4 right-4 z-50">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="bg-white shadow-lg">
+              <User className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+              <User className="w-4 h-4 mr-2" />
+              Profile & Settings
+            </DropdownMenuItem>
+            {selectedMerchant && (
+              <DropdownMenuItem 
+                onClick={() => {
+                  setEditingLocation(selectedMerchant);
+                  setShowLocationModal(true);
+                }}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Current Location
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => window.location.href = '/api/auth/logout'}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
       {currentlyManaging && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-2">
           <p className="text-sm text-blue-700 dark:text-blue-300">
