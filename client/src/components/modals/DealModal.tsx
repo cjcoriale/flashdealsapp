@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tag, Loader2, DollarSign, Percent, Calendar, MapPin } from "lucide-react";
+import { Tag, Loader2, DollarSign, Percent, Calendar, MapPin, Shield } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -155,6 +155,19 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
             Create a limited-time discount for your customers to discover
           </p>
+          
+          {merchants.filter((merchant: any) => merchant.verificationStatus === 'verified').length === 0 && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+              <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                <Shield className="w-4 h-4" />
+                <span className="font-medium">Verification Required</span>
+              </div>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                You need to verify at least one business location before creating deals. 
+                Verification helps build trust with customers and ensures deal authenticity.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div>
@@ -167,11 +180,16 @@ export default function DealModal({ isOpen, onClose, merchants, selectedMerchant
                   <SelectValue placeholder="Select a business location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {merchants.map((merchant: any) => (
+                  {merchants.filter((merchant: any) => merchant.verificationStatus === 'verified').map((merchant: any) => (
                     <SelectItem key={merchant.id} value={merchant.id.toString()}>
                       {merchant.name}
                     </SelectItem>
                   ))}
+                  {merchants.filter((merchant: any) => merchant.verificationStatus !== 'verified').length > 0 && (
+                    <SelectItem value="unverified" disabled>
+                      --- Unverified Businesses (Verification Required) ---
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               {form.formState.errors.merchantId && (

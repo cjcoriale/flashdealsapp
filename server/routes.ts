@@ -811,6 +811,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to create deals for this merchant" });
       }
 
+      // Check if merchant is verified (both Google My Business and phone verification required)
+      if (merchant.verificationStatus !== 'verified') {
+        return res.status(400).json({ 
+          message: "Business must be verified before creating deals", 
+          details: "Please complete both Google My Business and phone verification to create deals"
+        });
+      }
+
       // Convert string dates to Date objects
       const bodyWithDates = {
         ...req.body,

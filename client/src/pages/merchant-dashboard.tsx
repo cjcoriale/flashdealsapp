@@ -514,13 +514,28 @@ export default function MerchantDashboard() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedMerchant(merchant);
-                              setCurrentlyManaging(merchant);
-                              setShowDealModal(true);
+                              if (merchant.verificationStatus === 'verified') {
+                                setSelectedMerchant(merchant);
+                                setCurrentlyManaging(merchant);
+                                setShowDealModal(true);
+                              } else {
+                                toast({
+                                  title: "Verification Required",
+                                  description: "Please verify your business first to create deals",
+                                  variant: "destructive",
+                                });
+                              }
                             }}
+                            disabled={merchant.verificationStatus !== 'verified'}
+                            className={merchant.verificationStatus !== 'verified' ? 'opacity-50 cursor-not-allowed' : ''}
                           >
                             <Plus className="w-4 h-4 mr-2" />
                             Create Deal
+                            {merchant.verificationStatus !== 'verified' && (
+                              <Badge variant="outline" className="ml-2 text-xs">
+                                Verification Required
+                              </Badge>
+                            )}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -563,15 +578,25 @@ export default function MerchantDashboard() {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedMerchant(merchant);
-                          setCurrentlyManaging(merchant);
-                          setShowDealModal(true);
+                          if (merchant.verificationStatus === 'verified') {
+                            setSelectedMerchant(merchant);
+                            setCurrentlyManaging(merchant);
+                            setShowDealModal(true);
+                          } else {
+                            toast({
+                              title: "Verification Required",
+                              description: "Please verify your business first to create deals",
+                              variant: "destructive",
+                            });
+                          }
                         }}
-                        className="flex-1"
+                        className={`flex-1 ${merchant.verificationStatus !== 'verified' ? 'opacity-50' : ''}`}
                         size="sm"
+                        disabled={merchant.verificationStatus !== 'verified'}
+                        data-testid={`button-create-deal-${merchant.id}`}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Create Deal
+                        {merchant.verificationStatus === 'verified' ? 'Create Deal' : 'Verify to Create Deals'}
                       </Button>
                       {merchant.verificationStatus !== 'verified' && (
                         <Button

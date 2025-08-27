@@ -7,6 +7,8 @@ FlashDeals is a location-based mobile application designed for discovering local
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **August 27, 2025**: **CRITICAL BUSINESS RULE**: Implemented verification requirement for deal creation - merchants must complete both Google My Business and phone verification before they can create deals. This ensures business authenticity and builds customer trust.
+- **August 27, 2025**: Fixed Google Places API restriction issues - gracefully handles API key referer restrictions by accepting user-provided addresses when Google validation fails, allowing business creation to proceed while maintaining verification system functionality.
 - **August 23, 2025**: Fixed Create Deal modal functionality - resolved form validation issues by creating custom schema for form fields and automatically providing required database fields (category, startTime, endTime, discountPercentage) with sensible defaults.
 - **August 23, 2025**: Fixed Business Dashboard filtering - updated /api/deals endpoint to accept merchantId parameter and properly filter deals by merchant location instead of showing all deals from all businesses.
 - **Core Functionality**: Deal creation modal now works properly with automatic field defaults, Business Dashboard correctly filters deals by selected merchant location.
@@ -28,7 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Database Provider**: Neon Database (serverless PostgreSQL).
 - **Session Management**: PostgreSQL session store for persistent sessions across server restarts.
 - **API Design**: RESTful endpoints with JSON responses, including role-based authentication endpoints.
-- **Core Functionality**: Location-based deal searching, deal claiming, recurring deals system, comprehensive audit logging, merchant portal for deal and business management, role-based authentication (customer vs. merchant), persistent location storage for merchants across sessions, database-backed application configuration, user preferences system, state management with full persistence, explore mode for non-service areas, and comprehensive role-based permissions preventing merchants from claiming deals.
+- **Core Functionality**: Location-based deal searching, deal claiming, recurring deals system, comprehensive audit logging, merchant portal for deal and business management, role-based authentication (customer vs. merchant), persistent location storage for merchants across sessions, database-backed application configuration, user preferences system, state management with full persistence, explore mode for non-service areas, comprehensive role-based permissions preventing merchants from claiming deals, and mandatory business verification before deal creation (critical business rule for trust and authenticity).
 - **Database Schema**: Comprehensive database persistence including Users, Merchants, Deals, Audit Logs, Saved Deals, Deal Claims, Enabled States, App Settings, User Preferences, and PostgreSQL session storage. All application state and configuration data is stored in the database for consistent cross-session experience. Implemented archival system with soft deletion for both deals (status-based archiving) and merchants (isActive flag) to maintain data integrity while preventing foreign key constraint issues.
 
 ## External Dependencies
