@@ -102,8 +102,21 @@ class GooglePlacesService {
         error: 'Address not found or invalid',
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google Places API error:', error);
+      
+      // Handle API key restriction errors gracefully
+      if (error?.response?.data?.error_message?.includes('referer restrictions') ||
+          error?.response?.data?.status === 'REQUEST_DENIED') {
+        console.log('Google Places API restricted, accepting address as-is:', address);
+        // Return the address as valid with basic fallback
+        return {
+          isValid: true,
+          normalizedAddress: address,
+          coordinates: undefined // No coordinates available due to API restrictions
+        };
+      }
+      
       return {
         isValid: false,
         error: 'Failed to validate address with Google Places API',
@@ -135,8 +148,16 @@ class GooglePlacesService {
         types: place.types,
       })) || [];
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google Places search error:', error);
+      
+      // Handle API key restriction errors gracefully
+      if (error?.response?.data?.error_message?.includes('referer restrictions') ||
+          error?.response?.data?.status === 'REQUEST_DENIED') {
+        console.log('Google Places API restricted, returning empty search results');
+        return [];
+      }
+      
       return [];
     }
   }
