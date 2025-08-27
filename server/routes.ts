@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import { auditMiddleware, type AuditRequest, auditError } from "./middleware/audit";
 import { insertDealSchema, insertMerchantSchema, insertSavedDealSchema, insertDealClaimSchema, insertNotificationSchema } from "@shared/schema";
 import { placesService } from "./places";
+import { verificationService } from "./verification";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser for simple auth
@@ -435,6 +437,192 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       auditError(req, error as Error, "Delete Merchant");
       res.status(500).json({ message: "Failed to delete merchant" });
+    }
+  });
+
+  // Merchant Verification Endpoints
+  
+  // Initiate Google My Business verification
+  app.post("/api/merchants/:id/verify/google", isAuthenticated, auditMiddleware("Start GMB Verification"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      const { placeId } = req.body;
+
+      if (!placeId) {
+        return res.status(400).json({ message: "Google Place ID is required" });
+      }
+
+      // Verify user owns this merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      if (!existingMerchant || existingMerchant.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to verify this merchant" });
+      }
+
+      // Perform Google My Business verification
+      const verificationResult = await verificationService.verifyGoogleMyBusiness(
+        placeId,
+        existingMerchant.name,
+        existingMerchant.phone || ''
+      );
+
+      // Update merchant with verification results
+      const updateData: any = {
+        googlePlaceId: placeId,
+        googleMyBusinessVerified: verificationResult.isVerified
+      };
+
+      if (verificationResult.isVerified) {
+        updateData.verificationStatus = existingMerchant.phoneVerified ? 'verified' : 'pending';
+        if (existingMerchant.phoneVerified) {
+          updateData.verifiedAt = new Date();
+        }
+      }
+
+      await storage.updateMerchantVerification(merchantId, updateData);
+
+      res.json({
+        success: verificationResult.isVerified,
+        confidence: verificationResult.confidence,
+        message: verificationResult.isVerified 
+          ? "Google My Business verification successful" 
+          : "Google My Business verification failed",
+        details: verificationResult.details,
+        error: verificationResult.error
+      });
+
+    } catch (error) {
+      auditError(req, error as Error, "Start GMB Verification");
+      res.status(500).json({ message: "Failed to verify Google My Business" });
+    }
+  });
+
+  // Send phone verification code
+  app.post("/api/merchants/:id/verify/phone/send", isAuthenticated, auditMiddleware("Send Phone Code"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+
+      // Verify user owns this merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      if (!existingMerchant || existingMerchant.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to verify this merchant" });
+      }
+
+      if (!existingMerchant.phone) {
+        return res.status(400).json({ message: "Phone number is required for verification" });
+      }
+
+      // Send verification code
+      const codeResult = await verificationService.sendPhoneVerificationCode(existingMerchant.phone);
+
+      if (codeResult.success && codeResult.code && codeResult.expiresAt) {
+        // Store verification code in database
+        await storage.updateMerchantVerification(merchantId, {
+          phoneVerificationCode: codeResult.code,
+          phoneVerificationExpiry: codeResult.expiresAt
+        });
+
+        res.json({
+          success: true,
+          message: "Verification code sent successfully",
+          expiresAt: codeResult.expiresAt
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: codeResult.error || "Failed to send verification code"
+        });
+      }
+
+    } catch (error) {
+      auditError(req, error as Error, "Send Phone Code");
+      res.status(500).json({ message: "Failed to send phone verification code" });
+    }
+  });
+
+  // Verify phone code
+  app.post("/api/merchants/:id/verify/phone/confirm", isAuthenticated, auditMiddleware("Verify Phone Code"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+      const { code } = req.body;
+
+      if (!code) {
+        return res.status(400).json({ message: "Verification code is required" });
+      }
+
+      // Verify user owns this merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      if (!existingMerchant || existingMerchant.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to verify this merchant" });
+      }
+
+      // Verify the code
+      const isValidCode = verificationService.verifyPhoneCode(
+        code,
+        existingMerchant.phoneVerificationCode || '',
+        existingMerchant.phoneVerificationExpiry || new Date()
+      );
+
+      if (isValidCode) {
+        // Update merchant as phone verified
+        const updateData: any = {
+          phoneVerified: true,
+          phoneVerificationCode: null,
+          phoneVerificationExpiry: null
+        };
+
+        // If both Google and phone are verified, mark as fully verified
+        if (existingMerchant.googleMyBusinessVerified) {
+          updateData.verificationStatus = 'verified';
+          updateData.verifiedAt = new Date();
+        }
+
+        await storage.updateMerchantVerification(merchantId, updateData);
+
+        res.json({
+          success: true,
+          message: "Phone verification successful",
+          fullyVerified: existingMerchant.googleMyBusinessVerified
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "Invalid or expired verification code"
+        });
+      }
+
+    } catch (error) {
+      auditError(req, error as Error, "Verify Phone Code");
+      res.status(500).json({ message: "Failed to verify phone code" });
+    }
+  });
+
+  // Get merchant verification status
+  app.get("/api/merchants/:id/verification-status", isAuthenticated, auditMiddleware("Get Verification Status"), async (req: AuditRequest, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const merchantId = parseInt(req.params.id);
+
+      // Verify user owns this merchant
+      const existingMerchant = await storage.getMerchant(merchantId);
+      if (!existingMerchant || existingMerchant.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to view this merchant" });
+      }
+
+      res.json({
+        verificationStatus: existingMerchant.verificationStatus,
+        googleMyBusinessVerified: existingMerchant.googleMyBusinessVerified,
+        phoneVerified: existingMerchant.phoneVerified,
+        verifiedAt: existingMerchant.verifiedAt,
+        hasPhone: !!existingMerchant.phone,
+        hasGooglePlaceId: !!existingMerchant.googlePlaceId
+      });
+
+    } catch (error) {
+      auditError(req, error as Error, "Get Verification Status");
+      res.status(500).json({ message: "Failed to get verification status" });
     }
   });
 

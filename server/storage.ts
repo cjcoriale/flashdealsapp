@@ -239,6 +239,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(merchants.id, id));
   }
 
+  // Verification operations
+  async updateMerchantVerification(id: number, verificationData: {
+    verificationStatus?: string;
+    googleMyBusinessVerified?: boolean;
+    phoneVerified?: boolean;
+    googlePlaceId?: string;
+    phoneVerificationCode?: string;
+    phoneVerificationExpiry?: Date;
+    verifiedAt?: Date;
+  }): Promise<Merchant> {
+    const [merchant] = await db
+      .update(merchants)
+      .set(verificationData)
+      .where(eq(merchants.id, id))
+      .returning();
+    return merchant;
+  }
+
+  async clearPhoneVerificationCode(id: number): Promise<void> {
+    await db
+      .update(merchants)
+      .set({ 
+        phoneVerificationCode: null,
+        phoneVerificationExpiry: null 
+      })
+      .where(eq(merchants.id, id));
+  }
+
   // Deal operations
   async getDeal(id: number): Promise<Deal | undefined> {
     const [deal] = await db.select().from(deals).where(eq(deals.id, id));

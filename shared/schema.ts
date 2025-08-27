@@ -61,6 +61,14 @@ export const merchants = pgTable("merchants", {
   rating: real("rating").default(0),
   reviewCount: integer("review_count").default(0),
   isActive: boolean("is_active").default(true),
+  // Verification fields
+  verificationStatus: varchar("verification_status").default("pending"), // pending, verified, failed
+  googleMyBusinessVerified: boolean("google_my_business_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
+  googlePlaceId: text("google_place_id"), // Store the Google Place ID for verification
+  phoneVerificationCode: text("phone_verification_code"), // Temporary code for phone verification
+  phoneVerificationExpiry: timestamp("phone_verification_expiry"), // When the code expires
+  verifiedAt: timestamp("verified_at"), // When verification was completed
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   // Unique constraint: one merchant per name-address combination
