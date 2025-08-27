@@ -121,7 +121,7 @@ export default function MerchantDashboard() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/api/auth/login?role=merchant";
         }, 500);
         return;
       }
@@ -158,7 +158,7 @@ export default function MerchantDashboard() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/api/auth/login?role=merchant";
         }, 500);
         return;
       }
@@ -194,7 +194,7 @@ export default function MerchantDashboard() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/api/auth/login?role=merchant";
         }, 500);
         return;
       }
@@ -259,7 +259,7 @@ export default function MerchantDashboard() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/api/auth/login?role=merchant";
         }, 500);
         return;
       }
