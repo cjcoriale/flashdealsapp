@@ -29,6 +29,8 @@ import BottomNavigation from "@/components/layout/BottomNavigation";
 import PageHeader from "@/components/layout/PageHeader";
 import LocationModal from "@/components/modals/LocationModal";
 import DealModal from "@/components/modals/DealModal";
+import VerificationModal from "@/components/modals/VerificationModal";
+import VerificationStatus from "@/components/VerificationStatus";
 
 const merchantFormSchema = insertMerchantSchema.extend({
   address: z.string().min(5, "Address is required"),
@@ -73,6 +75,8 @@ export default function MerchantDashboard() {
   const [isSearching, setIsSearching] = useState(false);
   const [dealsSearchQuery, setDealsSearchQuery] = useState("");
   const [showSearchBox, setShowSearchBox] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verifyingMerchant, setVerifyingMerchant] = useState<any>(null);
 
   // Fetch user's merchants
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
@@ -521,6 +525,16 @@ export default function MerchantDashboard() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
+                              setVerifyingMerchant(merchant);
+                              setShowVerificationModal(true);
+                            }}
+                          >
+                            <Shield className="w-4 h-4 mr-2" />
+                            Verify Business
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDeleteMerchant(merchant.id);
                             }}
                             className="text-red-600"
@@ -539,20 +553,41 @@ export default function MerchantDashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                       {merchant.description}
                     </p>
-                    <p className="text-xs text-gray-500">{merchant.address}</p>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedMerchant(merchant);
-                        setCurrentlyManaging(merchant);
-                        setShowDealModal(true);
-                      }}
-                      className="w-full mt-4"
-                      size="sm"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Deal
-                    </Button>
+                    <p className="text-xs text-gray-500 mb-3">{merchant.address}</p>
+                    
+                    <div className="mb-4">
+                      <VerificationStatus merchant={merchant} />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMerchant(merchant);
+                          setCurrentlyManaging(merchant);
+                          setShowDealModal(true);
+                        }}
+                        className="flex-1"
+                        size="sm"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Deal
+                      </Button>
+                      {merchant.verificationStatus !== 'verified' && (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setVerifyingMerchant(merchant);
+                            setShowVerificationModal(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          data-testid={`button-verify-${merchant.id}`}
+                        >
+                          <Shield className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -776,6 +811,18 @@ export default function MerchantDashboard() {
       </div>
 
       <BottomNavigation />
+
+      {/* Verification Modal */}
+      {verifyingMerchant && (
+        <VerificationModal
+          isOpen={showVerificationModal}
+          onClose={() => {
+            setShowVerificationModal(false);
+            setVerifyingMerchant(null);
+          }}
+          merchant={verifyingMerchant}
+        />
+      )}
     </div>
   );
 }
