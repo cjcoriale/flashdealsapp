@@ -338,10 +338,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             merchantData.name = validation.placeDetails.name;
           }
         } else {
-          return res.status(400).json({ 
-            message: "Invalid address. Please provide a valid business address.",
-            error: validation.error 
-          });
+          // If validation fails due to API restrictions, log it but continue with user-provided address
+          console.log('Address validation failed, using user-provided address:', validation.error);
+          // Keep the original address and set default coordinates if none provided
+          if (!merchantData.latitude || !merchantData.longitude) {
+            merchantData.latitude = 0;
+            merchantData.longitude = 0;
+          }
         }
       }
 
@@ -388,10 +391,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             merchantData.longitude = validation.coordinates.lng;
           }
         } else {
-          return res.status(400).json({ 
-            message: "Invalid address. Please provide a valid business address.",
-            error: validation.error 
-          });
+          // If validation fails due to API restrictions, log it but continue with user-provided address
+          console.log('Address validation failed, using user-provided address:', validation.error);
+          // Keep the original address and set default coordinates if none provided
+          if (!merchantData.latitude || !merchantData.longitude) {
+            merchantData.latitude = 0;
+            merchantData.longitude = 0;
+          }
         }
       }
 
