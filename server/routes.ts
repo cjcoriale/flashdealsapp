@@ -833,6 +833,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deal = await storage.createDeal(dealData);
       console.log("Created deal:", deal);
       
+      // Create notification for new deal
+      try {
+        await storage.createNotification({
+          userId: merchant.userId,
+          type: 'deal_created',
+          title: 'New Deal Created',
+          message: `Your deal "${deal.title}" at ${merchant.name} is now live!`,
+          dealId: deal.id,
+          merchantId: merchant.id,
+        });
+      } catch (notificationError) {
+        console.error("Failed to create notification:", notificationError);
+        // Don't fail the deal creation if notification fails
+      }
+      
       res.json(deal);
     } catch (error) {
       console.error("Deal creation error:", error);
