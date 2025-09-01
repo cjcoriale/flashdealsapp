@@ -2,6 +2,12 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // Global handler for session expiration
 function handleSessionExpired() {
+  // Don't redirect if we're already on the landing page
+  if (window.location.pathname === '/') {
+    console.log('Already on landing page, not redirecting');
+    return;
+  }
+  
   console.log('Session expired - logging out user');
   
   // Clear auth token

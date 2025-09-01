@@ -5,8 +5,12 @@ import { User } from "@shared/schema";
 export function useAuth() {
   const queryClient = useQueryClient();
   
+  // Don't check auth if no token exists (prevents 401 loops on landing page)
+  const hasToken = !!localStorage.getItem('auth_token');
+  
   const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
+    enabled: hasToken, // Only run auth check if we have a token
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes - cache auth state during navigation
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in memory longer
