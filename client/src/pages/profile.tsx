@@ -203,6 +203,14 @@ export default function ProfilePage() {
               <Button 
                 variant="outline" 
                 className="justify-start h-12" 
+                onClick={() => window.location.href = '/notifications'}
+              >
+                <Bell className="w-4 h-4 mr-3" />
+                Notifications
+              </Button>
+              <Button 
+                variant="outline" 
+                className="justify-start h-12" 
                 onClick={() => window.location.href = '/'}
               >
                 <MapPin className="w-4 h-4 mr-3" />
@@ -228,14 +236,6 @@ export default function ProfilePage() {
                   My Claimed Deals
                 </Button>
               )}
-              <Button 
-                variant="outline" 
-                className="justify-start h-12" 
-                onClick={() => window.location.href = '/notifications'}
-              >
-                <Bell className="w-4 h-4 mr-3" />
-                Notifications
-              </Button>
               <Button 
                 variant="outline" 
                 className="justify-start h-12" 
