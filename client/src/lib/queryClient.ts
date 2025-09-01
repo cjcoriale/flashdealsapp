@@ -1,7 +1,27 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Global handler for session expiration
+function handleSessionExpired() {
+  console.log('Session expired - logging out user');
+  
+  // Clear auth token
+  localStorage.removeItem('auth_token');
+  
+  // Redirect to landing page (sign-in page)
+  window.location.href = '/';
+  
+  // Optional: Show a message (but redirect happens immediately)
+  console.log('Redirected to sign-in page due to session expiration');
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
+    // Handle session expiration
+    if (res.status === 401) {
+      handleSessionExpired();
+      return; // Don't throw after redirect
+    }
+    
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
@@ -68,8 +88,14 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (res.status === 401) {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      } else {
+        // Handle session expiration for regular queries
+        handleSessionExpired();
+        return null; // Return null instead of throwing after redirect
+      }
     }
 
     await throwIfResNotOk(res);
